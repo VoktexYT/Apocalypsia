@@ -45,6 +45,8 @@ export default class Entity {
     private _mesh: THREE.Object3D | null
     private _animations: {[key: string]: THREE.AnimationClip}
     private _mixer: THREE.AnimationMixer | null
+    private _start_position: [number, number, number]
+    private _scale: [number, number, number]
 
     constructor() {
         this._velocity = 0;
@@ -58,6 +60,8 @@ export default class Entity {
         this._mesh = null;
         this._animations = {};
         this._mixer = null
+        this._start_position = [0, 0, 0]
+        this._scale = [0, 0, 0]
     }
 
     set_velocity(velocity: Number): this {
@@ -68,6 +72,16 @@ export default class Entity {
     set_health_point(hp: Number): this {
         this._hp = hp;
         return this;
+    }
+
+    set_position(x: number, y: number, z: number): this {
+        this._start_position = [x, y, z];
+        return this;
+    }
+
+    set_scale(x: number, y: number, z: number): this {
+        this._scale = [x, y, z]
+        return this
     }
 
     set_name(name: String): this {
@@ -167,7 +181,17 @@ export default class Entity {
                         }
                     });
     
-                    object.scale.set(0.01, 0.01, 0.01);
+                    object.scale.set(
+                        this._scale[0],
+                        this._scale[1],
+                        this._scale[2]
+                    );
+
+                    object.position.set(
+                        this._start_position[0],
+                        this._start_position[1],
+                        this._start_position[2]
+                    )
 
                     THIS._mesh = object;
                     this._baseMeshAnimationPath = baseMeshAnimationPath[0];
