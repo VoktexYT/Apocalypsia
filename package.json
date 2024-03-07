@@ -1,0 +1,26 @@
+{
+  "name": "websurvivezombiefps",
+  "version": "1.0.0",
+  "description": "FPS Web Zombie",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WinstonWolf007/WebSurviveZombieFps.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/WinstonWolf007/WebSurviveZombieFps/issues"
+  },
+  "homepage": "https://github.com/WinstonWolf007/WebSurviveZombieFps#readme",
+  "dependencies": {
+    "three": "^0.162.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.162.0",
+    "ts-loader": "^9.5.1"
+  }
+}
