@@ -2,29 +2,41 @@ import * as THREE from 'three'
 import Entity from './entity'
 
 
+interface properties {
+    scene: THREE.Scene,
+    zombie_type: number,
+    zombie_velocity: number,
+    zombie_health: number,
+    zombie_name: string,
+    zombie_position: [number, number, number],
+    zombie_scale: [number, number, number]
+}
+
 export default class Zombie {
     private scene: THREE.Scene
     is_finish_load: Boolean
     entity: Entity
 
-    constructor(scene: THREE.Scene, velocity: number, hp: number, name: string, start_pos: [number, number, number], scale: [number, number, number]) {
-        this.scene = scene
+    constructor(settings: properties) {
+        this.scene = settings.scene
         this.is_finish_load = false
 
+        const ZT = settings.zombie_type
+
         this.entity = new Entity()
-            .set_velocity(velocity)
-            .set_health_point(hp)
-            .set_name(name)
-            .set_position(start_pos[0], start_pos[1], start_pos[2])
-            .set_scale(scale[0], scale[1], scale[2])
+            .set_velocity(settings.zombie_velocity)
+            .set_health_point(settings.zombie_health)
+            .set_name(settings.zombie_name)
+            .set_position(settings.zombie_position[0], settings.zombie_position[1], settings.zombie_position[2])
+            .set_scale(settings.zombie_scale[0], settings.zombie_scale[1], settings.zombie_scale[2])
             .set_textures({
-                map:             "assets/entity/zombie/textures/2_Albedo.png",
-                emissiveMap:     "assets/entity/zombie/textures/2_Emission.png",
-                roughnessMap:    "assets/entity/zombie/textures/2_gloss.png",
-                displacementMap: "assets/entity/zombie/textures/2_Height.png",
-                metalnessMap:    "assets/entity/zombie/textures/2_metalik marmoset.png",
-                normalMap:       "assets/entity/zombie/textures/2_Normal.png",
-                aoMap:           "assets/entity/zombie/textures/2_Occlusion.png"
+                map:             `assets/entity/zombie/textures/${ZT}/${ZT}_Albedo.png`,
+                emissiveMap:     `assets/entity/zombie/textures/${ZT}/${ZT}_Emission.png`,
+                roughnessMap:    `assets/entity/zombie/textures/${ZT}/${ZT}_gloss.png`,
+                displacementMap: `assets/entity/zombie/textures/${ZT}/${ZT}_Height.png`,
+                metalnessMap:    `assets/entity/zombie/textures/${ZT}/${ZT}_metalik marmoset.png`,
+                normalMap:       `assets/entity/zombie/textures/${ZT}/${ZT}_Normal.png`,
+                aoMap:           `assets/entity/zombie/textures/${ZT}/${ZT}_Occlusion.png`
             })
         
         this.entity.load(
