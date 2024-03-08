@@ -13,8 +13,9 @@ function animate() {
     requestAnimationFrame(animate)
 
     setup.controls.update()
-
     object.player.update()
+    
+
 
 
     // if (object.zombie.is_finish_load) {
