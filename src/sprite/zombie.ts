@@ -1,9 +1,9 @@
 import * as THREE from 'three'
+import * as setup from '../game/setup'
 import Entity from './entity'
 
 
 interface properties {
-    scene: THREE.Scene,
     zombie_type: number,
     zombie_velocity: number,
     zombie_health: number,
@@ -13,12 +13,10 @@ interface properties {
 }
 
 export default class Zombie {
-    private scene: THREE.Scene
     is_finish_load: Boolean
     entity: Entity
 
     constructor(settings: properties) {
-        this.scene = settings.scene
         this.is_finish_load = false
 
         const ZT = settings.zombie_type
@@ -40,7 +38,6 @@ export default class Zombie {
             })
         
         this.entity.load(
-            this.scene,
             "assets/entity/zombie/models/Base mesh fbx.fbx",
             [
                 ["assets/entity/zombie/animation/zombie@atack1.fbx", "attack1"],

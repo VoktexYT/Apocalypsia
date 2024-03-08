@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import * as path from 'path';
+import * as setup from '../game/setup'
 
 import { TextureLoader } from 'three';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
@@ -159,7 +160,7 @@ export default class Entity {
         }
     }
 
-    load(scene: THREE.Scene, baseMeshPathFBX: string, baseMeshAnimationPath: Array<[string, string]>): Promise<boolean> {
+    load(baseMeshPathFBX: string, baseMeshAnimationPath: Array<[string, string]>): Promise<boolean> {
         return new Promise((resolve, reject) => {
             const THIS = this;
             this._baseMeshPath = baseMeshPathFBX;
@@ -202,7 +203,7 @@ export default class Entity {
                                 this._animations[animsPath[1]] = animation.animations[0]
 
                                 if (idxAnimationLoad === baseMeshAnimationPath.length-1) {
-                                    scene.add(object);
+                                    setup.scene.add(object);
                                     resolve(true);
                                 } else {
                                     idxAnimationLoad++

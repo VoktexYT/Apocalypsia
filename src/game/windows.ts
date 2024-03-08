@@ -1,19 +1,40 @@
 import * as setup from './setup'
 import * as object from './object'
 
+export let activeCamera = setup.camera
+
+export const keysState: { [key: string]: boolean } = {};
+export let cursor_position: [number, number]
+
 
 export default function event() {
+
     window.addEventListener('resize', onWindowResize, false)
 
     window.addEventListener('keydown', (key) => {
-        if (key.code === "Space") {
-            object.zombie.entity.play_animation("walk")
-        }
+        keysState[key.code] = true;
 
-        else if (key.code === "Enter") {
-            object.zombie.entity.play_animation("roar")
+        switch (key.code) {
+            case "Escape":
+                setup.switch_active_camera();
+                break;
+            case "Enter":
+                object.zombie.entity.play_animation("walk");
+                break;
         }
     })
+
+    window.addEventListener('keyup', (event) => {
+        keysState[event.code] = false;
+    });
+
+    window.addEventListener("mousemove", (event) => {
+        if (setup.activeCamera === object.player.camera) {
+            const mouseX = event.clientX / window.innerWidth; 
+            object.player.theta_camera = (mouseX - 0.5) * Math.PI * 3;
+            object.player.update_camera_rotation()
+        }
+    });
 }
 
 
@@ -22,5 +43,4 @@ function onWindowResize() {
     setup.camera.aspect = window.innerWidth / window.innerHeight
     setup.camera.updateProjectionMatrix()
     setup.renderer.setSize(window.innerWidth, window.innerHeight)
-    setup.render()
 }
