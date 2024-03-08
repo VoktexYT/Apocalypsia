@@ -9,30 +9,63 @@
 
     <script src="./bundle.js"></script>
 
+    <div id="icon"></div>
+
     <style>
         body {
             margin: 0;
         }
+
+        #icon {
+            position: absolute;
+            top: 48%;
+            bottom: 48%;
+            left: 48%;
+            right: 48%;
+            z-index: 1000;
+            background-color: red;
+            width: 4%;
+            height: 4%;
+
+            animation: popup 2s ease-in-out infinite;
+        }
+
+        @keyframes popup {
+            0% {
+                background-color: red;
+
+                top: 48%;
+                bottom: 48%;
+                left: 48%;
+                right: 48%;
+                width: 4%;
+                height: 4%;
+            }
+
+        50% {
+                background-color: blue;
+
+                top: 47.5%;
+                bottom: 47.5%;
+                left: 47.5%;
+                right: 47.5%;
+                width: 5%;
+                height: 5%;
+            }
+
+        100% {
+            background-color: red;
+
+            top: 48%;
+            bottom: 48%;
+            left: 48%;
+            right: 48%;
+            width: 4%;
+            height: 4%;
+        }
+    }
+
     </style>
-
-    <script>
-        // let resizeTimeout;
-
-        // window.addEventListener("resize", () => {
-        //     clearTimeout(resizeTimeout);
-        //     resizeTimeout = setTimeout(() => {
-        //         window.dispatchEvent(new Event("resizeEnd"));
-        //     }, 250);
-        // });
-
-        // window.addEventListener("resizeEnd", () => {
-        //     const result = confirm("Do you want to proceed? WARNING the page will be reload!!");
-
-        //     if (result === true) {
-        //         window.location.reload()
-        //     }
-        // });
-    </script>
     
 </body>
 </html>

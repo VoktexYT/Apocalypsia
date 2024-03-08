@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
+
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -28,9 +30,29 @@ const sc = () => {
     else renderer.render(scene, camera2);
 }
 
+let enableGame = false
+
+const renderer2D = new CSS2DRenderer();
+renderer2D.setSize(window.innerWidth, window.innerHeight);
+renderer2D.domElement.style.position = 'absolute';
+renderer2D.domElement.style.top = '0';
+document.body.appendChild(renderer2D.domElement);
+
+// Créez un élément HTML
+const div = document.createElement('div');
+div.style.width = '100px';
+div.style.height = '100px';
+div.style.backgroundColor = 'red';
+div.textContent = 'Menu';
+div.style.textAlign = 'center';
+
+// Créez un objet CSS2D pour afficher l'élément HTML dans la scène
+const cssObject = new CSS2DObject(div);
+scene.add(cssObject);
+
 //////////////////////////////
 // Y angle
-let angleY = THREE.MathUtils.degToRad(90);
+let angleY = THREE.MathUtils.degToRad(0);
 let quaternionY = new THREE.Quaternion();
 let axisY = new THREE.Vector3(0, 1, 0);
 quaternionY.setFromAxisAngle(axisY, angleY);
@@ -56,76 +78,89 @@ const smoothFactor = 0.1;
 window.addEventListener("mousemove", (event) => {
     cursorPositionNow = [event.clientX, event.clientY];
 
-    // Calculer la différence de position de la souris
-    const deltaX = (cursorPositionNow[0] - cursorPositionAfter[0]) * cursorSensibility;
-    const deltaY = (cursorPositionNow[1] - cursorPositionAfter[1]) * cursorSensibility;
+    if (enableGame) {
 
-    // Appliquer le lissage
-    const smoothedDeltaX = deltaX * smoothFactor;
-    const smoothedDeltaY = deltaY * smoothFactor;
+        // Calculer la différence de position de la souris
+        const deltaX = (cursorPositionNow[0] - cursorPositionAfter[0]) * cursorSensibility;
+        const deltaY = (cursorPositionNow[1] - cursorPositionAfter[1]) * cursorSensibility;
 
-    // Mettre à jour les angles en fonction des mouvements de la souris
-    angleY -= THREE.MathUtils.degToRad(smoothedDeltaX);
-    angleX -= THREE.MathUtils.degToRad(smoothedDeltaY);
+        // Appliquer le lissage
+        const smoothedDeltaX = deltaX * smoothFactor;
+        const smoothedDeltaY = deltaY * smoothFactor;
 
-    // Mettre à jour les quaternions de rotation
-    quaternionY.setFromAxisAngle(axisY, angleY);
-    quaternionX.setFromAxisAngle(axisX, angleX);
+        // Mettre à jour les angles en fonction des mouvements de la souris
+        angleY -= THREE.MathUtils.degToRad(smoothedDeltaX);
+        angleX -= THREE.MathUtils.degToRad(smoothedDeltaY);
 
-    // Calculer le quaternion final
-    finalQuaternion.multiplyQuaternions(quaternionY, quaternionX);
+        // Mettre à jour les quaternions de rotation
+        quaternionY.setFromAxisAngle(axisY, angleY);
+        quaternionX.setFromAxisAngle(axisX, angleX);
 
-    // Appliquer le quaternion final à la caméra
-    camera.quaternion.copy(finalQuaternion);
+        // Calculer le quaternion final
+        finalQuaternion.multiplyQuaternions(quaternionY, quaternionX);
 
-    // Mettre à jour la position de la souris
-    cursorPositionAfter[0] = cursorPositionNow[0];
-    cursorPositionAfter[1] = cursorPositionNow[1];
+        // Appliquer le quaternion final à la caméra
+        camera.quaternion.copy(finalQuaternion);
+
+        // Mettre à jour la position de la souris
+        cursorPositionAfter[0] = cursorPositionNow[0];
+        cursorPositionAfter[1] = cursorPositionNow[1];
+    }
+
+    else {
+        cursorPositionAfter = cursorPositionNow
+    }
 });
 
 
 
 window.addEventListener("keydown", (event) => {
-    switch (event.code) {
-        case "KeyW":
-            const direction = new THREE.Vector3();
-            camera.getWorldDirection(direction); 
-            direction.setY(0).normalize()
-            const forwardDirection = new THREE.Vector3(0, 0, 1);
-            forwardDirection.applyAxisAngle(new THREE.Vector3(0, 1, 0), camera.rotation.y);
-            camera.position.add(forwardDirection.multiplyScalar(-0.1));
-            break;
-        // case "ArrowUp":
-        //     angleX += THREE.MathUtils.degToRad(1);
-        //     quaternionX.setFromAxisAngle(axisX, angleX);
-        //     finalQuaternion.multiplyQuaternions(quaternionY, quaternionX);
-        //     camera.quaternion.copy(finalQuaternion);
-        //     break;
-        // case "ArrowDown":
-        //     angleX -= THREE.MathUtils.degToRad(1);
-        //     quaternionX.setFromAxisAngle(axisX, angleX);
-        //     finalQuaternion.multiplyQuaternions(quaternionY, quaternionX);
-        //     camera.quaternion.copy(finalQuaternion);
-        //     break;
-        // case "ArrowLeft":
-        //     angleY += THREE.MathUtils.degToRad(1);
-        //     quaternionY.setFromAxisAngle(axisY, angleY);
-        //     finalQuaternion.multiplyQuaternions(quaternionX, quaternionY);
-        //     camera.quaternion.copy(finalQuaternion);
-        //     break;
-        // case "ArrowRight":
-        //     angleY -= THREE.MathUtils.degToRad(1);
-        //     quaternionY.setFromAxisAngle(axisY, angleY);
-        //     finalQuaternion.multiplyQuaternions(quaternionX, quaternionY);
-        //     camera.quaternion.copy(finalQuaternion);
-        //     break;
+    if (enableGame) {
+        switch (event.code) {
+            case "KeyW":
+                const direction = new THREE.Vector3();
+                camera.getWorldDirection(direction);
+
+                // Supprimer la composante Y pour ne pas se déplacer verticalement
+                direction.setY(0).normalize();
+
+                // Mouvement vers l'avant
+                camera.position.add(direction.multiplyScalar(0.1));
+                break;
+
+            case "KeyS":
+                const backwardDirection = new THREE.Vector3();
+                camera.getWorldDirection(backwardDirection);
+
+                // Supprimer la composante Y pour ne pas se déplacer verticalement
+                backwardDirection.setY(0).normalize();
+
+                // Mouvement vers l'arrière (inverse de la direction vers l'avant)
+                camera.position.add(backwardDirection.multiplyScalar(-0.1));
+                break;
+        }
     }
 });
+
 
 
 function animate() {
     requestAnimationFrame(animate);
     sc()
+
+    if (
+        cursorPositionNow[0] > (window.innerWidth / 2) - 10 &&
+        cursorPositionNow[0] < (window.innerWidth / 2) + 10 &&
+        cursorPositionNow[1] > (window.innerHeight / 2) - 10 &&
+        cursorPositionNow[1] < (window.innerHeight / 2) + 10) {
+        enableGame = true
+
+        let element = document.getElementById("icon");
+
+        if (element) {
+            element.style.display = 'none'
+        }
+    }
 }
 
 animate();
