@@ -9,16 +9,16 @@ export default class Player {
     color: THREE.ColorRepresentation
     capsule: THREE.Mesh
     camera: THREE.PerspectiveCamera
-    rotation_head_sensibility: number
     theta_camera: number
+    delta_camera: number
 
     constructor() {
         this.size = 2
         this.color = 0xBB0000
-        this.velocity = 0.1
+        this.velocity = 0.5
         this.capsule = new THREE.Mesh()
         this.theta_camera = 0
-        this.rotation_head_sensibility = 0.01
+        this.delta_camera = 0
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     }
 
@@ -39,15 +39,19 @@ export default class Player {
     }
 
     move_forward() {
-        this.camera.position.add(
-            this.camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(this.velocity)
-        );
+        const direction = new THREE.Vector3();
+        this.camera.getWorldDirection(direction); 
+        const forwardDirection = new THREE.Vector3(0, 0, -1);
+        forwardDirection.applyAxisAngle(new THREE.Vector3(0, 1, 0), this.camera.rotation.y);
+        this.camera.position.add(forwardDirection.multiplyScalar(this.velocity));
     }
 
     move_backward() {
-        this.camera.position.add(
-            this.camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(-this.velocity)
-        );
+        const direction = new THREE.Vector3();
+        this.camera.getWorldDirection(direction); 
+        const backwardDirection = new THREE.Vector3(0, 0, 1);
+        backwardDirection.applyAxisAngle(new THREE.Vector3(0, 1, 0), this.camera.rotation.y);
+        this.camera.position.add(backwardDirection.multiplyScalar(this.velocity));
     }
 
     load() {
@@ -64,8 +68,13 @@ export default class Player {
 
     update_camera_rotation() {
         this.camera.rotation.y = -this.theta_camera;
+
+        const maxPitch = Math.PI / 2;
+        this.camera.rotation.x = Math.max(-maxPitch, Math.min(maxPitch, -this.delta_camera));
+
         const direction = new THREE.Vector3(0, 0, -1);
         direction.applyQuaternion(this.camera.quaternion);
+
     }
 
     update() {
@@ -82,6 +91,5 @@ export default class Player {
         }
 
         this.capsule.position.set(this.camera.position.x, this.camera.position.y-2, this.camera.position.z)
-        this.capsule.rotation.set(this.camera.rotation.x, this.camera.rotation.y, this.camera.rotation.z)
     }
 }

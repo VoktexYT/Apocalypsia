@@ -17,18 +17,18 @@ function animate() {
     object.player.update()
 
 
-    if (object.zombie.is_finish_load) {
-        const zombieMesh = object.zombie.entity.get_mesh();
-        if (zombieMesh !== null) {
-            // zombieMesh.translateZ(0.002);
+    // if (object.zombie.is_finish_load) {
+    //     const zombieMesh = object.zombie.entity.get_mesh();
+    //     if (zombieMesh !== null) {
+    //         // zombieMesh.translateZ(0.002);
 
-            const mixer = object.zombie.entity.get_mixer();
+    //         const mixer = object.zombie.entity.get_mixer();
 
-            if (mixer !== null) {
-                mixer.update(0.04)
-            }
-        }
-    }
+    //         if (mixer !== null) {
+    //             mixer.update(0.04)
+    //         }
+    //     }
+    // }
 
     setup.render()
 

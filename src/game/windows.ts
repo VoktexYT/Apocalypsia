@@ -19,7 +19,7 @@ export default function event() {
                 setup.switch_active_camera();
                 break;
             case "Enter":
-                object.zombie.entity.play_animation("walk");
+                // object.zombie.entity.play_animation("walk");
                 break;
         }
     })
@@ -29,11 +29,13 @@ export default function event() {
     });
 
     window.addEventListener("mousemove", (event) => {
-        if (setup.activeCamera === object.player.camera) {
-            const mouseX = event.clientX / window.innerWidth; 
-            object.player.theta_camera = (mouseX - 0.5) * Math.PI * 3;
-            object.player.update_camera_rotation()
-        }
+        const mouseX = event.clientX / window.innerWidth; 
+        object.player.theta_camera = (mouseX - 0.5) * Math.PI * 3;
+
+        const mouseY = event.clientY / window.innerHeight;
+        object.player.delta_camera = (mouseY - 0.5) * Math.PI * 3;
+
+        object.player.update_camera_rotation()
     });
 }
 

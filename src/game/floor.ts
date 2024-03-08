@@ -4,7 +4,7 @@ import { TextureLoader } from 'three';
 
 
 export default function load_floor() {
-    const geometry = new THREE.BoxGeometry(40, 0.3, 40);
+    const geometry = new THREE.BoxGeometry(100, 0.3, 100);
 
     const loader = new TextureLoader();
 
