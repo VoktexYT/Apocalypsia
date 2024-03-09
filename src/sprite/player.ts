@@ -182,6 +182,8 @@ export default class Player {
         this.finalQuaternion.multiplyQuaternions(this.quaternionY, this.quaternionX);
     
         this.camera.quaternion.copy(this.finalQuaternion);
+
+        
     }
 
     

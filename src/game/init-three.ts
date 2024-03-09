@@ -6,20 +6,11 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 export const scene = new THREE.Scene();
 
 
-export const axe_helper = new THREE.AxesHelper(5);
-
-scene.add(axe_helper);
-
-
 export const ambientLight = new THREE.AmbientLight();
 
 ambientLight.color = new THREE.Color(0x777777);
 
 scene.add(ambientLight);
-
-
-const cameraHelper = new THREE.CameraHelper(object.player.camera);
-scene.add(cameraHelper);
 
 
 export const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
