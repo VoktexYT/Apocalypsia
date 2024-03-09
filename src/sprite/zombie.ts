@@ -31,7 +31,7 @@ export default class Zombie {
                 map:             `assets/entity/zombie/textures/${ZT}/${ZT}_Albedo.png`,
                 emissiveMap:     `assets/entity/zombie/textures/${ZT}/${ZT}_Emission.png`,
                 roughnessMap:    `assets/entity/zombie/textures/${ZT}/${ZT}_gloss.png`,
-                displacementMap: `assets/entity/zombie/textures/${ZT}/${ZT}_Height.png`,
+             displacementMap: `assets/entity/zombie/textures/${ZT}/${ZT}_Height.png`,
                 metalnessMap:    `assets/entity/zombie/textures/${ZT}/${ZT}_metalik marmoset.png`,
                 normalMap:       `assets/entity/zombie/textures/${ZT}/${ZT}_Normal.png`,
                 aoMap:           `assets/entity/zombie/textures/${ZT}/${ZT}_Occlusion.png`
