@@ -35,10 +35,6 @@ export interface MixerPack {
 
 // export default 
 export default class Entity {
-    private _velocity: Number
-    private _hp: Number
-    private _name: String
-    private _texturesLoader: Array<THREE.Texture>
     private _baseMeshPath: String
     private _baseMeshAnimationPath: Array<string>
     private _textures: Textures
@@ -50,10 +46,6 @@ export default class Entity {
     private _scale: [number, number, number]
 
     constructor() {
-        this._velocity = 0;
-        this._hp = 0;
-        this._name = "";
-        this._texturesLoader = [];
         this._baseMeshPath = "";
         this._baseMeshAnimationPath = [];
         this._textures = {};
@@ -65,16 +57,6 @@ export default class Entity {
         this._scale = [0, 0, 0]
     }
 
-    set_velocity(velocity: Number): this {
-        this._velocity = velocity;
-        return this;
-    }
-
-    set_health_point(hp: Number): this {
-        this._hp = hp;
-        return this;
-    }
-
     set_position(x: number, y: number, z: number): this {
         this._start_position = [x, y, z];
         return this;
@@ -83,11 +65,6 @@ export default class Entity {
     set_scale(x: number, y: number, z: number): this {
         this._scale = [x, y, z]
         return this
-    }
-
-    set_name(name: String): this {
-        this._name = name;
-        return this;
     }
 
     set_textures(textureFilesPath: TexturesPath): this {
@@ -166,9 +143,9 @@ export default class Entity {
             this._baseMeshPath = baseMeshPathFBX;
             this._baseMeshAnimationPath = baseMeshAnimationPath[0];
     
-            // Load Zombie
             const fbxLoader = new FBXLoader();
             let idxAnimationLoad = 0;
+
 
             fbxLoader.load(
                 baseMeshPathFBX,
@@ -195,21 +172,34 @@ export default class Entity {
                     )
 
                     THIS._mesh = object;
-                    this._baseMeshAnimationPath = baseMeshAnimationPath[0];
 
-                    for (const animsPath of baseMeshAnimationPath) {
-                        fbxLoader.load(animsPath[0],
-                            (animation) => {
-                                this._animations[animsPath[1]] = animation.animations[0]
 
-                                if (idxAnimationLoad === baseMeshAnimationPath.length-1) {
-                                    setup.scene.add(object);
-                                    resolve(true);
-                                } else {
-                                    idxAnimationLoad++
+                    if (baseMeshAnimationPath.length > 0) {
+                        this._baseMeshAnimationPath = baseMeshAnimationPath[0];
+
+                        for (const animsPath of baseMeshAnimationPath) {
+                            fbxLoader.load(animsPath[0],
+                                (animation) => {
+                                    this._animations[animsPath[1]] = animation.animations[0]
+
+                                    if (idxAnimationLoad === baseMeshAnimationPath.length-1) {
+                                        setup.scene.add(object);
+                                        resolve(true);
+                                    } else {
+                                        idxAnimationLoad++
+                                    }
+                                },
+                                (event) => {},
+                                (error) => {
+                                    console.log("UBERT", error)
                                 }
-                            }
-                        );
+                            );
+                        }
+                    }
+
+                    else {
+                        setup.scene.add(object);
+                        resolve(true);
                     }
                 },
 

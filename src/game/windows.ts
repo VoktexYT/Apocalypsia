@@ -24,7 +24,7 @@ export default function event() {
                 setup.switch_active_camera();
                 break;
             case "Enter":
-                object.zombie.entity.play_animation("idle2")
+                // object.zombie.entity.play_animation("idle2")
                 break;
         }
     })

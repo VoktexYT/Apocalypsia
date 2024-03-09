@@ -8,7 +8,7 @@ export const scene = new THREE.Scene();
 
 
 // AxesHelper
-// scene.add(new THREE.AxesHelper(5));
+scene.add(new THREE.AxesHelper(5));
 
 
 export const ambientLight = new THREE.AmbientLight();
@@ -18,8 +18,8 @@ ambientLight.color = new THREE.Color(0x777777);
 scene.add(ambientLight);
 
 
-// const cameraHelper = new THREE.CameraHelper(object.player.camera);
-// scene.add(cameraHelper);
+const cameraHelper = new THREE.CameraHelper(object.player.camera);
+scene.add(cameraHelper);
 
 
 export const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);

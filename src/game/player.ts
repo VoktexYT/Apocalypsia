@@ -79,8 +79,6 @@ export default class Player {
         for (let i=this.shakeCameraFrame-1; i>=0; i--) {
             this.shakeCameraPos.push(this.shakeCameraMin+frame*i)
         }
-
-        console.log(this.shakeCameraPos)
     }
 
     // Browse list of y axis pos
@@ -90,7 +88,6 @@ export default class Player {
         }
 
         this.shakeCameraIndex++
-        console.log(this.shakeCameraIndex)
     }
 
     setupCameraOrientation() {
@@ -165,8 +162,7 @@ export default class Player {
         const direction = new THREE.Vector3();
         this.camera.getWorldDirection(direction).negate();
 
-        const cylinderOffset = new THREE.Vector3(0, 0, 2);
-        const cylinderPosition = this.camera.position.clone().addScaledVector(direction, 2);
+        const cylinderPosition = this.camera.position.clone().addScaledVector(direction, 1);
         this.capsule.position.copy(cylinderPosition);
 
         this.capsule.position.y = this.camera.position.y - 1

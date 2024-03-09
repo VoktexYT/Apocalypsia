@@ -11,28 +11,34 @@ object.player.load()
 
 let zombieANim = false
 
+
 function animate() {
     requestAnimationFrame(animate)
 
     setup.controls.update()
     object.player.update()
 
-    // Create zombie animations
-    if (object.zombie.is_finish_load) {
-        const zombieMesh = object.zombie.entity.get_mesh();
-        if (zombieMesh !== null) {
-            const mixer = object.zombie.entity.get_mixer();
-            if (mixer !== null) {
-                mixer.update(0.04)
-            }
-        }
 
-        // Auto play animation
-        if (!zombieANim) {
-            object.zombie.entity.play_animation("idle2")
-            zombieANim = true
-        }
+    if (object.gun.is_finish_load) {
+        object.gun.update()
     }
+
+    // Create zombie animations
+    // if (object.zombie.is_finish_load) {
+    //     const zombieMesh = object.zombie.entity.get_mesh();
+    //     if (zombieMesh !== null) {
+    //         const mixer = object.zombie.entity.get_mixer();
+    //         if (mixer !== null) {
+    //             mixer.update(0.04)
+    //         }
+    //     }
+
+    //     // Auto play animation
+    //     if (!zombieANim) {
+    //         object.zombie.entity.play_animation("idle2")
+    //         zombieANim = true
+    //     }
+    // }
 
     setup.render()
 
