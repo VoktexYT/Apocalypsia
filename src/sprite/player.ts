@@ -38,7 +38,7 @@ export default class Player {
 
     constructor() {
         this.size = 2
-        this.color = 0xBB0000
+        this.color = 0x00BB00
         this.velocity = 0.1
         this.capsule = new THREE.Mesh()
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -193,7 +193,7 @@ export default class Player {
         const direction = new THREE.Vector3();
         this.camera.getWorldDirection(direction).negate();
 
-        const cylinderPosition = this.camera.position.clone().addScaledVector(direction, 1);
+        const cylinderPosition = this.camera.position.clone().addScaledVector(direction, 1.5);
         this.capsule.position.copy(cylinderPosition);
 
         this.capsule.position.y = this.camera.position.y - 1

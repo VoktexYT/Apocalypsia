@@ -12,7 +12,7 @@ export default class Floor {
     loader = new TextureLoader();
     is_finish_load = false
 
-    texture_path = "/assets/nature/grass/textures/grass.png"
+    texture_path = "./assets/nature/grass/textures/grass.png"
     texture_tint = 0x555555
 
     constructor() {

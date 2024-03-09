@@ -26,14 +26,14 @@ export default class Gun {
             .set_position(settings.gun_position[0], settings.gun_position[1], settings.gun_position[2])
             .set_scale(settings.gun_scale[0], settings.gun_scale[1], settings.gun_scale[2])
             .set_textures({
-                map: "assets/weapons/pistol/textures/Pistol_map.png",
-                metalnessMap: "assets/weapons/pistol/textures/Pistol_metalness.png",
-                normalMap: "assets/weapons/pistol/textures/Pistol_normalmap.png",
-                roughnessMap: "assets/weapons/pistol/textures/Pistol_roughness.png"
+                map: "./assets/weapons/pistol/textures/Pistol_map.png",
+                metalnessMap: "./assets/weapons/pistol/textures/Pistol_metalness.png",
+                normalMap: "./assets/weapons/pistol/textures/Pistol_normalmap.png",
+                roughnessMap: "./assets/weapons/pistol/textures/Pistol_roughness.png"
             })
         
         this.entity.load(
-            "assets/weapons/pistol/models/pistol.fbx",
+            "./assets/weapons/pistol/models/pistol.fbx",
             [
                 // ["assets/weapons/pistol/models/pistol_animation.fbx", "pow"]
             ]
