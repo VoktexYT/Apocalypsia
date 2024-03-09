@@ -1,12 +1,10 @@
 import Zombie from '../sprite/zombie'
-import Player from './player'
+import Player from '../sprite/player'
 import Gun from '../sprite/gun';
-import * as setup from './setup'
-import * as THREE from 'three'
+import WindowEvent from './window-event';
+import Floor from '../sprite/floor';
 
-import { TextureLoader } from 'three';
-import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
-
+import * as init from './init-three'
 
 
 export const zombie = new Zombie({
@@ -28,3 +26,24 @@ export const gun = new Gun({
     gun_rotation_degres: [90,  180, 0]
 })
 
+
+export const window_event = new WindowEvent(
+    init.activeCamera,
+    init.renderer,
+    player
+)
+
+
+export const floor = new Floor()
+
+
+export const FINISH_EVERY_LOADS = () => {
+    const all_load = [
+        zombie.is_finish_load,
+        player.is_finish_load,
+        gun.is_finish_load,
+        floor.is_finish_load
+    ]
+    
+    return all_load.every(val => val === true)
+};

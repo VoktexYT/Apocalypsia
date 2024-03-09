@@ -1,5 +1,4 @@
 import * as THREE from 'three'
-import * as setup from '../game/setup'
 import * as object from '../game/object'
 import Entity from './entity'
 
@@ -41,8 +40,6 @@ export default class Gun {
         ).then((finishLoad) => {
             this.is_finish_load = finishLoad;
 
-            console.log("finidh")
-
             const mesh = this.entity.get_mesh()
             if (mesh != null) {
                 mesh.rotateX(THREE.MathUtils.degToRad(settings.gun_rotation_degres[0]))
@@ -50,6 +47,7 @@ export default class Gun {
                 mesh.rotateZ(THREE.MathUtils.degToRad(settings.gun_rotation_degres[2]))
             }
 
+            console.info("[load]:", "Gun is loaded")
         });
     }
 

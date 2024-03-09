@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import * as setup from '../game/setup'
+import * as setup from '../game/init-three'
 import Entity from './entity'
 
 
@@ -48,6 +48,7 @@ export default class Zombie {
             ]
         ).then((finishLoad) => {
             this.is_finish_load = finishLoad;
+            console.info("[load]:", "Zombie is loaded")
         });
     }
 }

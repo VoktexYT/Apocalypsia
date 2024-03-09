@@ -1,14 +1,14 @@
 import * as THREE from 'three';
 import * as object from './object'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import * as windows from './windows'
 
 
 export const scene = new THREE.Scene();
 
 
-// AxesHelper
-scene.add(new THREE.AxesHelper(5));
+export const axe_helper = new THREE.AxesHelper(5);
+
+scene.add(axe_helper);
 
 
 export const ambientLight = new THREE.AmbientLight();
@@ -27,7 +27,7 @@ export const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window
 camera.position.set(19.19, 16.33, 13.79);
 
 
-export let activeCamera = camera
+export let activeCamera = object.player.camera
 
 export function switch_active_camera() {
     if (activeCamera === camera) {

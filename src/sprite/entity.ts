@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import * as path from 'path';
-import * as setup from '../game/setup'
+import * as setup from '../game/init-three'
 
 import { TextureLoader } from 'three';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
