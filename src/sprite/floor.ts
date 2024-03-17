@@ -18,7 +18,7 @@ export default class Floor {
     constructor() {
         this.loader.load(
             this.texture_path,
-            (texture) => {
+            (texture) => {                
                 const material = new THREE.MeshBasicMaterial({ map: texture, color: this.texture_tint });
                 init.scene.add(
                     new THREE.Mesh(this.geometry, material)
