@@ -26,9 +26,9 @@ const floorShape = new CANNON.Box(
     depth / 2
 ));
 
-let floorAngle = 100
+let floorAngle = 90
 
-const floorBody = new CANNON.Body({ mass: 0 });
+const floorBody = new CANNON.Body({ mass: 0, fixedRotation: false });
 floorBody.addShape(floorShape);
 
 floorBody.position.set(0, 0, 0);
@@ -48,28 +48,20 @@ const boxShape = new CANNON.Box(new CANNON.Vec3(
 ));
 
 const boxBody = new CANNON.Body({ 
-    mass: 10,
-    fixedRotation: false
+    mass: 1,
+    fixedRotation: true
 });
-
-boxBody.addShape(boxShape);
-world.addBody(boxBody);
-
 boxBody.position.set(0, 5, 0);
 
-// KEYBOARD
-document.addEventListener('keydown', (event) => {
-    if (event.key === 'ArrowUp') {
-        boxBody.position.x += 0.1
-    }
-});
+world.addBody(boxBody);
+boxBody.addShape(boxShape);
 
 
 
 // LOOP
 function animate() {
     requestAnimationFrame(animate);
-    floorAngle += 0.3
+    // floorAngle += 0.3
     world.step(1 / 300);
 
     floorBody.quaternion.setFromAxisAngle(

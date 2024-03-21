@@ -12,8 +12,7 @@ const loadPage = new HtmlPage("load-page")
 
 function animate() {
     requestAnimationFrame(animate)
-
-
+    init.cannon_world.step(1 / 60);
 
     init.controls.update()
 
@@ -27,8 +26,16 @@ function animate() {
    
 
     object.player.update()
+    object.floor.update()
 
+    const ks = object.window_event.key_states
+    const key_code = "Enter"
+    if (Object.keys(ks).includes(key_code) && ks[key_code]) {
+        ks[key_code] = false
+        init.switch_active_camera()
+    }
 
+/*
     if (object.gun.is_finish_load) {
         object.gun.update()
     }
@@ -49,6 +56,7 @@ function animate() {
             zombieANim = true
         }
     }
+    */
 
     init.render()
 

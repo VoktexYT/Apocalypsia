@@ -1,4 +1,6 @@
 import * as THREE from 'three'
+import * as CANNON from 'cannon'
+
 import * as init from '../game/init-three'
 import * as object from '../game/object'
 import HtmlPage from '../html-page/html-page'
@@ -12,6 +14,9 @@ export default class Player {
     camera: THREE.PerspectiveCamera
     theta_camera: number
     delta_camera: number
+
+    // setup cylinder body
+    cylinderBody: CANNON.Body | null = null
 
     angleY: number
     quaternionY: THREE.Quaternion
@@ -35,6 +40,8 @@ export default class Player {
 
     cursor_page: HtmlPage
 
+    jump_velocity = 4
+
 
     constructor() {
         this.size = 2
@@ -42,6 +49,7 @@ export default class Player {
         this.velocity = 0.1
         this.capsule = new THREE.Mesh()
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
 
         this.cursor_page = new HtmlPage("cursor-page")
 
@@ -108,6 +116,11 @@ export default class Player {
         if (this.enableCamera) {return}
         
         this.cursor_page.searchHTML()
+        
+        if (init.activeCamera === init.camera) {
+            this.cursor_page.disable()
+            return
+        }
 
         if (is_cursor_center_screen) {
             this.enableCamera = true
@@ -134,27 +147,51 @@ export default class Player {
         const direction = this.getDirection();
     
         if (keyStates["KeyW"]) {
-            this.moveCameraAlongDirection(direction, this.velocity);
+            this.moveBodyAlongDirection(direction);
         }
     
         if (keyStates["KeyS"]) {
-            this.moveCameraAlongDirection(direction.clone().negate(), this.velocity);
+            this.moveBodyAlongDirection(direction.clone().negate());
         }
     
         if (keyStates["KeyA"]) {
             const leftVector = new THREE.Vector3().crossVectors(this.camera.up, direction);
-            this.moveCameraAlongDirection(leftVector, this.velocity);
+            this.moveBodyAlongDirection(leftVector);
         }
     
         if (keyStates["KeyD"]) {
             const rightVector = new THREE.Vector3().crossVectors(this.camera.up, direction);
-            this.moveCameraAlongDirection(rightVector.negate(), this.velocity);
+            this.moveBodyAlongDirection(rightVector.negate());
+        }
+
+        if (keyStates["Space"]) {
+            this.jump()
         }
     }
+
+    jump() {
+        this.cylinderBody?.velocity.set(0, this.jump_velocity, 0)        
+    }
     
-    moveCameraAlongDirection(direction: THREE.Vector3, velocity: number) {
-        this.camera.position.add(direction.multiplyScalar(velocity));
-        this.shakeCameraIndex = (this.shakeCameraIndex + 1) % this.shakeCameraPos.length;
+    moveBodyAlongDirection(direction: THREE.Vector3) {
+        if (this.cylinderBody === null) return
+        const dir_pos = direction.multiplyScalar(this.velocity)
+
+        this.cylinderBody.position.x += dir_pos.x;
+        this.cylinderBody.position.z += dir_pos.z;
+    }
+
+    updatePosition() {
+        if (this.cylinderBody === null) return
+
+        this.capsule.position.copy(this.cylinderBody.position)
+        this.capsule.quaternion.copy(this.cylinderBody.quaternion)
+
+        this.camera.position.x = this.cylinderBody.position.x
+        this.camera.position.y = this.cylinderBody.position.y+1
+        this.camera.position.z = this.cylinderBody.position.z
+
+        // this.shakeCameraIndex = (this.shakeCameraIndex + 1) % this.shakeCameraPos.length;
     }
 
     /**
@@ -186,28 +223,40 @@ export default class Player {
         
     }
 
-    
-
-    // offset the player body of camera (A best client experience)
-    bodyOffset() {
-        const direction = new THREE.Vector3();
-        this.camera.getWorldDirection(direction).negate();
-
-        const cylinderPosition = this.camera.position.clone().addScaledVector(direction, 1.5);
-        this.capsule.position.copy(cylinderPosition);
-
-        this.capsule.position.y = this.camera.position.y - 1
-    }
-
     // load player body
     load() {
-        const capsuleGeometry = new THREE.CylinderGeometry(1, 1, this.size, 10);
-        const material = new THREE.MeshBasicMaterial({ color: this.color });
-        this.capsule = new THREE.Mesh(capsuleGeometry, material);
+        const radiusTop = 1; // Radius of the cylinder at the top
+        const radiusBottom = 1; // Radius of the cylinder at the bottom
+        const height = 2; // Height of the cylinder
+        const radialSegments = 10; // Number of segments around the circumference of the cylinder
+        const numSegments = 10; // Number of segments for Cannon.js cylinder approximation
+        const mass = 1; // Mass of the cylinder
+        
+        // Three.js Cylinder
+        const cylinderGeometry = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments);
+        const material = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // Specify color as needed
+        this.capsule = new THREE.Mesh(cylinderGeometry, material);
         init.scene.add(this.capsule);
+        
+        // Cannon.js Cylinder
+        const cylinderShape = new CANNON.Cylinder(radiusTop, radiusBottom, height, numSegments);
+        this.cylinderBody = new CANNON.Body({ mass: mass, fixedRotation: true });
+        this.cylinderBody.addShape(cylinderShape);
+        init.cannon_world.addBody(this.cylinderBody);
+        
+        this.cylinderBody.position.set(0, 11, 0)
 
         this.is_finish_load = true
+
         console.info("[load]:", "Player is loaded")
+    }
+
+    respawn_after_death() {
+        if (!this.cylinderBody) return
+
+        if (this.cylinderBody?.position.y < 0) {
+
+        }
     }
     
 
@@ -216,9 +265,8 @@ export default class Player {
             this.move()
         }
 
+        this.respawn_after_death()
         this.isStartCamera()
-        this.bodyOffset()
-
-        this.camera.position.y = this.shakeCameraPos[this.shakeCameraIndex]
+        this.updatePosition()
     }
 }

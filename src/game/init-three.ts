@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import * as CANNON from 'cannon';
 import * as object from './object'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
@@ -18,6 +19,9 @@ export const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window
 camera.position.set(19.19, 16.33, 13.79);
 
 
+// const cameraHelper = new THREE.CameraHelper(object.player.camera);
+// scene.add(cameraHelper);
+
 export let activeCamera = object.player.camera
 
 export function switch_active_camera() {
@@ -29,6 +33,7 @@ export function switch_active_camera() {
         controls.enabled = true
     }
 }
+
 
 export const renderer = new THREE.WebGLRenderer();
 
@@ -44,8 +49,14 @@ controls.enableDamping = true;
 controls.target.set(0, 1, 0);
 
 
+export const cannon_world = new CANNON.World();
+cannon_world.gravity.set(0, -9.82, 0)
+
 export function render() {
     renderer.render(scene, activeCamera)
 }
+
+switch_active_camera()
+
 
 
