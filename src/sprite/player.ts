@@ -44,7 +44,7 @@ export default class Player {
 
 
     constructor() {
-        this.size = 2
+        this.size = 3
         this.color = 0x00BB00
         this.velocity = 0.1
         this.capsule = new THREE.Mesh()
@@ -244,7 +244,7 @@ export default class Player {
         this.cylinderBody.addShape(cylinderShape);
         init.cannon_world.addBody(this.cylinderBody);
         
-        this.cylinderBody.position.set(0, 11, 0)
+        this.cylinderBody.position.set(2, 11, 2)
 
         this.is_finish_load = true
 
@@ -254,11 +254,11 @@ export default class Player {
     respawn_after_death() {
         if (!this.cylinderBody) return
 
-        if (this.cylinderBody?.position.y < 0) {
-
+        if (this.cylinderBody.position.y < -5) {
+            this.cylinderBody.position.set(0, 10, 0)
         }
     }
-    
+
 
     update() {
         if (this.enableCamera) {

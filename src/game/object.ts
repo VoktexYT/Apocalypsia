@@ -7,24 +7,24 @@ import Floor from '../sprite/floor';
 import * as init from './init-three'
 
 
-// export const zombie = new Zombie({
-//     zombie_type: 2,
-//     zombie_position: [0, 0.2, 0],
-//     zombie_scale: [0.02, 0.02, 0.02]
-// });
+export const zombie = new Zombie({
+    zombie_type: 2,
+    zombie_position: [0, 0.2, 0],
+    zombie_scale: [0.014, 0.014, 0.014]
+});
 
 
 export const player = new Player()
 
 
-// export const gun = new Gun({
-//     gun_bullet_charger_max: 10,
-//     gun_bullet_fire_max: 5,
-//     gun_damage: 1,
-//     gun_position: [0, 2, 0],
-//     gun_scale: [0.05, 0.05, 0.05],
-//     gun_rotation_degres: [90,  180, 0]
-// })
+export const gun = new Gun({
+    gun_bullet_charger_max: 10,
+    gun_bullet_fire_max: 5,
+    gun_damage: 1,
+    gun_position: [0, 2, 0],
+    gun_scale: [0.05, 0.05, 0.05],
+    gun_rotation_degres: [90,  180, 0]
+})
 
 
 export const window_event = new WindowEvent(
@@ -39,9 +39,9 @@ export const floor = new Floor()
 
 export const FINISH_EVERY_LOADS = () => {
     const all_load = [
-        // zombie.is_finish_load,
+        zombie.is_finish_load,
         player.is_finish_load,
-        // gun.is_finish_load,
+        gun.is_finish_load,
         floor.is_finish_load
     ]
     

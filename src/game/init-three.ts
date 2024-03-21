@@ -56,7 +56,5 @@ export function render() {
     renderer.render(scene, activeCamera)
 }
 
-switch_active_camera()
-
 
 

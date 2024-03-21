@@ -1,6 +1,9 @@
 import * as THREE from 'three'
 import * as setup from '../game/init-three'
+import * as init from '../game/init-three'
+import * as object from '../game/object'
 import Entity from './entity'
+import * as CANNON from 'cannon'
 
 
 interface properties {
@@ -12,6 +15,10 @@ interface properties {
 export default class Zombie {
     is_finish_load: Boolean
     entity: Entity
+
+    animation_name = ""
+
+    body: CANNON.Body = new CANNON.Body({ mass: 1, fixedRotation: true })
 
     constructor(settings: properties) {
         this.is_finish_load = false
@@ -47,8 +54,69 @@ export default class Zombie {
                 ["./assets/entity/zombie/animation/zombie@walk.fbx", "walk"]
             ]
         ).then((finishLoad) => {
+            const mesh = this.entity.get_mesh()
+            if (!mesh) return
+
             this.is_finish_load = finishLoad;
+
+            const boundingBox = new THREE.Box3().setFromObject(mesh);
+            const size = new THREE.Vector3();
+            const scale = mesh.scale
+            boundingBox.getSize(size);
+
+            const box_prop = new CANNON.Vec3(
+                size.x / 4, 
+                size.y / 2,
+                size.z / 4
+            )
+
+            const shape = new CANNON.Box(box_prop);
+        
+            this.body.addShape(shape);
+
+            this.body.position.set(-2, 1, -2)
+
+            init.cannon_world.addBody(this.body);
+
             console.info("[load]:", "Zombie is loaded")
         });
     }
+
+    update() {
+        const mesh = this.entity.get_mesh();
+        const playerX = object.player.cylinderBody?.position.x;
+        const playerZ = object.player.cylinderBody?.position.z;
+        const zombieX = this.body.position.x;
+        const zombieZ = this.body.position.z;
+        if (!mesh || !playerX || !playerZ) return;
+    
+        const diffX = playerX - zombieX;
+        const diffZ = playerZ - zombieZ;
+    
+        // Adjust the position
+        this.body.position.x += diffX / 500;
+        this.body.position.z += diffZ / 500;
+    
+        const angle = Math.atan2(diffX, diffZ);
+    
+        const angleInRange = (angle + Math.PI) % (2 * Math.PI) - Math.PI;
+    
+        // Update the quaternion
+        this.body.quaternion.setFromAxisAngle(
+            new CANNON.Vec3(0, 1, 0),
+            angleInRange
+        );
+    
+        // Update the mesh position
+        mesh.position.set(
+            this.body.position.x,
+            this.body.position.y-1.2, // Keep the y position of the mesh aligned with the collision box
+            this.body.position.z
+        );
+        mesh.quaternion.copy(this.body.quaternion);
+
+        const player_dist = Math.sqrt(Math.pow(diffX, 2)+Math.pow(diffZ, 2))
+    }
+    
+    
 }

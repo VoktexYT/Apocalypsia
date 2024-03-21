@@ -27,6 +27,7 @@ function animate() {
 
     object.player.update()
     object.floor.update()
+    object.zombie.update()
 
     const ks = object.window_event.key_states
     const key_code = "Enter"
@@ -35,7 +36,7 @@ function animate() {
         init.switch_active_camera()
     }
 
-/*
+
     if (object.gun.is_finish_load) {
         object.gun.update()
     }
@@ -52,11 +53,10 @@ function animate() {
 
         // Auto play animation
         if (!zombieANim) {
-            object.zombie.entity.play_animation("idle2")
+            object.zombie.entity.play_animation("walk")
             zombieANim = true
         }
     }
-    */
 
     init.render()
 
