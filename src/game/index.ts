@@ -52,6 +52,8 @@ function animate() {
         object.gun.update()
     }
 
+    // Collide
+
     init.render()
 
 }

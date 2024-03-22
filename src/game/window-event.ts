@@ -8,6 +8,7 @@ export default class WindowEvent {
     player: Player
 
     key_states: { [key: string]: boolean } = {};
+    mouse_state: { [key: string]: boolean } = {};
     current_cursor_position: Array<number> = [];
     previous_cursor_position: Array<number> = [];
 
@@ -24,6 +25,8 @@ export default class WindowEvent {
         window.addEventListener('keydown', this.window_keydown_event.bind(this));
         window.addEventListener('keyup', this.window_keyup_event.bind(this));
         window.addEventListener("mousemove", this.window_mousemove_event.bind(this));
+        window.addEventListener("mousedown", this.window_mousedown_event.bind(this))
+        window.addEventListener("mouseup", this.window_mouseup_event.bind(this))
     }
 
     window_resize_event() {
@@ -44,5 +47,33 @@ export default class WindowEvent {
         this.current_cursor_position = [mouse.clientX, mouse.clientY];
         this.player.moveHead()
         this.previous_cursor_position = this.current_cursor_position;
+    }
+
+    window_mousedown_event(this: WindowEvent, mouse: MouseEvent) {
+        switch (mouse.button) {
+            case 0:
+                this.mouse_state["left"] = true
+                break
+            case 1:
+                this.mouse_state["middle"] = true
+                break
+            case 2:
+                this.mouse_state["right"] = true
+                break
+        }
+    }
+
+    window_mouseup_event(this: WindowEvent, mouse: MouseEvent) {
+        switch (mouse.button) {
+            case 0:
+                this.mouse_state["left"] = false;
+                break
+            case 1:
+                this.mouse_state["middle"] = false
+                break
+            case 2:
+                this.mouse_state["right"] = false
+                break
+        }
     }
 }

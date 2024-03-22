@@ -4,6 +4,7 @@ import * as CANNON from 'cannon'
 import * as init from '../game/init-three'
 import * as object from '../game/object'
 import HtmlPage from '../html-page/html-page'
+import Bullet from './bullet'
 
 
 export default class Player {
@@ -46,6 +47,8 @@ export default class Player {
     health = 100
     max_health = 100
     previous_health = this.health
+
+    all_bullets: Array<Bullet> = []
 
 
     constructor() {
@@ -149,6 +152,7 @@ export default class Player {
     
     move() {
         const keyStates = object.window_event.key_states;
+        const mouseStates = object.window_event.mouse_state;
         const direction = this.getDirection();
     
         if (keyStates["KeyW"]) {
@@ -172,6 +176,24 @@ export default class Player {
         if (keyStates["Space"]) {
             this.jump()
         }
+
+        if (mouseStates["left"]) {
+            mouseStates["left"] = false
+            this.shoot()
+        }
+    }
+
+    shoot() {
+        if (!this.cylinderBody) return 
+
+        const position = this.cylinderBody.position
+        const direction = this.camera.getWorldDirection(new THREE.Vector3());
+
+        this.all_bullets.push(new Bullet([
+            position.x,
+            position.y+1,
+            position.z,
+        ], direction))
     }
 
     jump() {
@@ -224,8 +246,6 @@ export default class Player {
         this.finalQuaternion.multiplyQuaternions(this.quaternionY, this.quaternionX);
     
         this.camera.quaternion.copy(this.finalQuaternion);
-
-        
     }
 
     // load player body
@@ -299,6 +319,10 @@ export default class Player {
         this.respawn_after_death()
         this.isStartCamera()
         this.updatePosition()
+
+        for (let b of this.all_bullets) {
+            b.update()
+        }
 
         this.previous_health = this.health
     }

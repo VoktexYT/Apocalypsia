@@ -23,10 +23,19 @@ export default class Zombie {
     is_finish_load: Boolean
     entity: Entity
 
+    material = new CANNON.Material("zombie")
+
     animation_name = ""
     is_animation = false
 
     is_attack = false
+    is_hurt = false
+    is_hurt_time = Date.now()
+    is_death = false
+    is_death_time = Date.now()
+    is_play_animation_death = false
+
+    health = 4
 
     damage = 0.4
 
@@ -85,6 +94,7 @@ export default class Zombie {
             const shape = new CANNON.Box(box_prop);
         
             this.body.addShape(shape);
+            this.body.material = this.material
 
             this.body.position.set(-2, 1, -2)
 
@@ -110,6 +120,23 @@ export default class Zombie {
     attack_player() {
         object.player.set_health_point(-this.damage)
     }
+
+    get_damage(damage: number) {
+        if (this.is_death) return
+
+        this.is_hurt = true
+        this.is_hurt_time = Date.now()
+
+        this.health -= damage
+
+        if (this.health <= 0) {
+            this.is_death = true
+            this.is_death_time = Date.now()
+        } else {
+            this.animation_name = "gethit"
+            this.entity.play_animation(this.animation_name)
+        }
+    }
     
 
     update() {
@@ -123,10 +150,10 @@ export default class Zombie {
         const diffX = playerX - zombieX;
         const diffZ = playerZ - zombieZ;
     
-        if (!this.is_attack) {
+        if (!this.is_attack && !this.is_hurt && !this.is_death) {
             // Adjust the position
-            this.body.position.x += diffX / 500;
-            this.body.position.z += diffZ / 500;
+            this.body.position.x += diffX / 400;
+            this.body.position.z += diffZ / 400;
         }
 
         mesh.position.set(
@@ -149,7 +176,7 @@ export default class Zombie {
         
         // Check if player is near
         if (this.is_finish_load) {
-            if (player_dist < 2) {
+            if (player_dist < 2 && !this.is_death) {
                 if (!this.animation_name.includes("attack")) {
                     this.is_attack = true
                     this.animation_name = "attack" + randomChoice(["1", "2", "3"])
@@ -160,17 +187,36 @@ export default class Zombie {
                 
             } 
     
-            else {
+            else if (!this.is_hurt && !this.is_death) {
                 if (this.animation_name !== "walk") {
                     this.is_attack = false
                     this.animation_name = "walk"
                     this.entity.play_animation(this.animation_name)
                 }
-              
+            }
+
+            else if (this.is_death && !this.is_play_animation_death) {
+                if (this.animation_name !== "death1") {
+                    this.is_play_animation_death = true
+                    this.animation_name = "death1"
+                    this.entity.play_animation(this.animation_name)
+                }
             }
         }
 
+        if (this.is_hurt) {
+            if (Date.now() - this.is_hurt_time > 1000) {
+                this.is_hurt = false
+            }
+        }
 
+        if (this.is_death && Date.now() - this.is_death_time > 3000) {
+            const mesh = this.entity.get_mesh()
+            if (mesh) {
+                init.scene.remove(mesh)
+                init.cannon_world.remove(this.body)
+            }
+        }
 
         this.update_animation()
         
