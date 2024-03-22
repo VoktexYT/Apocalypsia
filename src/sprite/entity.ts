@@ -191,7 +191,6 @@ export default class Entity {
                                 },
                                 (event) => {},
                                 (error) => {
-                                    console.log("UBERT", error)
                                 }
                             );
                         }

@@ -39,8 +39,13 @@ export default class Player {
     is_finish_load = false
 
     cursor_page: HtmlPage
+    health_page = new HtmlPage("health-page")
 
     jump_velocity = 4
+
+    health = 100
+    max_health = 100
+    previous_health = this.health
 
 
     constructor() {
@@ -259,8 +264,34 @@ export default class Player {
         }
     }
 
+    set_health_point(hp: number) {
+        this.health_page.searchHTML()
+        this.health_page.enable()
+        const dom = this.health_page.dom_element
+        if (!dom) return
+
+        this.health += hp
+
+        if (this.health < 0) {
+            this.health = 0
+            this.health_page.disable()
+            init.change_game_running_to(false)
+        }
+        else if (this.health > this.max_health) {
+            this.health = this.max_health
+        }
+        
+        const health_percent = this.health / this.max_health;
+
+        dom.style.opacity = (1 - health_percent).toString()
+    }
+
 
     update() {
+        if (this.previous_health === this.health) {
+            this.set_health_point(+0.1)
+        }
+
         if (this.enableCamera) {
             this.move()
         }
@@ -268,5 +299,7 @@ export default class Player {
         this.respawn_after_death()
         this.isStartCamera()
         this.updatePosition()
+
+        this.previous_health = this.health
     }
 }

@@ -5,13 +5,24 @@ import HtmlPage from '../html-page/html-page'
 
 object.player.load()
 
-let zombieANim = false
-
 const loadPage = new HtmlPage("load-page")
 
 
+let refesh_page = false
+
 function animate() {
     requestAnimationFrame(animate)
+
+    if (refesh_page) {
+        refesh_page = false
+        window.location.reload()
+    }
+
+    if (!init.game_running) {
+        refesh_page = true
+        return
+    }
+
     init.cannon_world.step(1 / 60);
 
     init.controls.update()
@@ -39,23 +50,6 @@ function animate() {
 
     if (object.gun.is_finish_load) {
         object.gun.update()
-    }
-
-    // Create zombie animations
-    if (object.zombie.is_finish_load) {
-        const zombieMesh = object.zombie.entity.get_mesh();
-        if (zombieMesh !== null) {
-            const mixer = object.zombie.entity.get_mixer();
-            if (mixer !== null) {
-                mixer.update(0.04)
-            }
-        }
-
-        // Auto play animation
-        if (!zombieANim) {
-            object.zombie.entity.play_animation("walk")
-            zombieANim = true
-        }
     }
 
     init.render()

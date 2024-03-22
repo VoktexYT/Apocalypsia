@@ -12,11 +12,23 @@ interface properties {
     zombie_scale: [number, number, number]
 }
 
+function randomChoice<T>(items: T[]): T | undefined {
+    if (items.length === 0) return undefined;
+    const index = Math.floor(Math.random() * items.length);
+    return items[index];
+}
+
+
 export default class Zombie {
     is_finish_load: Boolean
     entity: Entity
 
     animation_name = ""
+    is_animation = false
+
+    is_attack = false
+
+    damage = 0.4
 
     body: CANNON.Body = new CANNON.Body({ mass: 1, fixedRotation: true })
 
@@ -82,6 +94,24 @@ export default class Zombie {
         });
     }
 
+    update_animation() {
+        // Create zombie animations
+        if (this.is_finish_load) {
+            const zombieMesh = this.entity.get_mesh();
+            if (zombieMesh !== null) {
+                const mixer = this.entity.get_mixer();
+                if (mixer !== null) {
+                    mixer.update(0.04)
+                }
+            }
+        }
+    }
+
+    attack_player() {
+        object.player.set_health_point(-this.damage)
+    }
+    
+
     update() {
         const mesh = this.entity.get_mesh();
         const playerX = object.player.cylinderBody?.position.x;
@@ -93,29 +123,57 @@ export default class Zombie {
         const diffX = playerX - zombieX;
         const diffZ = playerZ - zombieZ;
     
-        // Adjust the position
-        this.body.position.x += diffX / 500;
-        this.body.position.z += diffZ / 500;
-    
+        if (!this.is_attack) {
+            // Adjust the position
+            this.body.position.x += diffX / 500;
+            this.body.position.z += diffZ / 500;
+        }
+
+        mesh.position.set(
+            this.body.position.x,
+            this.body.position.y-1.2,
+            this.body.position.z
+        );
+
+        // Ajust angle
         const angle = Math.atan2(diffX, diffZ);
-    
         const angleInRange = (angle + Math.PI) % (2 * Math.PI) - Math.PI;
-    
-        // Update the quaternion
         this.body.quaternion.setFromAxisAngle(
             new CANNON.Vec3(0, 1, 0),
             angleInRange
         );
-    
-        // Update the mesh position
-        mesh.position.set(
-            this.body.position.x,
-            this.body.position.y-1.2, // Keep the y position of the mesh aligned with the collision box
-            this.body.position.z
-        );
+
         mesh.quaternion.copy(this.body.quaternion);
 
         const player_dist = Math.sqrt(Math.pow(diffX, 2)+Math.pow(diffZ, 2))
+        
+        // Check if player is near
+        if (this.is_finish_load) {
+            if (player_dist < 2) {
+                if (!this.animation_name.includes("attack")) {
+                    this.is_attack = true
+                    this.animation_name = "attack" + randomChoice(["1", "2", "3"])
+                    this.entity.play_animation(this.animation_name)
+                } else {
+                    this.attack_player()
+                }
+                
+            } 
+    
+            else {
+                if (this.animation_name !== "walk") {
+                    this.is_attack = false
+                    this.animation_name = "walk"
+                    this.entity.play_animation(this.animation_name)
+                }
+              
+            }
+        }
+
+
+
+        this.update_animation()
+        
     }
     
     

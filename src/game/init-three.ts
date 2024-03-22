@@ -6,6 +6,10 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 export const scene = new THREE.Scene();
 
+export let game_running = true;
+export function change_game_running_to(is_running: boolean) {
+    game_running = is_running
+}
 
 export const ambientLight = new THREE.AmbientLight();
 
