@@ -7,9 +7,9 @@ import { TextureLoader } from 'three';
 export default class Floor {
     is_finish_load = false
 
-    floor_width = 20
+    floor_width = 40
     floor_thickener = 0.3
-    floor_depth = 20
+    floor_depth = 40
     floor_angle = 90 // deg
 
     texture_path = "./assets/nature/grass/textures/grass.png"
@@ -28,7 +28,8 @@ export default class Floor {
         this.loader.load(
             this.texture_path,
             (texture) => {                
-                const material = new THREE.MeshBasicMaterial({ map: texture, color: this.texture_tint });
+                const material = new THREE.MeshBasicMaterial({ color: this.texture_tint });
+                // const material = new THREE.MeshBasicMaterial({ map: texture, color: this.texture_tint });
                 this.mesh = new THREE.Mesh(this.geometry, material);
                 init.scene.add(this.mesh);
 

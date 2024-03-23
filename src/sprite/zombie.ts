@@ -14,6 +14,7 @@ import MaterialTextureLoader from '../loader/material'
 
 
 import * as ZOMBIE_MATERIAL from '../load/material/material.zombie'
+import { randInt } from 'three/src/math/MathUtils'
 
 interface properties {
     zombie_type: number,
@@ -40,8 +41,11 @@ export default class Zombie {
     is_death_time = Date.now()
     
     animationSpeed = 0
-    health = 4
-    damage = 0.4
+    health = randInt(3, 6)
+    damage = randInt(0.4, 0.6)
+    velocity = randInt(300, 500)
+
+    obtimisation_range = 5
     
     material = new CANNON.Material("zombie")
     body: CANNON.Body = new CANNON.Body({ mass: 1, fixedRotation: true })
@@ -57,7 +61,11 @@ export default class Zombie {
         if (!copy_original) return
 
         this.mesh = clone(copy_original)
-        this.change_material(ZOMBIE_MATERIAL.material_zombie1_low)
+        if (this.properties.zombie_type === 1) {
+            this.change_material(ZOMBIE_MATERIAL.material_zombie1_low)
+        } else {
+            this.change_material(ZOMBIE_MATERIAL.material_zombie2_low)
+        }
 
         this.mesh.position.set(
             this.properties.zombie_position[0],
@@ -186,8 +194,8 @@ export default class Zombie {
     
         if (!this.is_attack && !this.is_hurt && !this.is_death) {
             // Adjust the position
-            this.body.position.x += diffX / 400;
-            this.body.position.z += diffZ / 400;
+            this.body.position.x += diffX / this.velocity;
+            this.body.position.z += diffZ / this.velocity;
         }
 
         mesh.position.set(
@@ -197,15 +205,17 @@ export default class Zombie {
         );
 
         // Ajust angle
-        const angle = Math.atan2(diffX, diffZ);
-        const angleInRange = (angle + Math.PI) % (2 * Math.PI) - Math.PI;
-        this.body.quaternion.setFromAxisAngle(
-            new CANNON.Vec3(0, 1, 0),
-            angleInRange
-        );
+        if (!this.is_death) {
+            const angle = Math.atan2(diffX, diffZ);
+            const angleInRange = (angle + Math.PI) % (2 * Math.PI) - Math.PI;
+            this.body.quaternion.setFromAxisAngle(
+                new CANNON.Vec3(0, 1, 0),
+                angleInRange
+            );
 
-        mesh.quaternion.copy(this.body.quaternion);
-
+            mesh.quaternion.copy(this.body.quaternion);
+        }
+        
         const player_dist = Math.sqrt(Math.pow(diffX, 2)+Math.pow(diffZ, 2))
         
         // Check if player is near
@@ -225,7 +235,7 @@ export default class Zombie {
                 if (this.animation_name !== "walk") {
                     this.is_attack = false
                     this.animation_name = "walk"
-                    this.play_animation(this.animation_name, 0.04, true)
+                    this.play_animation(this.animation_name, 0.06, true)
                 }
             }
 
@@ -255,14 +265,22 @@ export default class Zombie {
         this.update_animation()
 
         // Obtimisation
-        if (player_dist > 10 && !this.material_change) {
+        if (player_dist > this.obtimisation_range && !this.material_change) {
             this.material_change = true
-            this.change_material(ZOMBIE_MATERIAL.material_zombie1_low)
+            if (this.properties.zombie_type === 1) {
+                this.change_material(ZOMBIE_MATERIAL.material_zombie1_low)
+            } else {
+                this.change_material(ZOMBIE_MATERIAL.material_zombie2_low)
+            }
         }
         
-        if (player_dist <= 10 && this.material_change) {
+        if (player_dist <= this.obtimisation_range && this.material_change) {
             this.material_change = false
-            this.change_material(ZOMBIE_MATERIAL.material_zombie1_high)
+            if (this.properties.zombie_type === 1) {
+                this.change_material(ZOMBIE_MATERIAL.material_zombie1_high)
+            } else {
+                this.change_material(ZOMBIE_MATERIAL.material_zombie2_high)
+            }
         }
     }
 }

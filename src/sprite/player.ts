@@ -14,7 +14,7 @@ export default class Player {
     color = 0x00BB00
     health = 100
     max_health = 100
-    
+    position = [-15, 1, -15]
     capsule = new THREE.Mesh()
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     theta_camera = 0
@@ -94,6 +94,7 @@ export default class Player {
 
         if (keyStates["KeyA"])
             this.moveBodyAlongDirection(new THREE.Vector3().crossVectors(this.camera.up, direction));
+        
         else if (keyStates["KeyD"])
             this.moveBodyAlongDirection(new THREE.Vector3().crossVectors(this.camera.up, direction).negate());
 
@@ -193,7 +194,7 @@ export default class Player {
         this.cylinderBody.addShape(cylinderShape);
         init.cannon_world.addBody(this.cylinderBody);
         
-        this.cylinderBody.position.set(2, 11, 2)
+        this.cylinderBody.position.set(this.position[0], this.position[1], this.position[2])
 
         this.is_finish_load = true
 

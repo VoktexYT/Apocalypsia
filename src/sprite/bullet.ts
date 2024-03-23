@@ -6,10 +6,12 @@ import Zombie from './zombie'
 
 
 export default class Bullet {
-    velocity = 2
-    color = 0x0000FF
+    velocity = 1
+    color = 0x000000
     size = 0.1
     is_delete = false
+
+    fireTime = Date.now()
 
     dirrection: THREE.Vector3
     mesh: THREE.Mesh
@@ -22,7 +24,7 @@ export default class Bullet {
 
         // THREE.JS BOX
         const box = new THREE.BoxGeometry(this.size, this.size, this.size);
-        const material = new THREE.MeshBasicMaterial({ color: this.color });
+        const material = new THREE.MeshBasicMaterial({ color: this.color, opacity: 0.5, transparent: true });
         this.mesh = new THREE.Mesh(box, material);
 
         // CANNON.JS BOX
@@ -87,7 +89,16 @@ export default class Bullet {
         return collisionDetected;
     }
 
+    check_bullet_range() {
+        
+        if (Date.now() - this.fireTime > 1000) { // after 2 sec
+            this.delete()
+        }
+    }
+
     update() {
+        if (this.is_delete) return
+
         // UPDATE BULLET POSITION
         const dir_pos = this.dirrection.multiplyScalar(this.velocity)
         this.boxBody.position.x += dir_pos.x / 10;
@@ -102,12 +113,13 @@ export default class Bullet {
             this.zombie_collide.get_damage(1)
             this.zombie_collide = undefined
         }
+
+        this.check_bullet_range()
     }
     
     delete() {
         init.scene.remove(this.mesh)
         init.cannon_world.remove(this.boxBody);
         this.is_delete = true
-
     }
 }

@@ -5,22 +5,23 @@ import Floor from '../sprite/floor';
 import WindowEvent from './window-event';
 
 import * as init from './init-three'
+import { randInt } from 'three/src/math/MathUtils';
 
 
 
-export const every_zombie: Array<Zombie> = [
-    new Zombie({
-        zombie_type: 1,
-        zombie_position: [-2, 1, -2],
-        zombie_scale: [0.014, 0.014, 0.014]
-    }),
+export const every_zombie: Array<Zombie> = []
 
-    new Zombie({
-        zombie_type: 1,
-        zombie_position: [3, 1, 3],
-        zombie_scale: [0.014, 0.014, 0.014]
-    })
-]
+
+
+for (let i=0; i<10; i++) {
+    every_zombie.push(   
+        new Zombie({
+            zombie_type: randInt(1, 2),
+            zombie_position: [randInt(-5, 15), 1, randInt(-5, 15)],
+            zombie_scale: [0.014, 0.014, 0.014]
+        })
+    )
+}
 
 
 

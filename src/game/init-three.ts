@@ -22,8 +22,8 @@ scene.add(ambientLight);
 export const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(19.19, 16.33, 13.79);
 
-const cameraHelper = new THREE.CameraHelper(object.player.camera);
-scene.add(cameraHelper);
+// const cameraHelper = new THREE.CameraHelper(object.player.camera);
+// scene.add(cameraHelper);
 
 export let activeCamera = object.player.camera
 
