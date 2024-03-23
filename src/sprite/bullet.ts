@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import * as CANNON from 'cannon'
 import * as init from '../game/init-three'
 import * as object from '../game/object'
+import Zombie from './zombie'
 
 
 export default class Bullet {
@@ -14,6 +15,7 @@ export default class Bullet {
     mesh: THREE.Mesh
     boxBody: CANNON.Body
     boxMaterial: CANNON.Material
+    zombie_collide: Zombie | undefined
 
     constructor(position: Array<number>, direction: THREE.Vector3) {
         this.dirrection = direction
@@ -77,6 +79,7 @@ export default class Bullet {
             collisionDetected = distance < 1;
 
             if (collisionDetected) {
+                this.zombie_collide = zombie
                 break
             }
         }
@@ -94,12 +97,10 @@ export default class Bullet {
 
         // CHECK IF BULLET COLLIDE WITH A ZOMBIE
         const intersectsZombie = this.checkCollisionWithZombie();
-        if (intersectsZombie && !this.is_delete) {
+        if (intersectsZombie && !this.is_delete && this.zombie_collide) {
             this.delete()
-            
-            for (const zombie of object.every_zombie) {
-                zombie.get_damage(1)
-            }
+            this.zombie_collide.get_damage(1)
+            this.zombie_collide = undefined
         }
     }
     

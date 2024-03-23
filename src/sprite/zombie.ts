@@ -216,7 +216,7 @@ export default class Zombie {
                     this.animation_name = "attack" + randomChoice(["1", "2", "3"])
                     this.play_animation(this.animation_name, 0.08, true)
                 } else {
-                    // this.attack_player()
+                    this.attack_player()
                 }
                 
             } 
