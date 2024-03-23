@@ -5,7 +5,7 @@ import * as object from '../game/object'
 
 
 export default class Bullet {
-    velocity = 5
+    velocity = 2
     color = 0x0000FF
     size = 0.1
     is_delete = false

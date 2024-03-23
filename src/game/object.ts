@@ -15,11 +15,11 @@ export const every_zombie: Array<Zombie> = [
         zombie_scale: [0.014, 0.014, 0.014]
     }),
 
-    // new Zombie({
-    //     zombie_type: 1,
-    //     zombie_position: [-1, 1, -1],
-    //     zombie_scale: [0.014, 0.014, 0.014]
-    // })
+    new Zombie({
+        zombie_type: 1,
+        zombie_position: [3, 1, 3],
+        zombie_scale: [0.014, 0.014, 0.014]
+    })
 ]
 
 

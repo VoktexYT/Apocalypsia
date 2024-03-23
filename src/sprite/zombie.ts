@@ -6,10 +6,12 @@ import * as init from '../game/init-three'
 import * as object from '../game/object'
 
 import randomChoice from '../random.choice'
+import clone from '../skeleton.clone'
 
 // Loader
 import zombie_fbx_loader from '../load/object/object.zombie'
 import MaterialTextureLoader from '../loader/material'
+
 
 import * as ZOMBIE_MATERIAL from '../load/material/material.zombie'
 
@@ -21,7 +23,7 @@ interface properties {
 
 
 export default class Zombie {
-    mesh: THREE.Group<THREE.Object3DEventMap> | null = null
+    mesh: THREE.Object3D | null = null
     mixer: THREE.AnimationMixer | null = null
 
     last_action: THREE.AnimationAction | null = null
@@ -51,12 +53,10 @@ export default class Zombie {
     }
 
     setup_mesh() {
-        const copy_original = zombie_fbx_loader.copy()
+        const copy_original = zombie_fbx_loader.getObject()
         if (!copy_original) return
 
-        console.log("ORIGINAL: ", copy_original.scale)
-
-        this.mesh = copy_original
+        this.mesh = clone(copy_original)
         this.change_material(ZOMBIE_MATERIAL.material_zombie1_low)
 
         this.mesh.position.set(
@@ -65,18 +65,12 @@ export default class Zombie {
             this.properties.zombie_position[2]
         )
 
-
         this.mesh.scale.set(
             this.properties.zombie_scale[0],
             this.properties.zombie_scale[1],
             this.properties.zombie_scale[2]
         )
 
-        console.log("ORIGINAL: ", copy_original.scale)
-
-            
-            
-            
         const boundingBox = new THREE.Box3().setFromObject(this.mesh);
         const size = new THREE.Vector3();
         boundingBox.getSize(size);
@@ -119,9 +113,9 @@ export default class Zombie {
 
     play_animation(animationName: string, speed: number, is_loop?: boolean) {
         this.animationSpeed = speed
-        if (Object.keys(zombie_fbx_loader.animations).includes(animationName) && this.mesh !== null) {
+        if (Object.keys(zombie_fbx_loader.getAnimations()).includes(animationName) && this.mesh !== null) {
             const mixer = new THREE.AnimationMixer(this.mesh);
-            const action = mixer.clipAction(zombie_fbx_loader.animations[animationName]);
+            const action = mixer.clipAction(zombie_fbx_loader.getAnimations()[animationName]);
             if (this.last_action !== null) {
                 this.last_action.crossFadeTo(action, 0.5, false);
             }
@@ -172,7 +166,7 @@ export default class Zombie {
     
 
     update() {
-        if (!zombie_fbx_loader.finish_load) return
+        if (!zombie_fbx_loader.isFinishedLoading()) return
         if (!this.is_finish_load) {
             this.setup_mesh()
             this.is_finish_load = true

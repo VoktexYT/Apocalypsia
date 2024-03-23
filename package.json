@@ -19,7 +19,8 @@
   "dependencies": {
     "cannon": "^0.6.2",
     "cannon-es-debugger": "^1.0.0",
-    "three": "^0.162.0"
+    "three": "^0.162.0",
+    "three-addons": "^1.2.0"
   },
   "devDependencies": {
     "@types/cannon": "^0.1.12",
