@@ -7,11 +7,21 @@ import WindowEvent from './window-event';
 import * as init from './init-three'
 
 
-export const zombie = new Zombie({
-    zombie_type: 1,
-    zombie_position: [0, 0.2, 0],
-    zombie_scale: [0.014, 0.014, 0.014]
-});
+
+export const every_zombie: Array<Zombie> = [
+    new Zombie({
+        zombie_type: 1,
+        zombie_position: [-2, 1, -2],
+        zombie_scale: [0.014, 0.014, 0.014]
+    }),
+
+    // new Zombie({
+    //     zombie_type: 1,
+    //     zombie_position: [-1, 1, -1],
+    //     zombie_scale: [0.014, 0.014, 0.014]
+    // })
+]
+
 
 
 export const player = new Player()
@@ -35,15 +45,3 @@ export const window_event = new WindowEvent(
 
 
 export const floor = new Floor()
-
-
-export const FINISH_EVERY_LOADS = () => {
-    const all_load = [
-        zombie.is_finish_load,
-        player.is_finish_load,
-        gun.is_finish_load,
-        floor.is_finish_load
-    ]
-    
-    return all_load.every(val => val === true)
-};

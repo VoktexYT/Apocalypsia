@@ -42,9 +42,7 @@ export const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-export const render = ()=>  {
-    renderer.render(scene, activeCamera)
-}
+export const render = ()=>  {renderer.render(scene, activeCamera)}
 
 // Orbit Control
 export const controls = new OrbitControls(camera, renderer.domElement);

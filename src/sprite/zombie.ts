@@ -1,10 +1,17 @@
 import * as THREE from 'three'
-import * as setup from '../game/init-three'
-import * as init from '../game/init-three'
-import * as object from '../game/object'
-import Entity from './entity'
 import * as CANNON from 'cannon'
 
+import * as init from '../game/init-three'
+
+import * as object from '../game/object'
+
+import randomChoice from '../random.choice'
+
+// Loader
+import zombie_fbx_loader from '../load/object/object.zombie'
+import MaterialTextureLoader from '../loader/material'
+
+import * as ZOMBIE_MATERIAL from '../load/material/material.zombie'
 
 interface properties {
     zombie_type: number,
@@ -12,106 +19,131 @@ interface properties {
     zombie_scale: [number, number, number]
 }
 
-function randomChoice<T>(items: T[]): T | undefined {
-    if (items.length === 0) return undefined;
-    const index = Math.floor(Math.random() * items.length);
-    return items[index];
-}
-
 
 export default class Zombie {
-    is_finish_load: Boolean
-    entity: Entity
+    mesh: THREE.Group<THREE.Object3DEventMap> | null = null
+    mixer: THREE.AnimationMixer | null = null
 
-    material = new CANNON.Material("zombie")
+    last_action: THREE.AnimationAction | null = null
+    is_finish_load = false
 
     animation_name = ""
     is_animation = false
-
     is_attack = false
     is_hurt = false
-    is_hurt_time = Date.now()
-    is_death = false
-    is_death_time = Date.now()
     is_play_animation_death = false
-
+    is_death = false
+    
+    is_hurt_time = Date.now()
+    is_death_time = Date.now()
+    
+    animationSpeed = 0
     health = 4
-
     damage = 0.4
-
+    
+    material = new CANNON.Material("zombie")
     body: CANNON.Body = new CANNON.Body({ mass: 1, fixedRotation: true })
+    properties: properties
+    material_change = true
 
-    constructor(settings: properties) {
-        this.is_finish_load = false
+    constructor(properties: properties) {
+        this.properties = properties
+    }
 
-        const ZT = settings.zombie_type
+    setup_mesh() {
+        const copy_original = zombie_fbx_loader.copy()
+        if (!copy_original) return
 
-        this.entity = new Entity()
-            .set_position(settings.zombie_position[0], settings.zombie_position[1], settings.zombie_position[2])
-            .set_scale(settings.zombie_scale[0], settings.zombie_scale[1], settings.zombie_scale[2])
-            .set_textures({
-                map:             `./assets/entity/zombie/textures/${ZT}/HIGH/${ZT}_Albedo.png`,
-                emissiveMap:     `./assets/entity/zombie/textures/${ZT}/HIGH/${ZT}_Emission.png`,
-                roughnessMap:    `./assets/entity/zombie/textures/${ZT}/HIGH/${ZT}_gloss.png`,
-             displacementMap:    `./assets/entity/zombie/textures/${ZT}/HIGH/${ZT}_Height.png`,
-                metalnessMap:    `./assets/entity/zombie/textures/${ZT}/HIGH/${ZT}_metalik marmoset.png`,
-                normalMap:       `./assets/entity/zombie/textures/${ZT}/HIGH/${ZT}_Normal.png`,
-                aoMap:           `./assets/entity/zombie/textures/${ZT}/HIGH/${ZT}_Occlusion.png`
-            })
+        console.log("ORIGINAL: ", copy_original.scale)
+
+        this.mesh = copy_original
+        this.change_material(ZOMBIE_MATERIAL.material_zombie1_low)
+
+        this.mesh.position.set(
+            this.properties.zombie_position[0],
+            this.properties.zombie_position[1],
+            this.properties.zombie_position[2]
+        )
+
+
+        this.mesh.scale.set(
+            this.properties.zombie_scale[0],
+            this.properties.zombie_scale[1],
+            this.properties.zombie_scale[2]
+        )
+
+        console.log("ORIGINAL: ", copy_original.scale)
+
+            
+            
+            
+        const boundingBox = new THREE.Box3().setFromObject(this.mesh);
+        const size = new THREE.Vector3();
+        boundingBox.getSize(size);
+
+        const box_prop = new CANNON.Vec3(
+            size.x / 4, 
+            size.y / 2,
+            size.z / 4
+        )
+
+        const shape = new CANNON.Box(box_prop);
         
-        this.entity.load(
-            "assets/entity/zombie/models/Base mesh fbx.fbx",
-            [
-                ["./assets/entity/zombie/animation/zombie@atack1.fbx", "attack1"],
-                ["./assets/entity/zombie/animation/zombie@atack2.fbx", "attack2"],
-                ["./assets/entity/zombie/animation/zombie@atack3.fbx", "attack3"],
-                ["./assets/entity/zombie/animation/zombie@atack4.fbx", "attack4"],
-                ["./assets/entity/zombie/animation/zombie@death1.fbx", "death1"],
-                ["./assets/entity/zombie/animation/zombie@death2.fbx", "death2"],
-                ["./assets/entity/zombie/animation/zombie@gethit.fbx", "gethit"],
-                ["./assets/entity/zombie/animation/zombie@idle1.fbx", "idle1"],
-                ["./assets/entity/zombie/animation/zombie@idle2.fbx", "idle2"],
-                ["./assets/entity/zombie/animation/zombie@roar.fbx", "roar"],
-                ["./assets/entity/zombie/animation/zombie@walk.fbx", "walk"]
-            ]
-        ).then((finishLoad) => {
-            const mesh = this.entity.get_mesh()
-            if (!mesh) return
-
-            this.is_finish_load = finishLoad;
-
-            const boundingBox = new THREE.Box3().setFromObject(mesh);
-            const size = new THREE.Vector3();
-            const scale = mesh.scale
-            boundingBox.getSize(size);
-
-            const box_prop = new CANNON.Vec3(
-                size.x / 4, 
-                size.y / 2,
-                size.z / 4
-            )
-
-            const shape = new CANNON.Box(box_prop);
+        this.body.addShape(shape);
+        this.body.material = this.material
         
-            this.body.addShape(shape);
-            this.body.material = this.material
+        this.body.position.set(
+            this.properties.zombie_position[0],
+            this.properties.zombie_position[1],
+            this.properties.zombie_position[2],
+        )
+                
+        init.cannon_world.addBody(this.body);
+        init.scene.add(this.mesh);
+                
+        this.is_finish_load = true
+        console.info("[load]:", "Zombie is loaded")
+    }
 
-            this.body.position.set(-2, 1, -2)
+    change_material(new_material_loader: MaterialTextureLoader) {
+        const mesh = this.mesh
+        if (!mesh) return
 
-            init.cannon_world.addBody(this.body);
+        mesh.traverse((child) => {
+            if (!(child instanceof THREE.Mesh)) return
 
-            console.info("[load]:", "Zombie is loaded")
-        });
+            child.material = new_material_loader.material;
+            child.material.transparent = false;
+        })
+    }
+
+    play_animation(animationName: string, speed: number, is_loop?: boolean) {
+        this.animationSpeed = speed
+        if (Object.keys(zombie_fbx_loader.animations).includes(animationName) && this.mesh !== null) {
+            const mixer = new THREE.AnimationMixer(this.mesh);
+            const action = mixer.clipAction(zombie_fbx_loader.animations[animationName]);
+            if (this.last_action !== null) {
+                this.last_action.crossFadeTo(action, 0.5, false);
+            }
+
+            if (!is_loop) {
+                action.clampWhenFinished = true
+                action.setLoop(THREE.LoopOnce, 0)
+            }
+
+            action.play();
+            
+            this.last_action = action
+            this.mixer = mixer;
+        }
     }
 
     update_animation() {
-        // Create zombie animations
         if (this.is_finish_load) {
-            const zombieMesh = this.entity.get_mesh();
+            const zombieMesh = this.mesh;
             if (zombieMesh !== null) {
-                const mixer = this.entity.get_mixer();
-                if (mixer !== null) {
-                    mixer.update(0.04)
+                if (this.mixer !== null) {
+                    this.mixer.update(this.animationSpeed)
                 }
             }
         }
@@ -131,17 +163,24 @@ export default class Zombie {
 
         if (this.health <= 0) {
             this.is_death = true
-            init.cannon_world.remove(this.body)
             this.is_death_time = Date.now()
         } else {
             this.animation_name = "gethit"
-            this.entity.play_animation(this.animation_name)
+            this.play_animation(this.animation_name, 0.04)
         }
     }
     
 
     update() {
-        const mesh = this.entity.get_mesh();
+        if (!zombie_fbx_loader.finish_load) return
+        if (!this.is_finish_load) {
+            this.setup_mesh()
+            this.is_finish_load = true
+        }
+
+
+
+        const mesh = this.mesh;
         const playerX = object.player.cylinderBody?.position.x;
         const playerZ = object.player.cylinderBody?.position.z;
         const zombieX = this.body.position.x;
@@ -181,9 +220,9 @@ export default class Zombie {
                 if (!this.animation_name.includes("attack")) {
                     this.is_attack = true
                     this.animation_name = "attack" + randomChoice(["1", "2", "3"])
-                    this.entity.play_animation(this.animation_name)
+                    this.play_animation(this.animation_name, 0.08, true)
                 } else {
-                    this.attack_player()
+                    // this.attack_player()
                 }
                 
             } 
@@ -192,35 +231,44 @@ export default class Zombie {
                 if (this.animation_name !== "walk") {
                     this.is_attack = false
                     this.animation_name = "walk"
-                    this.entity.play_animation(this.animation_name)
+                    this.play_animation(this.animation_name, 0.04, true)
                 }
             }
 
             else if (this.is_death && !this.is_play_animation_death) {
-                if (this.animation_name !== "death1") {
+                if (!this.animation_name.includes("death")) {
+                    this.body.sleep()
+                    init.cannon_world.remove(this.body)
                     this.is_play_animation_death = true
-                    this.animation_name = "death1"
-                    this.entity.play_animation(this.animation_name)
+                    this.animation_name = "death" + randomChoice(["1", "2"])
+                    this.play_animation(this.animation_name, 0.08)
                 }
             }
         }
 
         if (this.is_hurt) {
-            if (Date.now() - this.is_hurt_time > 1000) {
+            if (Date.now() - this.is_hurt_time > 500) {
                 this.is_hurt = false
             }
         }
 
         if (this.is_death && Date.now() - this.is_death_time > 3000) {
-            const mesh = this.entity.get_mesh()
-            if (mesh) {
-                init.scene.remove(mesh)
-            }
+            const mesh = this.mesh
+            if (!mesh) return
+            init.scene.remove(mesh)
         }
 
         this.update_animation()
+
+        // Obtimisation
+        if (player_dist > 10 && !this.material_change) {
+            this.material_change = true
+            this.change_material(ZOMBIE_MATERIAL.material_zombie1_low)
+        }
         
+        if (player_dist <= 10 && this.material_change) {
+            this.material_change = false
+            this.change_material(ZOMBIE_MATERIAL.material_zombie1_high)
+        }
     }
-    
-    
 }

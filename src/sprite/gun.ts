@@ -33,10 +33,7 @@ export default class Gun {
             })
         
         this.entity.load(
-            "./assets/weapons/pistol/models/pistol.fbx",
-            [
-                // ["assets/weapons/pistol/models/pistol_animation.fbx", "pow"]
-            ]
+            "./assets/weapons/pistol/models/pistol.fbx", []
         ).then((finishLoad) => {
             this.is_finish_load = finishLoad;
 
@@ -54,7 +51,6 @@ export default class Gun {
     update() {
         const mesh = this.entity.get_mesh();
         if (mesh != null) {
-            // Mettre à jour la position et la rotation du gun en fonction de la caméra et du joueur
             mesh.position.copy(object.player.camera.position);
             mesh.quaternion.copy(object.player.camera.quaternion);
 
@@ -65,9 +61,7 @@ export default class Gun {
             mesh.rotateY(THREE.MathUtils.degToRad(this.settings.gun_rotation_degres[1]))
             mesh.rotateZ(THREE.MathUtils.degToRad(this.settings.gun_rotation_degres[2]))
 
-
-            // Appliquer un décalage pour positionner le gun par rapport au joueur
-            mesh.translateY(-1); // Par exemple, ajustez cette valeur en fonction de la position relative du gun par rapport au joueur
+            mesh.translateY(-1);
         }
     }
 }

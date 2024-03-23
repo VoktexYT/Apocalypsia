@@ -6,20 +6,20 @@ import { TextureLoader } from 'three';
 
 export default class Floor {
     is_finish_load = false
-    
+
     floor_width = 20
     floor_thickener = 0.3
     floor_depth = 20
+    floor_angle = 90 // deg
 
-    geometry = new THREE.BoxGeometry(this.floor_width, this.floor_thickener, this.floor_depth);
-    
-    // for material...
-    loader = new TextureLoader();
     texture_path = "./assets/nature/grass/textures/grass.png"
     texture_tint = 0x555555
-    floor_angle = 90
 
-    private default_position = {x:0, y:0, z:0}
+
+    geometry = new THREE.BoxGeometry(this.floor_width, this.floor_thickener, this.floor_depth);
+    loader = new TextureLoader();
+
+    default_position = {x:0, y:0, z:0}
 
     mesh: THREE.Mesh | null = null
     body_collide: CANNON.Body | null = null
@@ -30,7 +30,6 @@ export default class Floor {
             (texture) => {                
                 const material = new THREE.MeshBasicMaterial({ map: texture, color: this.texture_tint });
                 this.mesh = new THREE.Mesh(this.geometry, material);
-                // this.mesh.rotation.x = Math.PI / 2
                 init.scene.add(this.mesh);
 
                 // setup cannon collision
