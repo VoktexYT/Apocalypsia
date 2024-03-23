@@ -7,8 +7,8 @@ object.player.load()
 
 const loadPage = new HtmlPage("load-page")
 
-
 let refesh_page = false
+
 
 function animate() {
     requestAnimationFrame(animate)

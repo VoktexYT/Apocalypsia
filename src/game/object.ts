@@ -1,14 +1,14 @@
 import Zombie from '../sprite/zombie'
 import Player from '../sprite/player'
 import Gun from '../sprite/gun';
-import WindowEvent from './window-event';
 import Floor from '../sprite/floor';
+import WindowEvent from './window-event';
 
 import * as init from './init-three'
 
 
 export const zombie = new Zombie({
-    zombie_type: 2,
+    zombie_type: 1,
     zombie_position: [0, 0.2, 0],
     zombie_scale: [0.014, 0.014, 0.014]
 });

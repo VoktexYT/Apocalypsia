@@ -50,13 +50,13 @@ export default class Zombie {
             .set_position(settings.zombie_position[0], settings.zombie_position[1], settings.zombie_position[2])
             .set_scale(settings.zombie_scale[0], settings.zombie_scale[1], settings.zombie_scale[2])
             .set_textures({
-                map:             `./assets/entity/zombie/textures/${ZT}/${ZT}_Albedo.png`,
-                emissiveMap:     `./assets/entity/zombie/textures/${ZT}/${ZT}_Emission.png`,
-                roughnessMap:    `./assets/entity/zombie/textures/${ZT}/${ZT}_gloss.png`,
-             displacementMap:    `./assets/entity/zombie/textures/${ZT}/${ZT}_Height.png`,
-                metalnessMap:    `./assets/entity/zombie/textures/${ZT}/${ZT}_metalik marmoset.png`,
-                normalMap:       `./assets/entity/zombie/textures/${ZT}/${ZT}_Normal.png`,
-                aoMap:           `./assets/entity/zombie/textures/${ZT}/${ZT}_Occlusion.png`
+                map:             `./assets/entity/zombie/textures/${ZT}/HIGH/${ZT}_Albedo.png`,
+                emissiveMap:     `./assets/entity/zombie/textures/${ZT}/HIGH/${ZT}_Emission.png`,
+                roughnessMap:    `./assets/entity/zombie/textures/${ZT}/HIGH/${ZT}_gloss.png`,
+             displacementMap:    `./assets/entity/zombie/textures/${ZT}/HIGH/${ZT}_Height.png`,
+                metalnessMap:    `./assets/entity/zombie/textures/${ZT}/HIGH/${ZT}_metalik marmoset.png`,
+                normalMap:       `./assets/entity/zombie/textures/${ZT}/HIGH/${ZT}_Normal.png`,
+                aoMap:           `./assets/entity/zombie/textures/${ZT}/HIGH/${ZT}_Occlusion.png`
             })
         
         this.entity.load(
@@ -131,6 +131,7 @@ export default class Zombie {
 
         if (this.health <= 0) {
             this.is_death = true
+            init.cannon_world.remove(this.body)
             this.is_death_time = Date.now()
         } else {
             this.animation_name = "gethit"
@@ -214,7 +215,6 @@ export default class Zombie {
             const mesh = this.entity.get_mesh()
             if (mesh) {
                 init.scene.remove(mesh)
-                init.cannon_world.remove(this.body)
             }
         }
 

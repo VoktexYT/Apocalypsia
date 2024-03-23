@@ -45,6 +45,8 @@ export default class Entity {
     private _start_position: [number, number, number]
     private _scale: [number, number, number]
 
+    last_action: THREE.AnimationAction | null = null
+
     constructor() {
         this._baseMeshPath = "";
         this._baseMeshAnimationPath = [];
@@ -52,7 +54,7 @@ export default class Entity {
         this._material = null;
         this._mesh = null;
         this._animations = {};
-        this._mixer = null
+        this._mixer = null;
         this._start_position = [0, 0, 0]
         this._scale = [0, 0, 0]
     }
@@ -132,7 +134,11 @@ export default class Entity {
         if (Object.keys(this._animations).includes(animationName) && this._mesh !== null) {
             const mixer = new THREE.AnimationMixer(this._mesh);
             const action = mixer.clipAction(this._animations[animationName]);
+            if (this.last_action !== null) {
+                this.last_action.crossFadeTo(action, 0.5, false);
+            }
             action.play();
+            this.last_action = action
             this._mixer = mixer;
         }
     }

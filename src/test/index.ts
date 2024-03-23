@@ -8,6 +8,8 @@ const game = new Game();
 const world = new CANNON.World();
 world.gravity.set(0, -91.82, 0);
 
+
+
 // PLANE
 const width = 2;
 const height = 2;
@@ -64,6 +66,7 @@ function animate() {
     // floorAngle += 0.3
     world.step(1 / 300);
 
+
     floorBody.quaternion.setFromAxisAngle(
         new CANNON.Vec3(1, 0, 0),
         THREE.MathUtils.degToRad(floorAngle)
@@ -72,7 +75,7 @@ function animate() {
     floorMesh.position.copy(floorBody.position);
     floorMesh.quaternion.copy(floorBody.quaternion);
 
-    if (boxMesh.position.y < -10) {
+    if (boxMesh.position.y < -11) {
         boxBody.velocity.y = 0
         boxBody.velocity.x = 0
         boxBody.velocity.z = 0
