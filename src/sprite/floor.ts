@@ -19,7 +19,7 @@ export default class Floor {
     geometry = new THREE.BoxGeometry(this.floor_width, this.floor_thickener, this.floor_depth);
     loader = new TextureLoader();
 
-    default_position = {x:0, y:0, z:0}
+    default_position = {x:0, y:-2, z:0}
 
     mesh: THREE.Mesh | null = null
     body_collide: CANNON.Body | null = null
@@ -29,16 +29,15 @@ export default class Floor {
             this.texture_path,
             (texture) => {                
                 const material = new THREE.MeshBasicMaterial({ color: this.texture_tint });
-                // const material = new THREE.MeshBasicMaterial({ map: texture, color: this.texture_tint });
                 this.mesh = new THREE.Mesh(this.geometry, material);
                 init.scene.add(this.mesh);
 
                 // setup cannon collision
                 const floorShape = new CANNON.Box(
                     new CANNON.Vec3(
-                    this.floor_width / 2,
-                    this.floor_depth / 2,
-                    this.floor_thickener / 2
+                    this.floor_width/2,
+                    this.floor_depth/2,
+                    this.floor_thickener/2
                 ));
                 
                 this.body_collide = new CANNON.Body({ mass: 0, fixedRotation: true });

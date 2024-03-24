@@ -7,8 +7,11 @@ import Zombie from './zombie'
 
 export default class Bullet {
     velocity = 1
-    color = 0x000000
-    size = 0.1
+    color = 0xFF0000
+    opacity = 1
+    // color = 0x000000
+    // opacity = 0.5
+    size = 0.01
     is_delete = false
 
     fireTime = Date.now()
@@ -24,14 +27,12 @@ export default class Bullet {
 
         // THREE.JS BOX
         const box = new THREE.BoxGeometry(this.size, this.size, this.size);
-        const material = new THREE.MeshBasicMaterial({ color: this.color, opacity: 0.5, transparent: true });
+        const material = new THREE.MeshBasicMaterial({ color: this.color, opacity: this.opacity, transparent: true });
         this.mesh = new THREE.Mesh(box, material);
 
         // CANNON.JS BOX
         const boxShape = new CANNON.Box(new CANNON.Vec3(
-            box.parameters.width/2 + 0.01,
-            box.parameters.height/2 + 0.01,
-            box.parameters.depth/2 + 0.01
+            this.size/2, this.size/2, this.size/2
         ));
 
         this.boxMaterial = new CANNON.Material("bullet")
@@ -71,18 +72,23 @@ export default class Bullet {
         let collisionDetected: boolean = false
 
         for (const zombie of object.every_zombie) {
-            const zombiePosition = zombie.body.position;
-            const bulletPosition = this.boxBody.position
 
-            const distance = Math.sqrt(
-                Math.pow(zombiePosition.x - bulletPosition.x, 2) + Math.pow(zombiePosition.z - bulletPosition.z, 2)
-            )
+            if (zombie.mesh && !zombie.is_death) {
+                const bulletPos = this.boxBody.position
+                const bulletSize = this.size / 2
+                const zombiePos = zombie.body.position
+                const zombieSize = zombie.size
+                
 
-            collisionDetected = distance < 1;
-
-            if (collisionDetected) {
-                this.zombie_collide = zombie
-                break
+                if (
+                    (bulletPos.x-bulletSize < zombiePos.x+zombieSize.x/2 && bulletPos.x+bulletSize > zombiePos.x-zombieSize.x/2) &&
+                    (bulletPos.y-bulletSize < zombiePos.y+zombieSize.y/2 && bulletPos.y+bulletSize > zombiePos.y-zombieSize.y/2) &&
+                    (bulletPos.z-bulletSize < zombiePos.z+zombieSize.z/2 && bulletPos.z+bulletSize > zombiePos.z-zombieSize.z/2)
+                ) {
+                    this.zombie_collide = zombie
+                    collisionDetected = true
+                    break
+                }
             }
         }
 
@@ -101,9 +107,9 @@ export default class Bullet {
 
         // UPDATE BULLET POSITION
         const dir_pos = this.dirrection.multiplyScalar(this.velocity)
-        this.boxBody.position.x += dir_pos.x / 10;
-        this.boxBody.position.y += dir_pos.y / 10;
-        this.boxBody.position.z += dir_pos.z / 10;
+        this.boxBody.position.x += dir_pos.x / 5;
+        this.boxBody.position.y += dir_pos.y / 5;
+        this.boxBody.position.z += dir_pos.z / 5;
         this.mesh.position.copy(this.boxBody.position)
 
         // CHECK IF BULLET COLLIDE WITH A ZOMBIE
@@ -118,6 +124,7 @@ export default class Bullet {
     }
     
     delete() {
+    
         init.scene.remove(this.mesh)
         init.cannon_world.remove(this.boxBody);
         this.is_delete = true

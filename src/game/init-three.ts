@@ -47,13 +47,11 @@ export const render = ()=>  {renderer.render(scene, activeCamera)}
 // Orbit Control
 export const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
-controls.target.set(0, 1, 0);
+
+// const helpAxis = new THREE.AxesHelper(4)
+// scene.add(helpAxis)
 
 // CANNON World
 export const cannon_world = new CANNON.World();
 cannon_world.gravity.set(0, -9.82, 0)
-
-
-
-
 

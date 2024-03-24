@@ -6,6 +6,7 @@ import load_page_event from './loading'
 
 object.player.load()
 
+
 function animate() {
     requestAnimationFrame(animate)
 
@@ -20,6 +21,9 @@ function animate() {
     object.every_zombie.forEach((zombie) => {zombie.update()})
 
     init.render()
+
+    const pos = object.player.mesh.position
+    init.controls.target.copy(pos);
 
     change_camera_event()
     load_page_event()

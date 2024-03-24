@@ -10,17 +10,18 @@ import Bullet from './bullet'
 export default class Player {
     velocity = 0.1
     jump_velocity = 4
-    size = 3
     color = 0x00BB00
     health = 100
     max_health = 100
-    position = [-15, 1, -15]
-    capsule = new THREE.Mesh()
+    size = [1, 2.4, 1]
+    position = [0, 10, 0]
+
+    mesh = new THREE.Mesh()
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     theta_camera = 0
     delta_camera = 0
     
-    cylinderBody: CANNON.Body | null = null
+    cannon_body: CANNON.Body | null = null
     
     angleX = THREE.MathUtils.degToRad(0)
     angleY = THREE.MathUtils.degToRad(0)
@@ -39,6 +40,44 @@ export default class Player {
     health_page = new HtmlPage("health-page")
 
     all_bullets: Array<Bullet> = []
+
+    // load player body
+    load() {
+        // Three.js Box
+        const three_geometrie = new THREE.BoxGeometry(this.size[0], this.size[1], this.size[2]);
+        const three_material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        this.mesh = new THREE.Mesh(three_geometrie, three_material);
+        init.scene.add(this.mesh);
+        
+        // Cannon.js Box
+        const cannon_shape = new CANNON.Box(new CANNON.Vec3(
+            three_geometrie.parameters.width/2,
+            three_geometrie.parameters.height/2,
+            three_geometrie.parameters.depth/2
+        ));
+        this.cannon_body = new CANNON.Body({ mass: 1, fixedRotation: true });
+        this.cannon_body.addShape(cannon_shape);
+        this.cannon_body.position.set(this.position[0], this.position[1], this.position[2])
+
+        init.cannon_world.addBody(this.cannon_body);
+        this.mesh.position.copy(this.cannon_body.position)
+        this.is_finish_load = true
+
+        console.info("[load]:", "Player is loaded")
+    }
+
+    updatePosition() {
+        if (this.cannon_body === null) return
+
+        this.mesh.position.copy(this.cannon_body.position)
+        this.mesh.quaternion.copy(this.cannon_body.quaternion)
+
+        this.camera.position.set(
+            this.cannon_body.position.x,
+            this.cannon_body.position.y + 1,
+            this.cannon_body.position.z,
+        )
+    }
 
     // Check if play cursor is on middle of screen (Add a best client experience)
     isStartCamera() {
@@ -77,10 +116,6 @@ export default class Player {
         direction.setY(0).normalize();
         return direction;
     }
-
-    xor(a: boolean, b: boolean): boolean {
-        return (a || b) && !(a && b);
-    }
     
     move() {
         const keyStates = object.window_event.key_states;
@@ -107,10 +142,20 @@ export default class Player {
         }
     }
 
-    shoot() {
-        if (!this.cylinderBody) return 
+        
+    moveBodyAlongDirection(direction: THREE.Vector3) {
+        if (this.cannon_body === null) return
 
-        const position = this.cylinderBody.position
+        const dir_pos = direction.multiplyScalar(this.velocity)
+
+        this.cannon_body.position.x += dir_pos.x;
+        this.cannon_body.position.z += dir_pos.z;
+    }
+
+    shoot() {
+        if (!this.cannon_body) return 
+
+        const position = this.cannon_body.position
         const direction = this.camera.getWorldDirection(new THREE.Vector3());
 
         this.all_bullets.push(new Bullet([
@@ -121,29 +166,7 @@ export default class Player {
     }
 
     jump() {
-        this.cylinderBody?.velocity.set(0, this.jump_velocity, 0)        
-    }
-    
-    moveBodyAlongDirection(direction: THREE.Vector3) {
-        if (this.cylinderBody === null) return
-
-        const dir_pos = direction.multiplyScalar(this.velocity)
-
-        this.cylinderBody.position.x += dir_pos.x;
-        this.cylinderBody.position.z += dir_pos.z;
-    }
-
-    updatePosition() {
-        if (this.cylinderBody === null) return
-
-        this.capsule.position.copy(this.cylinderBody.position)
-        this.capsule.quaternion.copy(this.cylinderBody.quaternion)
-
-        this.camera.position.set(
-            this.cylinderBody.position.x,
-            this.cylinderBody.position.y + 1,
-            this.cylinderBody.position.z,
-        )
+        this.cannon_body?.velocity.set(0, this.jump_velocity, 0)        
     }
 
     /**
@@ -173,39 +196,11 @@ export default class Player {
         this.camera.quaternion.copy(this.finalQuaternion);
     }
 
-    // load player body
-    load() {
-        const radiusTop = 1;
-        const radiusBottom = 1;
-        const height = 2;
-        const radialSegments = 10;
-        const numSegments = 10;
-        const mass = 1;
-        
-        // Three.js Cylinder
-        const cylinderGeometry = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments);
-        const material = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // Specify color as needed
-        this.capsule = new THREE.Mesh(cylinderGeometry, material);
-        init.scene.add(this.capsule);
-        
-        // Cannon.js Cylinder
-        const cylinderShape = new CANNON.Cylinder(radiusTop, radiusBottom, height, numSegments);
-        this.cylinderBody = new CANNON.Body({ mass: mass, fixedRotation: true });
-        this.cylinderBody.addShape(cylinderShape);
-        init.cannon_world.addBody(this.cylinderBody);
-        
-        this.cylinderBody.position.set(this.position[0], this.position[1], this.position[2])
-
-        this.is_finish_load = true
-
-        console.info("[load]:", "Player is loaded")
-    }
-
     respawn_after_death() {
-        if (!this.cylinderBody) return
+        if (!this.cannon_body) return
 
-        if (this.cylinderBody.position.y < -5) {
-            this.cylinderBody.position.set(0, 10, 0)
+        if (this.cannon_body.position.y < -5) {
+            this.cannon_body.position.set(0, 10, 0)
         }
     }
 

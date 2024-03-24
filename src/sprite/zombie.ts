@@ -30,6 +30,8 @@ export default class Zombie {
     last_action: THREE.AnimationAction | null = null
     is_finish_load = false
 
+    walk_animation_speed = randInt(4, 10) / 100
+
     animation_name = ""
     is_animation = false
     is_attack = false
@@ -52,8 +54,14 @@ export default class Zombie {
     properties: properties
     material_change = true
 
+    COLLIDE_BOX: THREE.Mesh
+    size = new THREE.Vector3()
+
+    cannon_shape = new CANNON.Box(new CANNON.Vec3())
+
     constructor(properties: properties) {
         this.properties = properties
+        this.COLLIDE_BOX = new THREE.Mesh()
     }
 
     setup_mesh() {
@@ -61,6 +69,7 @@ export default class Zombie {
         if (!copy_original) return
 
         this.mesh = clone(copy_original)
+        
         if (this.properties.zombie_type === 1) {
             this.change_material(ZOMBIE_MATERIAL.material_zombie1_low)
         } else {
@@ -72,26 +81,21 @@ export default class Zombie {
             this.properties.zombie_position[1],
             this.properties.zombie_position[2]
         )
-
-        this.mesh.scale.set(
-            this.properties.zombie_scale[0],
-            this.properties.zombie_scale[1],
-            this.properties.zombie_scale[2]
-        )
+        
+        const scale = this.properties.zombie_scale;
+        this.mesh.scale.set(scale[0], scale[1], scale[2])
 
         const boundingBox = new THREE.Box3().setFromObject(this.mesh);
-        const size = new THREE.Vector3();
-        boundingBox.getSize(size);
+        boundingBox.getSize(this.size);
 
-        const box_prop = new CANNON.Vec3(
-            size.x / 4, 
-            size.y / 2,
-            size.z / 4
-        )
+        this.size.x /= 2
 
-        const shape = new CANNON.Box(box_prop);
+        this.cannon_shape = new CANNON.Box(new CANNON.Vec3(
+            this.size.x/2, this.size.y/2, this.size.z/2
+        ));
         
-        this.body.addShape(shape);
+        this.body.addShape(this.cannon_shape);
+
         this.body.material = this.material
         
         this.body.position.set(
@@ -102,6 +106,13 @@ export default class Zombie {
                 
         init.cannon_world.addBody(this.body);
         init.scene.add(this.mesh);
+
+        // DEBUG
+        const BOX = new THREE.BoxGeometry(this.size.x, this.size.y, this.size.z);
+        const MATERIAL = new THREE.MeshBasicMaterial({ color: 0x00FF00, transparent: true, opacity: 0 });
+        this.COLLIDE_BOX = new THREE.Mesh(BOX, MATERIAL);
+        this.COLLIDE_BOX.position.copy(this.body.position)
+        init.scene.add(this.COLLIDE_BOX)
                 
         this.is_finish_load = true
         console.info("[load]:", "Zombie is loaded")
@@ -123,6 +134,7 @@ export default class Zombie {
         this.animationSpeed = speed
         if (Object.keys(zombie_fbx_loader.getAnimations()).includes(animationName) && this.mesh !== null) {
             const mixer = new THREE.AnimationMixer(this.mesh);
+            
             const action = mixer.clipAction(zombie_fbx_loader.getAnimations()[animationName]);
             if (this.last_action !== null) {
                 this.last_action.crossFadeTo(action, 0.5, false);
@@ -165,6 +177,9 @@ export default class Zombie {
 
         if (this.health <= 0) {
             this.is_death = true
+            init.cannon_world.remove(this.body)
+            init.scene.remove(this.COLLIDE_BOX)
+
             this.is_death_time = Date.now()
         } else {
             this.animation_name = "gethit"
@@ -180,20 +195,24 @@ export default class Zombie {
             this.is_finish_load = true
         }
 
-
-
+        const player_body = object.player.cannon_body
         const mesh = this.mesh;
-        const playerX = object.player.cylinderBody?.position.x;
-        const playerZ = object.player.cylinderBody?.position.z;
+
+        if (!player_body || !mesh) return
+        
+        this.COLLIDE_BOX.position.copy(this.body.position)
+        this.COLLIDE_BOX.quaternion.copy(this.body.quaternion)
+
+        const playerX = player_body.position.x;
+        const playerZ = player_body.position.z;
         const zombieX = this.body.position.x;
         const zombieZ = this.body.position.z;
-        if (!mesh || !playerX || !playerZ) return;
+
     
         const diffX = playerX - zombieX;
         const diffZ = playerZ - zombieZ;
     
         if (!this.is_attack && !this.is_hurt && !this.is_death) {
-            // Adjust the position
             this.body.position.x += diffX / this.velocity;
             this.body.position.z += diffZ / this.velocity;
         }
@@ -217,9 +236,10 @@ export default class Zombie {
         }
         
         const player_dist = Math.sqrt(Math.pow(diffX, 2)+Math.pow(diffZ, 2))
-        
+
         // Check if player is near
         if (this.is_finish_load) {
+            
             if (player_dist < 2 && !this.is_death) {
                 if (!this.animation_name.includes("attack")) {
                     this.is_attack = true
@@ -235,14 +255,12 @@ export default class Zombie {
                 if (this.animation_name !== "walk") {
                     this.is_attack = false
                     this.animation_name = "walk"
-                    this.play_animation(this.animation_name, 0.06, true)
+                    this.play_animation(this.animation_name, this.walk_animation_speed, true)
                 }
             }
 
             else if (this.is_death && !this.is_play_animation_death) {
                 if (!this.animation_name.includes("death")) {
-                    this.body.sleep()
-                    init.cannon_world.remove(this.body)
                     this.is_play_animation_death = true
                     this.animation_name = "death" + randomChoice(["1", "2"])
                     this.play_animation(this.animation_name, 0.08)
@@ -264,7 +282,7 @@ export default class Zombie {
 
         this.update_animation()
 
-        // Obtimisation
+        // Texture obtimisation
         if (player_dist > this.obtimisation_range && !this.material_change) {
             this.material_change = true
             if (this.properties.zombie_type === 1) {
