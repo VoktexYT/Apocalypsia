@@ -16,6 +16,8 @@ export default class Gun {
     is_finish_load: Boolean
     entity: Entity
     settings: properties
+    is_shooting_position = false
+
 
     constructor(settings: properties) {
         this.is_finish_load = false
@@ -32,9 +34,7 @@ export default class Gun {
                 roughnessMap: "./assets/weapons/pistol/textures/Pistol_roughness.png"
             })
         
-        this.entity.load(
-            "./assets/weapons/pistol/models/pistol.fbx", []
-        ).then((finishLoad) => {
+        this.entity.load("./assets/weapons/pistol/models/pistol.fbx", []).then((finishLoad) => {
             this.is_finish_load = finishLoad;
 
             const mesh = this.entity.get_mesh()
@@ -48,20 +48,34 @@ export default class Gun {
         });
     }
 
+
     update() {
         const mesh = this.entity.get_mesh();
-        if (mesh != null) {
-            mesh.position.copy(object.player.camera.position);
-            mesh.quaternion.copy(object.player.camera.quaternion);
+        if (!mesh) return
+        
+        mesh.position.copy(object.player.camera.position);
+        mesh.quaternion.copy(object.player.camera.quaternion);
 
+        console.log(this.is_shooting_position)
+
+        if (!this.is_shooting_position) {
             mesh.translateZ(0)
             mesh.translateY(-1)
             mesh.translateX(1)
             mesh.rotateX(THREE.MathUtils.degToRad(this.settings.gun_rotation_degres[0]))
             mesh.rotateY(THREE.MathUtils.degToRad(this.settings.gun_rotation_degres[1]))
             mesh.rotateZ(THREE.MathUtils.degToRad(this.settings.gun_rotation_degres[2]))
+            mesh.translateY(-1)
+        }
 
-            mesh.translateY(-1);
+        else {
+            mesh.translateZ(-0.3)
+            mesh.translateY(-0.55)
+            mesh.translateX(0)
+            mesh.rotateX(THREE.MathUtils.degToRad(this.settings.gun_rotation_degres[0]))
+            mesh.rotateY(THREE.MathUtils.degToRad(this.settings.gun_rotation_degres[1]))
+            mesh.rotateZ(THREE.MathUtils.degToRad(this.settings.gun_rotation_degres[2]))
+            mesh.translateY(-0.55)
         }
     }
 }

@@ -1,6 +1,7 @@
 import ObjectLoader from "../loader/object"
 import * as THREE from 'three'
 import * as init from '../game/init-three'
+import * as CANNON from "cannon"
 
 
 export default class Basement {
@@ -30,13 +31,12 @@ export default class Basement {
         if (!meshObject) return
 
         meshObject.scale.set(this.SCALE, this.SCALE, this.SCALE)
-        meshObject.position.set(0, -1.5, 0)
-
+        meshObject.position.set(0, -1.55, 0)
+        
+        this.is_finish_load = true
 
         init.scene.add(meshObject)
         
-        this.is_finish_load = true
         console.info("[load]:", "Basement is loaded")
-
     }
 }

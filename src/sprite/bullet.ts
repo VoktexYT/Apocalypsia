@@ -7,10 +7,8 @@ import Zombie from './zombie'
 
 export default class Bullet {
     velocity = 1
-    color = 0xFF0000
+    color = 0xFFFF00
     opacity = 1
-    // color = 0x000000
-    // opacity = 0.5
     size = 0.01
     is_delete = false
 

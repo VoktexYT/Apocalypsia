@@ -21,8 +21,8 @@ scene.add(ambientLight);
 export const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(19.19, 16.33, 13.79);
 
-const cameraHelper = new THREE.CameraHelper(object.player.camera);
-scene.add(cameraHelper);
+// const cameraHelper = new THREE.CameraHelper(object.player.camera);
+// scene.add(cameraHelper);
 
 export let activeCamera = object.player.camera
 
@@ -47,9 +47,9 @@ export const render = ()=>  {renderer.render(scene, activeCamera)}
 export const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 
-const helpAxis = new THREE.AxesHelper(20)
-helpAxis.position.set(0, -5, 0)
-scene.add(helpAxis)
+// const helpAxis = new THREE.AxesHelper(20)
+// helpAxis.position.set(0, -5, 0)
+// scene.add(helpAxis)
 
 // CANNON World
 export const cannon_world = new CANNON.World();
@@ -61,5 +61,13 @@ const near = 1;
 const far = 40;
 const fog = new THREE.Fog(fogColor, near, far);
 scene.fog = fog;
+
+// test cube
+
+const three_geometrie = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+const three_material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+const mesh = new THREE.Mesh(three_geometrie, three_material);
+mesh.position.set(-6, 1, 22)
+
 
 

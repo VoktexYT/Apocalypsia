@@ -13,7 +13,7 @@ const is_finish_loading = () => {
     ]
 
     for (const zombie of object.every_zombie) {
-        // all_load.push(zombie.is_finish_load)
+        all_load.push(zombie.is_finish_load)
     }
     
     return all_load.every(val => val === true)

@@ -5,6 +5,7 @@ import * as init from '../game/init-three'
 import * as object from '../game/object'
 import HtmlPage from '../html-page/html-page'
 import Bullet from './bullet'
+import randomChoice from '../random.choice'
 
 
 export default class Player {
@@ -14,7 +15,7 @@ export default class Player {
     health = 100
     max_health = 100
     size = [1, 2.4, 1]
-    position = [0, 10, 0]
+    position = [-7, 10, 21]
 
     mesh = new THREE.Mesh()
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -43,7 +44,7 @@ export default class Player {
 
     flash_light = new THREE.SpotLight(0xFF0000, 1)
     flash_light_object = new THREE.Object3D(); 
-    flash_light_helper = new THREE.SpotLightHelper(this.flash_light)
+    // flash_light_helper = new THREE.SpotLightHelper(this.flash_light)
 
 
     // load player body
@@ -72,7 +73,7 @@ export default class Player {
 
         init.scene.add(this.mesh);
         init.scene.add(this.flash_light)
-        init.scene.add(this.flash_light_helper)
+        // init.scene.add(this.flash_light_helper)
         init.scene.add(this.flash_light_object)
         
         // Cannon.js Box
@@ -107,7 +108,7 @@ export default class Player {
         )
 
         this.flash_light.position.copy(this.camera.position)
-        this.flash_light_helper.update()
+        // this.flash_light_helper.update()
     }
 
     // Check if play cursor is on middle of screen (Add a best client experience)
@@ -148,7 +149,7 @@ export default class Player {
         return direction;
     }
     
-    move() {
+    event() {
         const keyStates = object.window_event.key_states;
         const mouseStates = object.window_event.mouse_state;
         const direction = this.getDirection();
@@ -164,13 +165,12 @@ export default class Player {
         else if (keyStates["KeyD"])
             this.moveBodyAlongDirection(new THREE.Vector3().crossVectors(this.camera.up, direction).negate());
 
-        if (keyStates["Space"])
-            this.jump()
-
         if (mouseStates["left"]) {
             mouseStates["left"] = false
             this.shoot()
         }
+
+        object.gun.is_shooting_position = keyStates['Space']
     }
 
         
@@ -189,15 +189,28 @@ export default class Player {
         const position = this.cannon_body.position
         const direction = this.camera.getWorldDirection(new THREE.Vector3());
 
+        let position_random = new THREE.Vector3(
+            position.x, position.y + 1, position.z
+        )
+
+        if (!object.gun.is_shooting_position) {
+            const posX = randomChoice([-0.5, -0.3, 0, 0.3, 0.5])
+            const posY = randomChoice([-0.5, -0.3, 0, 0.3, 0.5])
+
+            position_random.x += posX ? posX: 0
+            position_random.y += posY ? posY: 0
+        }
+
         this.all_bullets.push(new Bullet([
-            position.x,
-            position.y+1,
-            position.z,
+            position_random.x,
+            position_random.y,
+            position_random.z,
         ], direction))
+  
     }
 
     jump() {
-        this.cannon_body?.velocity.set(0, this.jump_velocity, 0)        
+        this.cannon_body?.velocity.set(0, this.jump_velocity, 0)
     }
 
     updateFlashLightPosition() {
@@ -277,7 +290,7 @@ export default class Player {
         this.auto_regenerate()
 
         if (this.enableCamera) {
-            this.move()
+            this.event()
         }
 
         this.respawn_after_death()
