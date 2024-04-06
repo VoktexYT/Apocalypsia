@@ -41,20 +41,47 @@ export default class Player {
 
     all_bullets: Array<Bullet> = []
 
+    flash_light = new THREE.SpotLight(0xFF0000, 1)
+    flash_light_object = new THREE.Object3D(); 
+    flash_light_helper = new THREE.SpotLightHelper(this.flash_light)
+
+
     // load player body
     load() {
         // Three.js Box
         const three_geometrie = new THREE.BoxGeometry(this.size[0], this.size[1], this.size[2]);
         const three_material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
         this.mesh = new THREE.Mesh(three_geometrie, three_material);
+
+        this.flash_light = new THREE.SpotLight(0xFFFFFF, 0);
+
+        this.flash_light.position.copy(this.camera.position)
+        this.flash_light.intensity = 5
+        this.flash_light.distance = 20;
+        this.flash_light.angle = Math.PI / 3.5;
+        this.flash_light.penumbra = 1;
+        this.flash_light.decay = 1;
+        this.flash_light.castShadow = true
+        this.flash_light.shadow.mapSize.width = 1024;
+        this.flash_light.shadow.mapSize.height = 1024;
+        this.flash_light.shadow.camera.near = 500;
+        this.flash_light.shadow.camera.far = 4000;
+        this.flash_light.shadow.camera.fov = 30;
+
+        this.flash_light.target = this.flash_light_object
+
         init.scene.add(this.mesh);
+        init.scene.add(this.flash_light)
+        init.scene.add(this.flash_light_helper)
+        init.scene.add(this.flash_light_object)
         
         // Cannon.js Box
         const cannon_shape = new CANNON.Box(new CANNON.Vec3(
-            three_geometrie.parameters.width/2,
-            three_geometrie.parameters.height/2,
-            three_geometrie.parameters.depth/2
+            this.size[0] / 2,
+            this.size[1] / 2,
+            this.size[2] / 2
         ));
+
         this.cannon_body = new CANNON.Body({ mass: 1, fixedRotation: true });
         this.cannon_body.addShape(cannon_shape);
         this.cannon_body.position.set(this.position[0], this.position[1], this.position[2])
@@ -62,6 +89,7 @@ export default class Player {
         init.cannon_world.addBody(this.cannon_body);
         this.mesh.position.copy(this.cannon_body.position)
         this.is_finish_load = true
+
 
         console.info("[load]:", "Player is loaded")
     }
@@ -77,6 +105,9 @@ export default class Player {
             this.cannon_body.position.y + 1,
             this.cannon_body.position.z,
         )
+
+        this.flash_light.position.copy(this.camera.position)
+        this.flash_light_helper.update()
     }
 
     // Check if play cursor is on middle of screen (Add a best client experience)
@@ -169,6 +200,15 @@ export default class Player {
         this.cannon_body?.velocity.set(0, this.jump_velocity, 0)        
     }
 
+    updateFlashLightPosition() {
+        const distance = 2;
+        const direction = new THREE.Vector3();
+        this.camera.getWorldDirection(direction);
+        const ray = new THREE.Ray(this.camera.position, direction);
+        const newPosition = ray.at(distance, new THREE.Vector3());
+        this.flash_light_object.position.copy(newPosition)
+    }
+
     /**
      * PLAYER HEAD MOVEMENT FUNCTION
      */
@@ -243,6 +283,7 @@ export default class Player {
         this.respawn_after_death()
         this.isStartCamera()
         this.updatePosition()
+        this.updateFlashLightPosition()
         
         this.all_bullets.forEach((bullet) => {bullet.update()})
 

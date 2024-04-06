@@ -14,16 +14,15 @@ export function change_game_running_to(is_running: boolean) {
 }
 
 // Ambiant light
-export const ambientLight = new THREE.AmbientLight();
-ambientLight.color = new THREE.Color(0x777777);
+export const ambientLight = new THREE.AmbientLight(0x000000, 1);
 scene.add(ambientLight);
 
 // Camera
 export const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(19.19, 16.33, 13.79);
 
-// const cameraHelper = new THREE.CameraHelper(object.player.camera);
-// scene.add(cameraHelper);
+const cameraHelper = new THREE.CameraHelper(object.player.camera);
+scene.add(cameraHelper);
 
 export let activeCamera = object.player.camera
 
@@ -48,8 +47,9 @@ export const render = ()=>  {renderer.render(scene, activeCamera)}
 export const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 
-// const helpAxis = new THREE.AxesHelper(4)
-// scene.add(helpAxis)
+const helpAxis = new THREE.AxesHelper(20)
+helpAxis.position.set(0, -5, 0)
+scene.add(helpAxis)
 
 // CANNON World
 export const cannon_world = new CANNON.World();

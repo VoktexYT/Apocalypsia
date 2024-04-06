@@ -18,12 +18,13 @@ function animate() {
     object.player.update()
     object.floor.update()
     object.gun.update()
-    object.every_zombie.forEach((zombie) => {zombie.update()})
+    // object.every_zombie.forEach((zombie) => {zombie.update()})
+    object.basement.update()
 
     init.render()
 
-    const pos = object.player.mesh.position
-    init.controls.target.copy(pos);
+    // const pos = object.player.mesh.position
+    // init.controls.target.copy(pos);
 
     change_camera_event()
     load_page_event()

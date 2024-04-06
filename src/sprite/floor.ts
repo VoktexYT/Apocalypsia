@@ -7,9 +7,9 @@ import { TextureLoader } from 'three';
 export default class Floor {
     is_finish_load = false
 
-    floor_width = 40
+    floor_width = 70
     floor_thickener = 0.3
-    floor_depth = 40
+    floor_depth = 70
     floor_angle = 90 // deg
 
     texture_path = "./assets/nature/grass/textures/grass.png"
