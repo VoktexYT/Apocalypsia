@@ -55,3 +55,11 @@ scene.add(helpAxis)
 export const cannon_world = new CANNON.World();
 cannon_world.gravity.set(0, -9.82, 0)
 
+// FOG ambiance
+const fogColor = 0x555555;
+const near = 1;
+const far = 40;
+const fog = new THREE.Fog(fogColor, near, far);
+scene.fog = fog;
+
+
