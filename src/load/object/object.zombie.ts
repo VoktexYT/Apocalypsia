@@ -16,8 +16,6 @@ const zombie_loader = new FbxObjectLoader(
         {path: "./assets/entity/zombie/animation/zombie@roar.fbx", name: "roar"},
         {path: "./assets/entity/zombie/animation/zombie@walk.fbx", name: "walk"}
     ]
-)
+);
 
-export default zombie_loader
-
-
+export default zombie_loader;

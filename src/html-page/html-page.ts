@@ -12,13 +12,13 @@ export default class HtmlPage {
     }
 
     enable() {
-        if (this.dom_element === null) {return}
+        if (this.dom_element === null) return
         this.dom_element.style.display = "flex"
         this.dom_element.style.zIndex = "1000"
     }
 
     disable() {
-        if (this.dom_element === null) {return}
+        if (this.dom_element === null) return
         this.dom_element.style.display = "none"
         this.dom_element.style.zIndex = "-1"
     }

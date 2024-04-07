@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import * as CANNON from 'cannon'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import ObjectLoader from '../loader/object';
+import AudioLoader from '../loader/audio';
 
 
 const scene = new THREE.Scene();
@@ -16,9 +17,9 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-// export const controls = new OrbitControls(camera, renderer.domElement);
-// controls.enableDamping = true;
-// controls.target.set(0, 1, 0);
+export const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.target.set(0, 1, 0);
 
 const axeHelper = new THREE.AxesHelper(5)
 scene.add(axeHelper)
@@ -31,29 +32,20 @@ window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-});
+})
 
 
-let fbxObject = new ObjectLoader("./assets/env/diner.fbx")
-let is_finish = false
 
-function setupMesh() {
-    let meshObject = fbxObject.getObject()
-    if (!meshObject) return
-    meshObject.scale.set(0.001, 0.001, 0.001)
-    scene.add(meshObject)
-    is_finish = true
-}
+new AudioLoader(camera).playSound("./assets/sound/backgroundMusic.mp3", true, 1);
+
+
+
 
 
 function animate() {
     requestAnimationFrame(animate);
     cannon_world.step(1 / 60);
 
-    if (!fbxObject.isFinishedLoading()) return
-    if (!is_finish) {
-        setupMesh()
-    }
 
     renderer.render(scene, camera);
 }

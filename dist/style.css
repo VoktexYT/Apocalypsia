@@ -2,7 +2,7 @@ body {
     margin: 0;
 }
 
-#cursor-page, #load-page, #health-page {
+#cursor-page, #load-page, #health-page, #home-page {
     display: none;
     position: absolute;
     top: 0;

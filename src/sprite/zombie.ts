@@ -11,6 +11,7 @@ import clone from '../skeleton.clone'
 // Loader
 import zombie_fbx_loader from '../load/object/object.zombie'
 import MaterialTextureLoader from '../loader/material'
+import AudioLoader from '../loader/audio'
 
 
 import * as ZOMBIE_MATERIAL from '../load/material/material.zombie'
@@ -29,6 +30,8 @@ export default class Zombie {
 
     last_action: THREE.AnimationAction | null = null
     is_finish_load = false
+
+    is_make_sound = false
 
     walk_animation_speed = randInt(4, 10) / 100
 
@@ -177,6 +180,8 @@ export default class Zombie {
 
         if (this.health <= 0) {
             this.is_death = true
+            new AudioLoader(object.player.camera).playSound("./assets/sound/zombie.mp3", false, 0.6);
+
             init.cannon_world.remove(this.body)
             init.scene.remove(this.COLLIDE_BOX)
 

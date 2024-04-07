@@ -10,7 +10,7 @@ export interface TexturesPath {
     metalnessMap?: string,
     normalMap?: string,
     aoMap?: string
-}
+};
 
 interface TexturesThree {
     map?: THREE.Texture,
@@ -20,17 +20,18 @@ interface TexturesThree {
     metalnessMap?: THREE.Texture,
     normalMap?: THREE.Texture,
     aoMap?: THREE.Texture
-}
+};
 
 
 export default class MaterialLoader {
-    private _texture_paths: TexturesPath = {}
-    private _three_textures: TexturesThree = {}
+    private _texture_paths: TexturesPath   = {};
+    private _three_textures: TexturesThree = {};
     material: THREE.MeshStandardMaterial
 
     constructor(texturePaths: TexturesPath) {
-        this._texture_paths = texturePaths
-        this.material = this.createMaterial()
+        this._texture_paths = texturePaths;
+
+        this.material = this.createMaterial();
     }
 
     private createMaterial(): THREE.MeshStandardMaterial {
@@ -44,6 +45,6 @@ export default class MaterialLoader {
             }
         }
 
-        return new THREE.MeshStandardMaterial(this._three_textures)
+        return new THREE.MeshStandardMaterial(this._three_textures);
     }
 }

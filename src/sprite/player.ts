@@ -7,6 +7,8 @@ import HtmlPage from '../html-page/html-page'
 import Bullet from './bullet'
 import randomChoice from '../random.choice'
 
+import AudioLoader from '../loader/audio';
+
 
 export default class Player {
     velocity = 0.1
@@ -16,6 +18,9 @@ export default class Player {
     max_health = 100
     size = [1, 2.4, 1]
     position = [-7, 10, 21]
+
+    camera_move_y = 0
+    is_moving = false;
 
     mesh = new THREE.Mesh()
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -54,7 +59,7 @@ export default class Player {
         const three_material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
         this.mesh = new THREE.Mesh(three_geometrie, three_material);
 
-        this.flash_light = new THREE.SpotLight(0xFFFFFF, 0);
+        this.flash_light = new THREE.SpotLight(0xFFFFFF);
 
         this.flash_light.position.copy(this.camera.position)
         this.flash_light.intensity = 5
@@ -91,6 +96,7 @@ export default class Player {
         this.mesh.position.copy(this.cannon_body.position)
         this.is_finish_load = true
 
+        this.music()
 
         console.info("[load]:", "Player is loaded")
     }
@@ -103,11 +109,14 @@ export default class Player {
 
         this.camera.position.set(
             this.cannon_body.position.x,
-            this.cannon_body.position.y + 1,
+            this.cannon_body.position.y + 1 + Math.sin(1.5*this.camera_move_y)/5,
             this.cannon_body.position.z,
         )
 
-        this.flash_light.position.copy(this.camera.position)
+        // this.flash_light.position.copy(this.camera.position)
+
+        if (this.is_moving)
+            this.camera_move_y += 0.1
         // this.flash_light_helper.update()
     }
 
@@ -165,6 +174,10 @@ export default class Player {
         else if (keyStates["KeyD"])
             this.moveBodyAlongDirection(new THREE.Vector3().crossVectors(this.camera.up, direction).negate());
 
+        if (!keyStates["KeyW"] && !keyStates["KeyS"] && !keyStates["KeyA"] && !keyStates["KeyD"]) {
+            this.is_moving = false
+        }
+
         if (mouseStates["left"]) {
             mouseStates["left"] = false
             this.shoot()
@@ -181,16 +194,18 @@ export default class Player {
 
         this.cannon_body.position.x += dir_pos.x;
         this.cannon_body.position.z += dir_pos.z;
+
+        this.is_moving = true
     }
 
     shoot() {
         if (!this.cannon_body) return 
 
-        const position = this.cannon_body.position
+        const position = this.camera.position
         const direction = this.camera.getWorldDirection(new THREE.Vector3());
 
         let position_random = new THREE.Vector3(
-            position.x, position.y + 1, position.z
+            position.x, position.y, position.z
         )
 
         if (!object.gun.is_shooting_position) {
@@ -206,6 +221,9 @@ export default class Player {
             position_random.y,
             position_random.z,
         ], direction))
+
+        new AudioLoader(this.camera).playSound("./assets/sound/fire.mp3", false, 1);
+
   
     }
 
@@ -287,6 +305,9 @@ export default class Player {
 
 
     update() {
+        this.updateFlashLightPosition()
+        this.updatePosition()
+
         this.auto_regenerate()
 
         if (this.enableCamera) {
@@ -295,11 +316,13 @@ export default class Player {
 
         this.respawn_after_death()
         this.isStartCamera()
-        this.updatePosition()
-        this.updateFlashLightPosition()
         
         this.all_bullets.forEach((bullet) => {bullet.update()})
 
         this.previous_health = this.health
+    }
+
+    music() {
+        new AudioLoader(this.camera).playSound("./assets/sound/backgroundMusic2.mp3", true, 0.5);
     }
 }

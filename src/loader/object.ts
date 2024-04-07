@@ -1,10 +1,11 @@
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
 import * as THREE from 'three';
 
+
 interface AnimationFbxPath {
     path: string;
     name: string;
-}
+};
 
 export default class ObjectLoader {
     animations: {[key: string]: THREE.AnimationClip} = {};
@@ -17,6 +18,7 @@ export default class ObjectLoader {
 
     private load(): void {
         const fbxLoader = new FBXLoader();
+
         fbxLoader.load(this.baseFBXFile, (object) => {
             this.object = object;
             this.loadAnimations();
@@ -29,7 +31,7 @@ export default class ObjectLoader {
         if (!this.animationFBXFile || this.animationFBXFile.length === 0) {
             this.finishLoad = true;
             return;
-        }
+        };
 
         const fbxLoader = new FBXLoader();
         const animationCount = this.animationFBXFile.length;
@@ -39,20 +41,20 @@ export default class ObjectLoader {
                 this.animations[animsPath.name] = animation.animations[0];
                 if (Object.keys(this.animations).length === animationCount) {
                     this.finishLoad = true;
-                }
+                };
             });
         });
     }
 
-    public isFinishedLoading(): boolean {
+    isFinishedLoading(): boolean {
         return this.finishLoad;
     }
 
-    public getObject(): THREE.Group<THREE.Object3DEventMap> | null {
+    getObject(): THREE.Group<THREE.Object3DEventMap> | null {
         return this.object;
     }
 
-    public getAnimations(): {[key: string]: THREE.AnimationClip} {
+    getAnimations(): {[key: string]: THREE.AnimationClip} {
         return this.animations;
     }
 }
