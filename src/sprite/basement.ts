@@ -32,6 +32,8 @@ export default class Basement {
             this.inverse = !this.inverse
             mesh.traverse((child: THREE.Mesh | any) => {
                 if (child instanceof THREE.Mesh) {
+                    console.log(child.material)
+
                     const back_side: Array<string> = [
                         "Fence_Collision",
                         "Tiles"
@@ -42,28 +44,13 @@ export default class Basement {
                     else if (child.name === "DINER_Collision") {}
                     
                     else if (child.name === "DINER") {
-                        const back_dinner: Array<string> = [
-                            
-                        ]
-
                         for (let m of child.material) {
-                            // console.log(m.name)
-                            if (back_dinner.includes(m.name)) {
-                                m.side = THREE.BackSide
-                            } else {
-                                m.side = THREE.FrontSide
-                            }
+                            m.side = THREE.FrontSide
                         }
                     }
                     else {
-                        // console.log(child.name)
                         child.material.side = THREE.FrontSide;
                     }
-                    // if (this.inverse) console.log("back side")
-                    // else console.log("front side")
-
-                    
-                    // console.log(child.name, " : ", child.material)
                 }
             })
         }, 2000)
