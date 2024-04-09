@@ -56,19 +56,33 @@ export default class Player {
 
     near_death_sound: THREE.Audio | null = null
     switch_weapons_sound: THREE.Audio | null = null
+    empty_weapons_sound: THREE.Audio | null = null
+    reload_weapons_sound: THREE.Audio | null = null
 
     set_sound() {
         this.audioLoader.loadSound("./assets/sound/nearDeath.mp3", false, 0.3, (loaded, sound) => {
             if (loaded && sound) {
                 this.near_death_sound = sound;
             }
-        })
+        });
 
-        this.audioLoader.loadSound("./assets/sound/switchWeapon.mp3", false, 0.2, (loaded, sound) => {
+        this.audioLoader.loadSound("./assets/sound/switchWeapon.mp3", false, 0.5, (loaded, sound) => {
             if (loaded && sound) {
                 this.switch_weapons_sound = sound;
             }
-        })
+        });
+
+        this.audioLoader.loadSound("./assets/sound/empty-gun.mp3", false, 0.5, (loaded, sound) => {
+            if (loaded && sound) {
+                this.empty_weapons_sound = sound;
+            }
+        });
+
+        this.audioLoader.loadSound("./assets/sound/reload-gun.mp3", false, 0.3, (loaded, sound) => {
+            if (loaded && sound) {
+                this.reload_weapons_sound = sound;
+            }
+        });
     }
 
 
@@ -237,6 +251,16 @@ export default class Player {
             this.is_moving = false
         }
 
+        if (keyStates["KeyR"]) {
+            if (object.gun.is_gun_loader) {
+                object.gun.pistol_bullet_charge_now = object.gun.pistol_bullet_charge_max;
+            } else {
+                object.gun.riffle_bullet_charge_now = object.gun.riffle_bullet_charge_max;
+            }
+            
+            this.reload_weapons_sound?.play()
+        }
+
         if (mouseStates["left"]) {
             this.shoot()
         }
@@ -260,43 +284,78 @@ export default class Player {
         if (object.gun.is_fire) return
         if (!this.cannon_body) return 
 
-        object.gun.is_fire = true;
+        const gunMesh = object.gun.mesh
+        if (!gunMesh) return
+
+        let gunUsed = false;
 
         if (object.gun.is_gun_loader) {
+            if (object.gun.pistol_bullet_charge_now > 0) {
+                object.gun.pistol_bullet_charge_now -= 1;
+                object.gun.is_fire = true;
+                object.gun.fire_backward = true;
+                this.flash_light.intensity = 2;
+                gunUsed = true;
+
+                setTimeout(() => {
+                    object.gun.is_fire = false;
+                }, object.gun.pistol_fire_interval);
+            }
+        }
+
+        else if (!object.gun.is_gun_loader) {
+            if (object.gun.riffle_bullet_charge_now > 0) {
+                object.gun.riffle_bullet_charge_now -= 1;
+                object.gun.is_fire = true;
+                object.gun.fire_backward = true;
+                this.flash_light.intensity = 2;
+                gunUsed = true;
+
+                setTimeout(() => {
+                    object.gun.is_fire = false;
+                }, object.gun.riffle_fire_interval);
+            }
+        }
+
+        if (gunUsed) {
             setTimeout(() => {
-                object.gun.is_fire = false;
-            }, 1000);
+                object.gun.fire_backward = false;
+                this.flash_light.intensity = 1;
+            }, 100);
+
+            const position = this.camera.position
+            const direction = this.camera.getWorldDirection(new THREE.Vector3());
+
+            let position_random = new THREE.Vector3(
+                position.x, position.y, position.z
+            )
+
+            if (!object.gun.is_shooting_position) {
+                const posX = randomChoice([-0.5, -0.3, 0, 0.3, 0.5])
+                const posY = randomChoice([-0.5, -0.3, 0, 0.3, 0.5])
+
+                position_random.x += posX ? posX: 0
+                position_random.y += posY ? posY: 0
+            }
+
+            this.all_bullets.push(new Bullet([
+                position_random.x,
+                position_random.y,
+                position_random.z,
+            ], direction))
+
+            this.audioLoader.loadSound("./assets/sound/fire.mp3", false, 1);
         }
 
         else {
+            object.gun.fire_backward = true;
+
             setTimeout(() => {
-                object.gun.is_fire = false;
-            }, 150);
+                object.gun.fire_backward = false;
+            }, 100);
+
+            this.empty_weapons_sound?.play()
         }
-
-        const position = this.camera.position
-        const direction = this.camera.getWorldDirection(new THREE.Vector3());
-
-        let position_random = new THREE.Vector3(
-            position.x, position.y, position.z
-        )
-
-        if (!object.gun.is_shooting_position) {
-            const posX = randomChoice([-0.5, -0.3, 0, 0.3, 0.5])
-            const posY = randomChoice([-0.5, -0.3, 0, 0.3, 0.5])
-
-            position_random.x += posX ? posX: 0
-            position_random.y += posY ? posY: 0
-        }
-
-        this.all_bullets.push(new Bullet([
-            position_random.x,
-            position_random.y,
-            position_random.z,
-        ], direction))
-
-        this.audioLoader.loadSound("./assets/sound/fire.mp3", false, 1);
-
     }
 
     jump() {

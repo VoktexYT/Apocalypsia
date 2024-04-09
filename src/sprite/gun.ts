@@ -26,7 +26,9 @@ export default class Gun {
     is_finish_load:       boolean = false;
     is_shooting_position: boolean = false;
     is_fire:              boolean = false;
-    last_fire:            number  = Date.now();
+    fire_backward:        boolean = false;
+
+    every_loaded:         boolean = false;
 
     mass: number = 1
     fixed_rotation: boolean = true;
@@ -39,6 +41,17 @@ export default class Gun {
 
     riffle_normal_rad = [Math.PI, -Math.PI / 100, Math.PI];
     riffle_shooting_rad = [Math.PI, 0, Math.PI];
+
+    pistol_bullet_charge_max = 4
+    pistol_bullet_charge_now = 4
+    
+    riffle_bullet_charge_max = 10
+    riffle_bullet_charge_now = 10
+
+    pistol_fire_interval = 600;
+    riffle_fire_interval = 150;
+
+    is_reload = false;
 
 
     settings: properties;
@@ -54,7 +67,7 @@ export default class Gun {
 
     gun_loader: FbxObjectLoader = weapon_loader.gun_loader;
     riffle_loader: FbxObjectLoader = weapon_loader.riffle_loader;
-    actual_loader: FbxObjectLoader = this.gun_loader;
+    actual_loader: FbxObjectLoader = this.riffle_loader;
     is_gun_loader: boolean = true;
 
 
@@ -127,7 +140,13 @@ export default class Gun {
 
         if (!this.is_finish_load) {
             this.setup_mesh();
-            this.is_finish_load = true;
+
+            if (!this.every_loaded) {
+                this.switch_gun();
+                this.every_loaded = true;
+            } else {
+                this.is_finish_load = true;
+            }
         }
 
         if (!this.mesh) return
@@ -165,6 +184,10 @@ export default class Gun {
                 this.mesh.rotateY(this.pistol_shooting_rad[1]);
                 this.mesh.rotateZ(this.pistol_shooting_rad[2]);
             }
+
+            if (this.fire_backward) {
+                this.mesh.translateY(0.1);
+            }
         } else {
             if (!this.is_shooting_position) {
                 this.mesh.translateZ(-1);
@@ -195,8 +218,12 @@ export default class Gun {
                 this.mesh.rotateY(this.riffle_shooting_rad[1]);
                 this.mesh.rotateZ(this.riffle_shooting_rad[2]);
             }
+
+            if (this.fire_backward) {
+                this.mesh.translateZ(-0.1);
+            }
         }
-        
+
         this.movement += 0.1;
     }
 }
