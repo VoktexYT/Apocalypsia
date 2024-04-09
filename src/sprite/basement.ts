@@ -30,38 +30,40 @@ export default class Basement {
 
         setInterval(() => {
             this.inverse = !this.inverse
-            mesh.traverse((child) => {
+            mesh.traverse((child: THREE.Mesh | any) => {
                 if (child instanceof THREE.Mesh) {
-                    const front_material: Array<string> = [
-                        "Asphalt",
-                        "Asphalt_01",
-                        "Asphalt_02",
-                        "Lines",
-                        "Lines_01",
-                    ]
-
-                    const double_side: Array<string> = [
-                        "Entry"
-                    ]
-
                     const back_side: Array<string> = [
-                        "Fence_collision"
+                        "Fence_Collision",
+                        "Tiles"
                     ]
-
-                    if (front_material.includes(child.name))
-                        child.material.side = THREE.FrontSide
-                    else if (back_side.includes(child.name)) {
+                    if (back_side.includes(child.name))
                         child.material.side = THREE.BackSide
-                    }
-                    else if (double_side.includes(child.name)) {
-                        child.material.side = THREE.DoubleSide
-                    }
-                    else
-                        child.material.side = this.inverse ? THREE.FrontSide : THREE.BackSide;
 
+                    else if (child.name === "DINER_Collision") {}
+                    
+                    else if (child.name === "DINER") {
+                        const back_dinner: Array<string> = [
+                            
+                        ]
+
+                        for (let m of child.material) {
+                            // console.log(m.name)
+                            if (back_dinner.includes(m.name)) {
+                                m.side = THREE.BackSide
+                            } else {
+                                m.side = THREE.FrontSide
+                            }
+                        }
+                    }
+                    else {
+                        // console.log(child.name)
+                        child.material.side = THREE.FrontSide;
+                    }
                     // if (this.inverse) console.log("back side")
                     // else console.log("front side")
-                    console.log(child.name, " : ", child.material)
+
+                    
+                    // console.log(child.name, " : ", child.material)
                 }
             })
         }, 2000)

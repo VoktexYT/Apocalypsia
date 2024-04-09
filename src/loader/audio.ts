@@ -8,7 +8,7 @@ export default class AudioLoader {
         camera.add(this.listener);
     }
 
-    playSound(path: string, isLoop: boolean, volume: number) {
+    loadSound(path: string, isLoop: boolean, volume: number, callback?: (isLoaded: boolean, sound?: THREE.Audio) => void) {
         const audioLoader = new THREE.AudioLoader();
         
         const THIS = this;
@@ -18,7 +18,11 @@ export default class AudioLoader {
             sound.setBuffer(buffer);
             sound.setLoop(isLoop);
             sound.setVolume(volume);
-            sound.play();
+
+            if (callback)
+                callback(true, sound);
+            else
+                sound.play()
         });
     }
 }

@@ -1,6 +1,7 @@
 import FbxObjectLoader from "../../loader/object";
 
 
-const gun_loader = new FbxObjectLoader("./assets/weapons/pistol/models/pistol.fbx");
+export const gun_loader = new FbxObjectLoader("./assets/weapons/pistol/models/pistol.fbx");
 
-export default gun_loader;
+export const riffle_loader = new FbxObjectLoader("./assets/weapons/weapons/AK-74(HP).fbx");
+

@@ -3,11 +3,13 @@ import * as CANNON from 'cannon';
 
 import * as object from '../game/object'
 import * as init from '../game/init-three';
-import Entity from './entity'
 
-import gun_loader from '../load/object/object.gun'
-import { material_gun } from '../load/material/material.gun';
+import * as weapon_loader from '../load/object/object.gun'
+
+import { material_gun, material_riffle } from '../load/material/material.gun';
 import MaterialTextureLoader from '../loader/material'
+
+import FbxObjectLoader from '../loader/object'
 
 
 
@@ -23,12 +25,25 @@ interface properties {
 export default class Gun {
     is_finish_load:       boolean = false;
     is_shooting_position: boolean = false;
+    is_fire:              boolean = false;
+    last_fire:            number  = Date.now();
 
     mass: number = 1
     fixed_rotation: boolean = true;
 
-    entity: Entity;
+    pistol_scale: Array<number> = [0.05, 0.05, 0.05];
+    riffle_scale: Array<number> = [0.004, 0.004, 0.004];
+
+    pistol_normal_rad = [Math.PI / 2, Math.PI, 0];
+    pistol_shooting_rad = [Math.PI / 2, Math.PI, 0];
+
+    riffle_normal_rad = [Math.PI, -Math.PI / 100, Math.PI];
+    riffle_shooting_rad = [Math.PI, 0, Math.PI];
+
+
     settings: properties;
+
+    movement: number = 0;
 
     material = new CANNON.Material("gun");
 
@@ -37,32 +52,15 @@ export default class Gun {
     cannon_shape: CANNON.Shape | null = null;
     cannon_body: CANNON.Body = new CANNON.Body({ mass: this.mass, fixedRotation: this.fixed_rotation });
 
+    gun_loader: FbxObjectLoader = weapon_loader.gun_loader;
+    riffle_loader: FbxObjectLoader = weapon_loader.riffle_loader;
+    actual_loader: FbxObjectLoader = this.gun_loader;
+    is_gun_loader: boolean = true;
+
 
     constructor(settings: properties) {
         this.settings = settings;
-        
-        this.entity = new Entity()
-            .set_position(settings.gun_position[0], settings.gun_position[1], settings.gun_position[2])
-            .set_scale(settings.gun_scale[0], settings.gun_scale[1], settings.gun_scale[2])
-            .set_textures({
-                map: "./assets/weapons/pistol/textures/Pistol_map.png",
-                metalnessMap: "./assets/weapons/pistol/textures/Pistol_metalness.png",
-                normalMap: "./assets/weapons/pistol/textures/Pistol_normalmap.png",
-                roughnessMap: "./assets/weapons/pistol/textures/Pistol_roughness.png"
-            })
-        
-        this.entity.load("./assets/weapons/pistol/models/pistol.fbx", []).then((finishLoad) => {
-            this.is_finish_load = finishLoad;
-
-            const mesh = this.entity.get_mesh()
-            if (mesh != null) {
-                mesh.rotateX(THREE.MathUtils.degToRad(settings.gun_rotation_degres[0]))
-                mesh.rotateY(THREE.MathUtils.degToRad(settings.gun_rotation_degres[1]))
-                mesh.rotateZ(THREE.MathUtils.degToRad(settings.gun_rotation_degres[2]))
-            }
-
-            console.info("[load]:", "Gun is loaded")
-        });
+        this.setup_mesh()
     }
 
     change_material(new_material_loader: MaterialTextureLoader) {
@@ -76,79 +74,129 @@ export default class Gun {
         })
     }
 
+    change_loader(new_loader: FbxObjectLoader) {
+        if (this.mesh) {
+            init.scene.remove(this.mesh)
+            this.actual_loader = new_loader
+            this.is_finish_load = false;
+        }
+    }
+
+    switch_gun() {
+        this.is_gun_loader = !this.is_gun_loader;
+
+        if (this.is_gun_loader) {
+            this.change_loader(this.gun_loader);
+        } else {
+            this.change_loader(this.riffle_loader);
+        }
+
+    }
+
     setup_mesh() {
-        this.mesh = gun_loader.getObject();
+        this.mesh = this.actual_loader.getObject();
+
         if (!this.mesh) return;
 
-        const position = this.settings.gun_position
-        this.mesh.position.set(position[0], position[1], position[2]);
-        
-        const scale = this.settings.gun_scale;
-        this.mesh.scale.set(scale[0], scale[1], scale[2]);
-        
-        const degres: [number, number, number] = this.settings.gun_rotation_degres;
-        this.mesh.rotateX(THREE.MathUtils.degToRad(degres[0]));
-        this.mesh.rotateY(THREE.MathUtils.degToRad(degres[1]));
-        this.mesh.rotateZ(THREE.MathUtils.degToRad(degres[2]));
+        if (this.is_gun_loader) {
+            this.mesh.scale.set(
+                this.pistol_scale[0],
+                this.pistol_scale[1],
+                this.pistol_scale[2],
+            );
+            this.change_material(material_gun);
+        } else {
+            this.mesh.scale.set(
+                this.riffle_scale[0],
+                this.riffle_scale[1],
+                this.riffle_scale[2],
+            );
+            this.change_material(material_riffle);
+        }
 
-        const boundingBox = new THREE.Box3().setFromObject(this.mesh);
-        boundingBox.getSize(this.size);
 
-        this.change_material(material_gun);
-
-        this.size.x /= 2;
-
-        this.cannon_shape = new CANNON.Box(new CANNON.Vec3(
-            this.size.x/2, this.size.y/2, this.size.z/2
-        ));
-        
-        this.cannon_body.addShape(this.cannon_shape);
-
-        this.cannon_body.material = this.material;
-        
-        this.cannon_body.position.set(position[0], position[1], position[2])
-                
-        init.cannon_world.addBody(this.cannon_body);
         init.scene.add(this.mesh);
-
         this.is_finish_load = true;
 
-        console.info("[load]:", "gun is loaded")
+        console.info("[load]:", "gun is loaded");
     }
 
 
     update() {
-        if (!gun_loader.isFinishedLoading()) return;
+        if (!this.actual_loader.isFinishedLoading()) return;
+
         if (!this.is_finish_load) {
             this.setup_mesh();
             this.is_finish_load = true;
         }
 
-        const mesh = this.entity.get_mesh();
-        if (!mesh) return
+        if (!this.mesh) return
         
-        mesh.position.copy(object.player.camera.position);
-        mesh.quaternion.copy(object.player.camera.quaternion);
+        this.mesh.position.copy(object.player.camera.position);
+        this.mesh.quaternion.copy(object.player.camera.quaternion);
+
+        if (this.is_gun_loader) {
+            if (!this.is_shooting_position) {
+                this.mesh.translateZ(-0.8)
+                this.mesh.translateX(0.7);
+    
+                if (object.player.is_moving) {
+                    this.mesh.translateY(-0.8 + Math.sin(this.movement) / 20);
+                } else {
+                    this.mesh.translateY(-0.8 + Math.sin(this.movement) / 100);
+                }
+    
+                this.mesh.rotateX(this.pistol_normal_rad[0]);
+                this.mesh.rotateY(this.pistol_normal_rad[1]);
+                this.mesh.rotateZ(this.pistol_normal_rad[2]);
+            }
+    
+            else {
+                this.mesh.translateZ(-0.8);
+                this.mesh.translateX(0);
+    
+                if (object.player.is_moving) {
+                    this.mesh.translateY(-0.55 + Math.sin(this.movement) / 40)
+                } else {
+                    this.mesh.translateY(-0.55 + Math.sin(this.movement) / 200)
+                }
+    
+                this.mesh.rotateX(this.pistol_shooting_rad[0]);
+                this.mesh.rotateY(this.pistol_shooting_rad[1]);
+                this.mesh.rotateZ(this.pistol_shooting_rad[2]);
+            }
+        } else {
+            if (!this.is_shooting_position) {
+                this.mesh.translateZ(-1);
+                this.mesh.translateX(0.6);
+    
+                if (object.player.is_moving) {
+                    this.mesh.translateY(-0.8 + Math.sin(this.movement) / 20);
+                } else {
+                    this.mesh.translateY(-0.8 + Math.sin(this.movement) / 100);
+                }
+    
+                this.mesh.rotateX(this.riffle_normal_rad[0]);
+                this.mesh.rotateY(this.riffle_normal_rad[1]);
+                this.mesh.rotateZ(this.riffle_normal_rad[2]);
+            }
+    
+            else {
+                this.mesh.translateZ(-1)
+                this.mesh.translateX(0.05);
+    
+                if (object.player.is_moving) {
+                    this.mesh.translateY(-0.59 + Math.sin(this.movement) / 40)
+                } else {
+                    this.mesh.translateY(-0.59 + Math.sin(this.movement) / 200)
+                }
+
+                this.mesh.rotateX(this.riffle_shooting_rad[0]);
+                this.mesh.rotateY(this.riffle_shooting_rad[1]);
+                this.mesh.rotateZ(this.riffle_shooting_rad[2]);
+            }
+        }
         
-
-        if (!this.is_shooting_position) {
-            mesh.translateZ(0)
-            mesh.translateY(-1)
-            mesh.translateX(1)
-            mesh.rotateX(THREE.MathUtils.degToRad(this.settings.gun_rotation_degres[0]))
-            mesh.rotateY(THREE.MathUtils.degToRad(this.settings.gun_rotation_degres[1]))
-            mesh.rotateZ(THREE.MathUtils.degToRad(this.settings.gun_rotation_degres[2]))
-            mesh.translateY(-1)
-        }
-
-        else {
-            mesh.translateZ(-0.3)
-            mesh.translateY(-0.55)
-            mesh.translateX(0)
-            mesh.rotateX(THREE.MathUtils.degToRad(this.settings.gun_rotation_degres[0]))
-            mesh.rotateY(THREE.MathUtils.degToRad(this.settings.gun_rotation_degres[1]))
-            mesh.rotateZ(THREE.MathUtils.degToRad(this.settings.gun_rotation_degres[2]))
-            mesh.translateY(-0.55)
-        }
+        this.movement += 0.1;
     }
 }

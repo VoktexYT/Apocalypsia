@@ -28,19 +28,19 @@ export function change_game_running_to(is_running: boolean) {
 }
 
 // Ambiant light
-const ambientLight = new THREE.AmbientLight(0xFFFFFF, 1);
-scene.add(ambientLight);
+// const ambientLight = new THREE.AmbientLight(0x000000, 0);
+// scene.add(ambientLight);
 
 // FOG Ambiance
 const near = 1;
 const far = 40;
-scene.fog = new THREE.Fog(0x555555, near, far);
+scene.fog = new THREE.Fog(0x333333, near, far);
 
 // Camera
 export const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(-6.9182842130092705, 1.1729619062491528, 16.613011115597622);
 
-export let activeCamera = camera
+export let activeCamera = object.player.camera
 
 export function switch_active_camera() {
     if (activeCamera === camera) {

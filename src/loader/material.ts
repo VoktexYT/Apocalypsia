@@ -40,7 +40,10 @@ export default class MaterialLoader {
         for (const [key, path] of Object.entries(this._texture_paths)) {
             if (path) {
                 if (!(key in this._three_textures)) {
-                    this._three_textures[key as keyof TexturesThree] = textureLoader.load(path);
+                    const texture = textureLoader.load(path);
+                    texture.format = THREE.RGBAFormat
+                    this._three_textures[key as keyof TexturesThree] = texture;
+
                 }
             }
         }

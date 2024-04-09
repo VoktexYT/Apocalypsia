@@ -12,6 +12,7 @@ export default class WindowEvent {
     mouse_state: { [key: string]: boolean } = {};
     current_cursor_position: Array<number>  = [];
     previous_cursor_position: Array<number> = [];
+    wheel_states: { up: boolean, down: boolean } = { up: false, down: false }
 
     smooth_factor:      number = 0.1;
     cursor_sensibility: number = 5;
@@ -22,12 +23,22 @@ export default class WindowEvent {
         this.webGl_renderer = webGl_renderer;
         this.player = player;
 
-        window.addEventListener('resize', this.window_resize_event);
-        window.addEventListener('keydown', this.window_keydown_event.bind( this ));
-        window.addEventListener('keyup', this.window_keyup_event.bind( this ));
-        window.addEventListener("mousemove", this.window_mousemove_event.bind( this ));
-        window.addEventListener("mousedown", this.window_mousedown_event.bind( this ));
-        window.addEventListener("mouseup", this.window_mouseup_event.bind( this ));
+        window.addEventListener('resize',    this.window_resize_event);
+        window.addEventListener('keydown',   this.window_keydown_event   .bind( this ));
+        window.addEventListener('keyup',     this.window_keyup_event     .bind( this ));
+        window.addEventListener("mousemove", this.window_mousemove_event .bind( this ));
+        window.addEventListener("mousedown", this.window_mousedown_event .bind( this ));
+        window.addEventListener("mouseup",   this.window_mouseup_event   .bind( this ));
+        window.addEventListener('wheel',     this.window_mousewheel_event.bind( this ));
+
+    }
+
+    window_mousewheel_event(this: WindowEvent, event: WheelEvent) {
+        const wheel_dir = Math.sign(event.deltaY);
+        const is_down = (wheel_dir === 1);
+
+        this.wheel_states.down = is_down;
+        this.wheel_states.up = !is_down;
     }
 
     window_resize_event() {

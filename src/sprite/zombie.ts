@@ -180,7 +180,7 @@ export default class Zombie {
 
         if (this.health <= 0) {
             this.is_death = true
-            new AudioLoader(object.player.camera).playSound("./assets/sound/zombie.mp3", false, 0.6);
+            new AudioLoader(object.player.camera).loadSound("./assets/sound/zombie_death.mp3", false, 0.3);
 
             init.cannon_world.remove(this.body)
             init.scene.remove(this.COLLIDE_BOX)
