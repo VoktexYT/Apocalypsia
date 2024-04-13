@@ -32,7 +32,7 @@ export default class Basement {
             this.inverse = !this.inverse
             mesh.traverse((child: THREE.Mesh | any) => {
                 if (child instanceof THREE.Mesh) {
-                    console.log(child.material)
+                    // console.log(child.material)
 
                     const back_side: Array<string> = [
                         "Fence_Collision",

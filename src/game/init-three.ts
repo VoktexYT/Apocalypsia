@@ -50,6 +50,8 @@ export function switch_active_camera() {
     }
 }
 
+export const raycaster = new THREE.Raycaster();
+
 // Renderer
 export const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);

@@ -54,10 +54,11 @@ export default class Player {
     audioLoader = new AudioLoader(this.camera);
     every_music: Array<THREE.Audio> = [];
 
-    near_death_sound: THREE.Audio | null = null
-    switch_weapons_sound: THREE.Audio | null = null
-    empty_weapons_sound: THREE.Audio | null = null
-    reload_weapons_sound: THREE.Audio | null = null
+    near_death_sound:     THREE.Audio | null = null;
+    switch_weapons_sound: THREE.Audio | null = null;
+    empty_weapons_sound:  THREE.Audio | null = null;
+    reload_weapons_sound: THREE.Audio | null = null;
+    fire_weapons_sound:   THREE.Audio | null = null;
 
     set_sound() {
         this.audioLoader.loadSound("./assets/sound/nearDeath.mp3", false, 0.3, (loaded, sound) => {
@@ -83,6 +84,12 @@ export default class Player {
                 this.reload_weapons_sound = sound;
             }
         });
+
+        this.audioLoader.loadSound("./assets/sound/fire.mp3", false, 1, (loaded, sound) => {
+            if (loaded && sound) {
+                this.fire_weapons_sound = sound;
+            }
+        })
     }
 
 
@@ -248,24 +255,24 @@ export default class Player {
             this.moveBodyAlongDirection(new THREE.Vector3().crossVectors(this.camera.up, direction).negate());
 
         if (!keyStates["KeyW"] && !keyStates["KeyS"] && !keyStates["KeyA"] && !keyStates["KeyD"]) {
-            this.is_moving = false
+            this.is_moving = false;
         }
 
         if (keyStates["KeyR"]) {
-            if (object.gun.is_gun_loader) {
-                object.gun.pistol_bullet_charge_now = object.gun.pistol_bullet_charge_max;
+            if (object.gun.has_pistol) {
+                object.gun.PISTOL.bullet_charge_now = object.gun.PISTOL.bullet_charge_max;
             } else {
-                object.gun.riffle_bullet_charge_now = object.gun.riffle_bullet_charge_max;
+                object.gun.RIFLE.bullet_charge_now = object.gun.RIFLE.bullet_charge_max;
             }
-            
-            this.reload_weapons_sound?.play()
+
+            this.reload_weapons_sound?.play();
         }
 
         if (mouseStates["left"]) {
-            this.shoot()
+            this.shoot();
         }
 
-        object.gun.is_shooting_position = keyStates['Space']
+        object.gun.is_shooting_position = keyStates['Space'];
     }
 
         
@@ -281,43 +288,13 @@ export default class Player {
     }
 
     shoot() {
-        if (object.gun.is_fire) return
-        if (!this.cannon_body) return 
+        if (object.gun.is_fire) return;
+        if (!this.cannon_body) return;
+        if (!object.gun.mesh) return;
 
-        const gunMesh = object.gun.mesh
-        if (!gunMesh) return
+        object.gun.fire_event()
 
-        let gunUsed = false;
-
-        if (object.gun.is_gun_loader) {
-            if (object.gun.pistol_bullet_charge_now > 0) {
-                object.gun.pistol_bullet_charge_now -= 1;
-                object.gun.is_fire = true;
-                object.gun.fire_backward = true;
-                this.flash_light.intensity = 2;
-                gunUsed = true;
-
-                setTimeout(() => {
-                    object.gun.is_fire = false;
-                }, object.gun.pistol_fire_interval);
-            }
-        }
-
-        else if (!object.gun.is_gun_loader) {
-            if (object.gun.riffle_bullet_charge_now > 0) {
-                object.gun.riffle_bullet_charge_now -= 1;
-                object.gun.is_fire = true;
-                object.gun.fire_backward = true;
-                this.flash_light.intensity = 2;
-                gunUsed = true;
-
-                setTimeout(() => {
-                    object.gun.is_fire = false;
-                }, object.gun.riffle_fire_interval);
-            }
-        }
-
-        if (gunUsed) {
+        if (object.gun.is_gun_used) {
             setTimeout(() => {
                 object.gun.fire_backward = false;
                 this.flash_light.intensity = 1;
@@ -331,20 +308,22 @@ export default class Player {
             )
 
             if (!object.gun.is_shooting_position) {
-                const posX = randomChoice([-0.5, -0.3, 0, 0.3, 0.5])
-                const posY = randomChoice([-0.5, -0.3, 0, 0.3, 0.5])
+                const posX = randomChoice([-0.5, -0.3, 0, 0.3, 0.5]);
+                const posY = randomChoice([-0.5, -0.3, 0, 0.3, 0.5]);
 
-                position_random.x += posX ? posX: 0
-                position_random.y += posY ? posY: 0
+                position_random.x += posX ? posX: 0;
+                position_random.y += posY ? posY: 0;
             }
 
             this.all_bullets.push(new Bullet([
                 position_random.x,
                 position_random.y,
                 position_random.z,
-            ], direction))
+            ], direction));
 
-            this.audioLoader.loadSound("./assets/sound/fire.mp3", false, 1);
+            if (!this.fire_weapons_sound?.isPlaying) {
+                this.fire_weapons_sound?.play();
+            }
         }
 
         else {
