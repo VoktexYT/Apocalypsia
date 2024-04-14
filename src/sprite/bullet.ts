@@ -80,8 +80,9 @@ export default class Bullet {
         
     }
 
-    checkCollisionWithZombie(): boolean {
+    checkCollisionWithZombie(): [boolean, boolean] {
         let collisionDetected: boolean = false;
+        let head_shot: boolean = false;
 
         for (const zombie of object.every_zombie) {
 
@@ -100,12 +101,14 @@ export default class Bullet {
                 if (is_collide) {
                     this.zombie_collide = zombie;
                     collisionDetected = is_collide;
+                    head_shot = bulletPos.y > 0.19;
+                    
                     break;
                 }
             }
         }
 
-        return collisionDetected;
+        return [collisionDetected, head_shot];
     }
 
     check_bullet_range() {
@@ -128,9 +131,15 @@ export default class Bullet {
         // Check collide with zombies
         const intersectsZombie = this.checkCollisionWithZombie();
 
-        if (intersectsZombie && !this.is_delete && this.zombie_collide) {
+        if (intersectsZombie[0] && !this.is_delete && this.zombie_collide) {
             this.delete();
-            this.zombie_collide.get_damage(1);
+
+            if (intersectsZombie[1]) {
+                this.zombie_collide.get_damage(this.zombie_collide.health);
+            } else {
+                this.zombie_collide.get_damage(1);
+            }
+
             this.zombie_collide = undefined;
         }
 
