@@ -47,7 +47,11 @@ export default class Gun {
     mesh: THREE.Object3D | null = null;
 
     audioLoader = new AudioLoader(object.player.camera);
+
     reload_weapons_sound: THREE.Audio | null = null;
+    switch_weapons_sound: THREE.Audio | null = null;
+    empty_weapons_sound:  THREE.Audio | null = null;
+    fire_weapons_sound:   THREE.Audio | null = null;
 
 
     PISTOL: gun_settings = {
@@ -84,12 +88,12 @@ export default class Gun {
     
     actual_settings: gun_settings = this.is_pistol_weapon ? this.PISTOL : this.RIFLE;
 
-    private refesh_actual_settings() {
+    private update_actual_settings() {
         this.actual_settings = this.is_pistol_weapon ? this.PISTOL : this.RIFLE;
     }
 
     constructor() {
-        this.set_music();
+        this.set_audio();
     }
 
     update() {
@@ -128,11 +132,11 @@ export default class Gun {
     }
 
     private change_material(new_material_loader: MaterialTextureLoader) {
-        const mesh = this.mesh
-        if (!mesh) return
+        const mesh = this.mesh;
+        if (!mesh) return;
 
         mesh.traverse((child) => {
-            if (!(child instanceof THREE.Mesh)) return
+            if (!(child instanceof THREE.Mesh)) return;
             child.material = new_material_loader.material;
             child.material.transparent = false;
         })
@@ -143,18 +147,17 @@ export default class Gun {
             this.is_pistol_weapon = !this.is_pistol_weapon;
             this.is_finish_load = false;
             init.scene.remove(this.mesh);
-            this.mesh = null;
+            if (!this.switch_weapons_sound?.isPlaying)
+                this.switch_weapons_sound?.play();
         }
     }
 
     private setup_mesh() {
-        if (this.mesh !== null) return;
-
         this.mesh = this.is_pistol_weapon ? this.PISTOL.loader.mesh: this.RIFLE.loader.mesh;
-        this.refesh_actual_settings()
-
         if (!this.mesh) return;
 
+        this.update_actual_settings();
+        
         this.mesh.scale.set(
             this.actual_settings.scale[0],
             this.actual_settings.scale[1],
@@ -182,25 +185,60 @@ export default class Gun {
             setTimeout(() => {
                 this.is_fire = false;
             }, this.actual_settings.fire_interval);
+
+            setTimeout(() => {
+                this.fire_backward = false;
+                object.player.flash_light.intensity = 1;
+            }, 100);
+
+            this.audioLoader.loadSound("./assets/sound/fire.mp3", false, 0.8);
+        } else {
+            this.fire_backward = true;
+
+            setTimeout(() => {
+                this.fire_backward = false;
+            }, 100);
+
+            if (!this.empty_weapons_sound?.isPlaying) {
+                this.empty_weapons_sound?.play();
+            }
         }
     }
 
     reload_gun_event() {
         setTimeout(() => {
-            this.actual_settings.bullet_charge_now = this.actual_settings.bullet_charge_max;
+            this.actual_settings.bullet_charge_now = this.actual_settings.bullet_charge_max
+        }, 1100);
 
-            if (!this.reload_weapons_sound?.isPlaying) {
-                this.reload_weapons_sound?.play();
-            }
-        }, this.actual_settings.reload_interval)
-        
+        if (!this.reload_weapons_sound?.isPlaying) {
+            this.reload_weapons_sound?.setPlaybackRate(0.8);
+            this.reload_weapons_sound?.play();
+        }
     }
 
-    set_music() {
-        this.audioLoader.loadSound("./assets/sound/reload-gun.mp3", false, 0.3, (loaded, sound) => {
+    set_audio() {
+        this.audioLoader.loadSound("./assets/sound/switchWeapon.mp3", false, 0.4, (loaded, sound) => {
+            if (loaded && sound) {
+                this.switch_weapons_sound = sound;
+            }
+        });
+
+        this.audioLoader.loadSound("./assets/sound/empty-gun.mp3", false, 0.4, (loaded, sound) => {
+            if (loaded && sound) {
+                this.empty_weapons_sound = sound;
+            }
+        });
+
+        this.audioLoader.loadSound("./assets/sound/reload-gun.mp3", false, 0.6, (loaded, sound) => {
             if (loaded && sound) {
                 this.reload_weapons_sound = sound;
             }
         });
+
+        this.audioLoader.loadSound("./assets/sound/fire.mp3", false, 0.8, (loaded, sound) => {
+            if (loaded && sound) {
+                this.fire_weapons_sound = sound;
+            }
+        })
     }
 }

@@ -77,7 +77,7 @@ export default class Zombie {
     }
 
     set_sound() {
-        this.audioLoader.loadSound("./assets/sound/zombie_death.mp3", false, 0.3, (loader, sound) => {
+        this.audioLoader.loadSound("./assets/sound/zombie_death.mp3", false, 0.6, (loader, sound) => {
             if (loader && sound) {
                 this.zombie_death_sound = sound;
             }

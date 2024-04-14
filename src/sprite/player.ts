@@ -55,62 +55,43 @@ export default class Player {
     every_music: Array<THREE.Audio> = [];
 
     near_death_sound:     THREE.Audio | null = null;
-    switch_weapons_sound: THREE.Audio | null = null;
-    empty_weapons_sound:  THREE.Audio | null = null;
-    reload_weapons_sound: THREE.Audio | null = null;
-    fire_weapons_sound:   THREE.Audio | null = null;
+    walk_sound:   THREE.Audio | null = null;
 
     set_audio() {
         // SOUND
-        this.audioLoader.loadSound("./assets/sound/nearDeath.mp3", false, 0.3, (loaded, sound) => {
+        this.audioLoader.loadSound("./assets/sound/nearDeath.mp3", false, 0.5, (loaded, sound) => {
             if (loaded && sound) {
                 this.near_death_sound = sound;
             }
         });
-
-        this.audioLoader.loadSound("./assets/sound/switchWeapon.mp3", false, 0.5, (loaded, sound) => {
+        
+        this.audioLoader.loadSound("./assets/sound/walk.mp3", false, 0.1, (loaded, sound) => {
             if (loaded && sound) {
-                this.switch_weapons_sound = sound;
+                this.walk_sound = sound;
             }
         });
-
-        this.audioLoader.loadSound("./assets/sound/empty-gun.mp3", false, 0.5, (loaded, sound) => {
-            if (loaded && sound) {
-                this.empty_weapons_sound = sound;
-            }
-        });
-
-        this.audioLoader.loadSound("./assets/sound/reload-gun.mp3", false, 0.3, (loaded, sound) => {
-            if (loaded && sound) {
-                this.reload_weapons_sound = sound;
-            }
-        });
-
-        this.audioLoader.loadSound("./assets/sound/fire.mp3", false, 1, (loaded, sound) => {
-            if (loaded && sound) {
-                this.fire_weapons_sound = sound;
-            }
-        })
 
         // MUSIC
 
-        this.audioLoader.loadSound("./assets/sound/backgroundMusic.mp3", false, 0.5, (loaded, sound) => {
+        this.audioLoader.loadSound("./assets/sound/backgroundMusic2.mp3", false, 0.2, (loaded, sound) => {
             if (loaded && sound) {
                 this.every_music.push(sound)
             }
         });
 
-        this.audioLoader.loadSound("./assets/sound/backgroundMusic2.mp3", false, 0.5, (loaded, sound) => {
+        this.audioLoader.loadSound("./assets/sound/backgroundMusic3.mp3", false, 0.2, (loaded, sound) => {
             if (loaded && sound) {
                 this.every_music.push(sound)
             }
         });
 
-        this.audioLoader.loadSound("./assets/sound/backgroundMusic3.mp3", false, 0.5, (loaded, sound) => {
+        this.audioLoader.loadSound("./assets/sound/backgroundMusic4.mp3", false, 0.2, (loaded, sound) => {
             if (loaded && sound) {
                 this.every_music.push(sound)
             }
         });
+
+    
     }
 
 
@@ -148,7 +129,6 @@ export default class Player {
         this.flash_light.shadow.camera.near = 500;
         this.flash_light.shadow.camera.far = 4000;
         this.flash_light.shadow.camera.fov = 30;
-
         this.flash_light.target = this.flash_light_object
 
         init.scene.add(this.flash_light)
@@ -171,36 +151,32 @@ export default class Player {
     }
 
     update_music() {
-        if (this.every_music.length !== 3) return
-        let nothing_music_play = true;
+    if (this.every_music.length !== 3) return;
 
-        for (let m of this.every_music) {
-            if (m.isPlaying) {
-                nothing_music_play = false;
-            }
-        }
+    const isAnyMusicPlaying = this.every_music.some(m => m.isPlaying);
 
-        if (nothing_music_play) {
-            randomChoice(this.every_music)?.play()
-        }
+    if (!isAnyMusicPlaying) {
+        const randomMusic = this.every_music[Math.floor(Math.random() * this.every_music.length)];
+        randomMusic.play();
+    }
     }
 
     update_position() {
-        if (this.cannon_body === null) return
+        if (this.cannon_body === null) return;
 
-        this.mesh.position.copy(this.cannon_body.position)
-        this.mesh.quaternion.copy(this.cannon_body.quaternion)
+        this.mesh.position.copy(this.cannon_body.position);
+        this.mesh.quaternion.copy(this.cannon_body.quaternion);
 
         this.camera.position.set(
             this.cannon_body.position.x,
             this.cannon_body.position.y + 1 + Math.sin(1.5*this.camera_move_y) / this.health_movement_intensity,
             this.cannon_body.position.z,
-        )
+        );
 
-        this.flash_light.position.copy(this.camera.position)
+        this.flash_light.position.copy(this.camera.position);
 
         if (this.is_moving)
-            this.camera_move_y += 0.1
+            this.camera_move_y += 0.1;
     }
 
 
@@ -210,24 +186,24 @@ export default class Player {
             object.window_event.current_cursor_position[0] < (window.innerWidth / 2) + 10 &&
             object.window_event.current_cursor_position[1] > (window.innerHeight / 2) - 10 &&
             object.window_event.current_cursor_position[1] < (window.innerHeight / 2) + 10
-        )
+        );
         
-        if (this.enableCamera) {return}
+        if (this.enableCamera) return;
         
-        this.cursor_page.searchHTML()
+        this.cursor_page.searchHTML();
         
         if (init.activeCamera === init.camera) {
-            this.cursor_page.disable()
-            return
+            this.cursor_page.disable();
+            return;
         }
 
         if (is_cursor_center_screen) {
-            this.enableCamera = true
-            this.cursor_page.disable()
+            this.enableCamera = true;
+            this.cursor_page.disable();
         }
 
         else {
-            this.cursor_page.enable()
+            this.cursor_page.enable();
         }
     }
 
@@ -243,36 +219,22 @@ export default class Player {
         const mouseStates = object.window_event.mouse_state;
         const direction = this.getDirection();
 
-        if (keyStates["KeyW"])
-            this.moveBodyAlongDirection(direction);
-        else if (keyStates["KeyS"])
-            this.moveBodyAlongDirection(direction.clone().negate());
+        this.is_moving = false;
 
+        if (keyStates["KeyS"])
+            this.moveBodyAlongDirection(direction.clone().negate());
         if (keyStates["KeyA"])
             this.moveBodyAlongDirection(new THREE.Vector3().crossVectors(this.camera.up, direction));
-        
-        else if (keyStates["KeyD"])
+        if (keyStates["KeyW"])
+            this.moveBodyAlongDirection(direction);
+        if (keyStates["KeyD"])
             this.moveBodyAlongDirection(new THREE.Vector3().crossVectors(this.camera.up, direction).negate());
-
-        if (!keyStates["KeyW"] && !keyStates["KeyS"] && !keyStates["KeyA"] && !keyStates["KeyD"]) {
-            this.is_moving = false;
-        }
-
-        if (keyStates["KeyR"]) {
-            if (object.gun.is_pistol_weapon) {
-                object.gun.PISTOL.bullet_charge_now = object.gun.PISTOL.bullet_charge_max;
-            } else {
-                object.gun.RIFLE.bullet_charge_now = object.gun.RIFLE.bullet_charge_max;
-            }
-
-            if (!this.reload_weapons_sound?.isPlaying) {
-                this.reload_weapons_sound?.play();
-            }
-        }
-
-        if (mouseStates["left"]) {
+        if (keyStates["KeyR"])
+            object.gun.reload_gun_event();
+        if (mouseStates["left"])
             this.shoot();
-        }
+        if (!this.is_moving)
+            this.walk_sound?.stop();
 
         object.gun.is_shooting_position = keyStates['Space'];
     }
@@ -280,31 +242,24 @@ export default class Player {
         
     moveBodyAlongDirection(direction: THREE.Vector3) {
         if (this.cannon_body === null) return
-
+        
+        this.is_moving = true;
+        
         const dir_pos = direction.multiplyScalar(this.velocity)
-
         this.cannon_body.position.x += dir_pos.x;
         this.cannon_body.position.z += dir_pos.z;
 
-        this.is_moving = true
+        if (!this.walk_sound?.isPlaying) {
+            this.walk_sound?.setPlaybackRate(1.3);
+            this.walk_sound?.play();
+        }
     }
 
     shoot() {
-        if (object.gun.is_fire) return;
-        if (!this.cannon_body) return;
-        if (!object.gun.mesh) return;
-
-        object.gun.fire_event()
+        if (object.gun.is_fire || !this.cannon_body || !object.gun.mesh) return;
+        object.gun.fire_event();
 
         if (object.gun.is_gun_used) {
-            setTimeout(() => {
-                object.gun.fire_backward = false;
-                this.flash_light.intensity = 1;
-            }, 100);
-
-            this.audioLoader.loadSound("./assets/sound/fire.mp3", false, 1)
-
-
             const position = this.camera.position
             const direction = this.camera.getWorldDirection(new THREE.Vector3());
 
@@ -316,7 +271,7 @@ export default class Player {
                 const posX = randomChoice([-0.5, -0.3, 0, 0.3, 0.5]);
                 const posY = randomChoice([-0.5, -0.3, 0, 0.3, 0.5]);
 
-                position_random.x += posX ? posX: 0;
+                position_random.x += posX ? posX: 0;// random choice can be underfined
                 position_random.y += posY ? posY: 0;
             }
 
@@ -325,28 +280,11 @@ export default class Player {
                 position_random.y,
                 position_random.z,
             ], direction));
-
-            // if (!this.fire_weapons_sound?.isPlaying) {
-                // this.fire_weapons_sound?.play();
-
-            // }
-        }
-
-        else {
-            object.gun.fire_backward = true;
-
-            setTimeout(() => {
-                object.gun.fire_backward = false;
-            }, 100);
-
-            if (!this.empty_weapons_sound?.isPlaying) {
-                this.empty_weapons_sound?.play();
-            }
         }
     }
 
     jump() {
-        this.cannon_body?.velocity.set(0, this.jump_velocity, 0)
+        this.cannon_body?.velocity.set(0, this.jump_velocity, 0);
     }
 
     updateFlashLightPosition() {
@@ -360,9 +298,7 @@ export default class Player {
     }
 
     moveHead() {
-        if (!this.enableCamera) {
-            return;
-        }
+        if (!this.enableCamera) return;
     
         const { current_cursor_position, previous_cursor_position, cursor_sensibility, smooth_factor } = object.window_event;
         const delta_x = (current_cursor_position[0] - previous_cursor_position[0]) * cursor_sensibility * smooth_factor;
@@ -377,51 +313,45 @@ export default class Player {
     
         this.quaternionY.setFromAxisAngle(this.axisY, this.angleY);
         this.quaternionX.setFromAxisAngle(this.axisX, this.angleX);
-    
+
         this.finalQuaternion.multiplyQuaternions(this.quaternionY, this.quaternionX);
     
         this.camera.quaternion.copy(this.finalQuaternion);
     }
 
     respawn_after_death() {
-        if (!this.cannon_body) return
-
-        if (this.cannon_body.position.y < -5) {
+        if (!this.cannon_body) return;
+        if (this.cannon_body.position.y < -5)
             this.cannon_body.position.set(0, 10, 0)
-        }
     }
 
     set_health_point(hp: number) {
-        this.health_page.searchHTML()
-        this.health_page.enable()
-        const dom = this.health_page.dom_element
-        if (!dom) return
+        this.health_page.searchHTML();
+        this.health_page.enable();
+        const dom = this.health_page.dom_element;
+        if (!dom) return;
 
-        this.health += hp
+        this.health += hp;
 
         if (this.health < 0) {
-            this.health = 0
-            this.health_page.disable()
-            init.change_game_running_to(false)
+            this.health = 0;
+            this.health_page.disable();
+            init.change_game_running_to(false);
         }
         else if (this.health > this.max_health) {
-            this.health = this.max_health
+            this.health = this.max_health;
         }
 
-        else if (this.health < this.max_health) {
-            if (!this.near_death_sound?.isPlaying) {
-                this.near_death_sound?.play()
-            }
+        else if (this.health < this.max_health && !this.near_death_sound?.isPlaying) {
+            this.near_death_sound?.play();
         }
-        
-        const health_percent = this.health / this.max_health;
 
-        dom.style.opacity = (1 - health_percent).toString()
+        dom.style.opacity = (1 - this.health / this.max_health).toString();
     }
 
     auto_regenerate() {
         if (this.previous_health === this.health && this.health < this.max_health) {
-            this.set_health_point(+0.1)
+            this.set_health_point(+0.1);
         }
     }
 
@@ -429,8 +359,6 @@ export default class Player {
         const wheel_event = object.window_event.wheel_states
 
         if (wheel_event.up || wheel_event.down) {
-            if (!this.switch_weapons_sound?.isPlaying)
-                this.switch_weapons_sound?.play();
             wheel_event.up = false;
             wheel_event.down = false;
             object.gun.switch_gun();
