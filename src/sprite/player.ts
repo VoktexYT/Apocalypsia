@@ -11,44 +11,44 @@ import AudioLoader from '../loader/audio';
 
 
 export default class Player {
-    velocity = 0.1
-    jump_velocity = 4
-    color = 0x00BB00
-    health = 100
-    max_health = 100
-    size = [1, 2.4, 1]
-    position = [-7, 10, 21]
-    health_movement_intensity = 10
+    velocity = 0.1;
+    jump_velocity = 4;
+    color = 0x00BB00;
+    health = 100;
+    max_health = 100;
+    size = [1, 2.4, 1];
+    position = [-7, 10, 21];
+    health_movement_intensity = 10;
 
-    camera_move_y = 0
+    camera_move_y = 0;
     is_moving = false;
 
-    mesh = new THREE.Mesh()
+    mesh = new THREE.Mesh();
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    theta_camera = 0
-    delta_camera = 0
+    theta_camera = 0;
+    delta_camera = 0;
     
-    cannon_body: CANNON.Body | null = null
+    cannon_body: CANNON.Body | null = null;
     
-    angleX = THREE.MathUtils.degToRad(0)
-    angleY = THREE.MathUtils.degToRad(0)
-    quaternionX = new THREE.Quaternion()
-    quaternionY =  new THREE.Quaternion()
-    axisX = new THREE.Vector3(1, 0, 0)
-    axisY = new THREE.Vector3(0, 1, 0)
+    angleX = THREE.MathUtils.degToRad(0);
+    angleY = THREE.MathUtils.degToRad(0);
+    quaternionX = new THREE.Quaternion();
+    quaternionY =  new THREE.Quaternion();
+    axisX = new THREE.Vector3(1, 0, 0);
+    axisY = new THREE.Vector3(0, 1, 0);
     
-    previous_health = this.health
-    finalQuaternion = new THREE.Quaternion()
+    previous_health = this.health;
+    finalQuaternion = new THREE.Quaternion();
     
-    enableCamera = false
-    is_finish_load = false
+    enableCamera = false;
+    is_finish_load = false;
 
-    cursor_page = new HtmlPage("cursor-page")
-    health_page = new HtmlPage("health-page")
+    cursor_page = new HtmlPage("cursor-page");
+    health_page = new HtmlPage("health-page");
 
-    all_bullets: Array<Bullet> = []
+    all_bullets: Array<Bullet> = [];
 
-    flash_light = new THREE.SpotLight(0xFF0000, 1)
+    flash_light = new THREE.SpotLight(0xFF0000, 1);
     flash_light_object = new THREE.Object3D();
 
     audioLoader = new AudioLoader(this.camera);
@@ -60,7 +60,8 @@ export default class Player {
     reload_weapons_sound: THREE.Audio | null = null;
     fire_weapons_sound:   THREE.Audio | null = null;
 
-    set_sound() {
+    set_audio() {
+        // SOUND
         this.audioLoader.loadSound("./assets/sound/nearDeath.mp3", false, 0.3, (loaded, sound) => {
             if (loaded && sound) {
                 this.near_death_sound = sound;
@@ -90,6 +91,26 @@ export default class Player {
                 this.fire_weapons_sound = sound;
             }
         })
+
+        // MUSIC
+
+        this.audioLoader.loadSound("./assets/sound/backgroundMusic.mp3", false, 0.5, (loaded, sound) => {
+            if (loaded && sound) {
+                this.every_music.push(sound)
+            }
+        });
+
+        this.audioLoader.loadSound("./assets/sound/backgroundMusic2.mp3", false, 0.5, (loaded, sound) => {
+            if (loaded && sound) {
+                this.every_music.push(sound)
+            }
+        });
+
+        this.audioLoader.loadSound("./assets/sound/backgroundMusic3.mp3", false, 0.5, (loaded, sound) => {
+            if (loaded && sound) {
+                this.every_music.push(sound)
+            }
+        });
     }
 
 
@@ -97,8 +118,7 @@ export default class Player {
     load() {
         this.set_three_box();
         this.set_cannon_collide_box();
-        this.set_music();
-        this.set_sound();
+        this.set_audio();
         this.set_flash_light();
 
         this.is_finish_load = true
@@ -148,26 +168,6 @@ export default class Player {
         this.cannon_body.addShape(cannon_shape);
         init.cannon_world.addBody(this.cannon_body);
         this.mesh.position.copy(this.cannon_body.position);
-    }
-
-    set_music() {
-        this.audioLoader.loadSound("./assets/sound/backgroundMusic.mp3", false, 0.5, (loaded, sound) => {
-            if (loaded && sound) {
-                this.every_music.push(sound)
-            }
-        });
-
-        this.audioLoader.loadSound("./assets/sound/backgroundMusic2.mp3", false, 0.5, (loaded, sound) => {
-            if (loaded && sound) {
-                this.every_music.push(sound)
-            }
-        });
-
-        this.audioLoader.loadSound("./assets/sound/backgroundMusic3.mp3", false, 0.5, (loaded, sound) => {
-            if (loaded && sound) {
-                this.every_music.push(sound)
-            }
-        });
     }
 
     update_music() {
@@ -259,13 +259,15 @@ export default class Player {
         }
 
         if (keyStates["KeyR"]) {
-            if (object.gun.has_pistol) {
+            if (object.gun.is_pistol_weapon) {
                 object.gun.PISTOL.bullet_charge_now = object.gun.PISTOL.bullet_charge_max;
             } else {
                 object.gun.RIFLE.bullet_charge_now = object.gun.RIFLE.bullet_charge_max;
             }
 
-            this.reload_weapons_sound?.play();
+            if (!this.reload_weapons_sound?.isPlaying) {
+                this.reload_weapons_sound?.play();
+            }
         }
 
         if (mouseStates["left"]) {
@@ -300,6 +302,9 @@ export default class Player {
                 this.flash_light.intensity = 1;
             }, 100);
 
+            this.audioLoader.loadSound("./assets/sound/fire.mp3", false, 1)
+
+
             const position = this.camera.position
             const direction = this.camera.getWorldDirection(new THREE.Vector3());
 
@@ -321,9 +326,10 @@ export default class Player {
                 position_random.z,
             ], direction));
 
-            if (!this.fire_weapons_sound?.isPlaying) {
-                this.fire_weapons_sound?.play();
-            }
+            // if (!this.fire_weapons_sound?.isPlaying) {
+                // this.fire_weapons_sound?.play();
+
+            // }
         }
 
         else {
@@ -333,7 +339,9 @@ export default class Player {
                 object.gun.fire_backward = false;
             }, 100);
 
-            this.empty_weapons_sound?.play()
+            if (!this.empty_weapons_sound?.isPlaying) {
+                this.empty_weapons_sound?.play();
+            }
         }
     }
 

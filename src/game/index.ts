@@ -5,6 +5,8 @@ import * as camera_func from './camera'
 import load_page_event from './loading'
 import HtmlPage from '../html-page/html-page'
 
+
+// object.gun.set_music()
 object.player.load()
 
 
@@ -31,8 +33,6 @@ function animate() {
     init.render();
 
     camera_func.change_camera_event();
-    camera_func.look_object();
-    camera_func.no_look_object();
     load_page_event();
 }
 

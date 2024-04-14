@@ -21,7 +21,7 @@ export default class Basement {
         if (this.is_finish_load) return
         if (this.fbxObject === null) return
 
-        const mesh = this.fbxObject.getObject()
+        const mesh = this.fbxObject.mesh;
 
         if (!mesh) return
 

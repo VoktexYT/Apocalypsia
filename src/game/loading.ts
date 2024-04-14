@@ -2,7 +2,6 @@ import * as object from './object'
 import HtmlPage from '../html-page/html-page';
 
 const loadPage = new HtmlPage("load-page")
-// const homePage = new HtmlPage("home-page")
 
 const is_finish_loading = () => {
     let all_load = [
@@ -21,13 +20,10 @@ const is_finish_loading = () => {
 
 export default function load_page_event() {
     loadPage.searchHTML()
-    // homePage.searchHTML()
 
     if (is_finish_loading()) {
         loadPage.disable()
-        // homePage.enable()
     } else {
         loadPage.enable()
-        // homePage.disable()
     }
 }

@@ -61,7 +61,11 @@ export default class Zombie {
     size = new THREE.Vector3();
 
     audioLoader = new AudioLoader(object.player.camera);
+
     zombie_death_sound: THREE.Audio | null = null;
+    zombie_sound: THREE.Audio | null = null;
+
+    last_zombie_sound: number = Date.now();
 
     cannon_shape = new CANNON.Box(new CANNON.Vec3());
 
@@ -77,7 +81,13 @@ export default class Zombie {
             if (loader && sound) {
                 this.zombie_death_sound = sound;
             }
-        })
+        });
+
+        this.audioLoader.loadSound("./assets/sound/zombie.mp3", false, 0.1, (loader, sound) => {
+            if (loader && sound) {
+                this.zombie_sound = sound;
+            }
+        });
     }
 
     get_damage(damage: number) {
@@ -104,7 +114,7 @@ export default class Zombie {
     }
 
     setup_mesh() {
-        const copy_original = zombie_fbx_loader.getObject();
+        const copy_original = zombie_fbx_loader.mesh;
         if (!copy_original) return;
 
         this.mesh = clone(copy_original);
@@ -172,10 +182,10 @@ export default class Zombie {
 
     play_animation(animationName: string, speed: number, is_loop?: boolean) {
         this.animationSpeed = speed
-        if (Object.keys(zombie_fbx_loader.getAnimations()).includes(animationName) && this.mesh !== null) {
+        if (Object.keys(zombie_fbx_loader.animations).includes(animationName) && this.mesh !== null) {
             const mixer = new THREE.AnimationMixer(this.mesh);
             
-            const action = mixer.clipAction(zombie_fbx_loader.getAnimations()[animationName]);
+            const action = mixer.clipAction(zombie_fbx_loader.animations[animationName]);
             if (this.last_action !== null) {
                 this.last_action.crossFadeTo(action, 0.5, false);
             }
@@ -209,7 +219,7 @@ export default class Zombie {
     
 
     update() {
-        if (!zombie_fbx_loader.isFinishedLoading()) return
+        if (!zombie_fbx_loader.finishLoad) return
         if (!this.is_finish_load) {
             this.setup_mesh()
             this.is_finish_load = true
@@ -319,6 +329,15 @@ export default class Zombie {
             } else {
                 this.change_material(ZOMBIE_MATERIAL.material_zombie2_high)
             }
+        }
+
+        // Zombie sound
+        if (Date.now() - this.last_zombie_sound >= 2000) {
+            if (randInt(0, 4) === 1) {
+                // if (!this.zombie_sound?.isPlaying)
+                    // this.zombie_sound?.play()
+            }
+            this.last_zombie_sound = Date.now();
         }
     }
 }

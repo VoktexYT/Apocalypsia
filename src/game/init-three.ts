@@ -17,19 +17,13 @@ export const order_html_page = [
 
 export let idx_page = 0;
 
-export function incIdx() {
-    idx_page++
-}
+export const next_page = () => {idx_page++};
 
 // Game running
 export let game_running = true;
 export function change_game_running_to(is_running: boolean) {
     game_running = is_running
 }
-
-// Ambiant light
-// const ambientLight = new THREE.AmbientLight(0x000000, 0);
-// scene.add(ambientLight);
 
 // FOG Ambiance
 const near = 1;
