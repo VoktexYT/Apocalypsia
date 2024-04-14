@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import * as CANNON from 'cannon';
 import * as object from './object'
 import HtmlPage from '../html-page/html-page';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 
 // Scene
@@ -25,6 +26,7 @@ export function change_game_running_to(is_running: boolean) {
     game_running = is_running
 }
 
+
 // FOG Ambiance
 const near = 1;
 const far = 40;
@@ -44,7 +46,6 @@ export function switch_active_camera() {
     }
 }
 
-export const raycaster = new THREE.Raycaster();
 
 // Renderer
 export const renderer = new THREE.WebGLRenderer();
@@ -53,8 +54,16 @@ document.body.appendChild(renderer.domElement);
 
 export const render = ()=>  {renderer.render(scene, activeCamera)}
 
+// Orbit Editor
+export const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.target.set(0, 1, 0);
+
+
 // Cannon.js Word
 export const cannon_world = new CANNON.World();
 cannon_world.gravity.set(0, -9.82, 0)
+
+// Add cube
 
 

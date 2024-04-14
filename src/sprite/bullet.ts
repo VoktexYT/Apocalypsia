@@ -101,7 +101,7 @@ export default class Bullet {
                 if (is_collide) {
                     this.zombie_collide = zombie;
                     collisionDetected = is_collide;
-                    head_shot = bulletPos.y > 0.19;
+                    head_shot = bulletPos.y > 0.40;
                     
                     break;
                 }

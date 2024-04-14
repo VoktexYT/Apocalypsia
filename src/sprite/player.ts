@@ -231,6 +231,8 @@ export default class Player {
             this.moveBodyAlongDirection(new THREE.Vector3().crossVectors(this.camera.up, direction).negate());
         if (keyStates["KeyR"])
             object.gun.reload_gun_event();
+        if (keyStates["KeyQ"])
+            this.jump();
         if (mouseStates["left"])
             this.shoot();
         if (!this.is_moving)
