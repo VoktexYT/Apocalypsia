@@ -12,7 +12,7 @@ export default class Basement {
     fbxObjectPosition: {x: number, y: number, z: number} = {x: 0, y: -1.55, z: 0};
     fbxObject: ObjectLoader = new ObjectLoader(this.fbxObjectPath);
 
-
+    
     update() {
         this.setupMesh();
     }

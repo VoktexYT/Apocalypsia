@@ -17,7 +17,7 @@ export const player = new Player();
 // Create Zombies
 export const every_zombie: Array<Zombie> = [];
 
-for (let i=0; i<20; i++) {
+for (let i=0; i<10; i++) {
     every_zombie.push(   
         new Zombie({
             zombie_type: randInt(1, 2),

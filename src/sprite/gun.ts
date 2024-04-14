@@ -22,6 +22,7 @@ interface gun_settings {
 
     bullet_charge_max: number,
     bullet_charge_now: number,
+    bulet_damage: number,
     fire_interval: number
     reload_interval: number,
 
@@ -63,6 +64,7 @@ export default class Gun {
         shooting_position_translate: [0, -0.55, -0.8],
         bullet_charge_max: 4,
         bullet_charge_now: 4,
+        bulet_damage: 1,
         fire_interval: 600,
         reload_interval: 500,
         loader: weapon_loader.pistol_loader,
@@ -79,6 +81,7 @@ export default class Gun {
         shooting_position_translate: [-0.55, -0.59, -1],
         bullet_charge_max: 10,
         bullet_charge_now: 10,
+        bulet_damage: 0.5,
         reload_interval: 1000,
         fire_interval: 150,
         loader: weapon_loader.rifle_loader,
@@ -191,7 +194,10 @@ export default class Gun {
                 object.player.flash_light.intensity = 1;
             }, 100);
 
-            this.audioLoader.loadSound("./assets/sound/fire.mp3", false, 0.8);
+            if (this.is_pistol_weapon)
+                this.audioLoader.loadSound("./assets/sound/fire3.mp3", false, 0.8);
+            else
+                this.audioLoader.loadSound("./assets/sound/fire2.mp3", false, 0.8);
         } else {
             this.fire_backward = true;
 

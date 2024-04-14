@@ -59,7 +59,7 @@ export default class Player {
 
     set_audio() {
         // SOUND
-        this.audioLoader.loadSound("./assets/sound/nearDeath.mp3", false, 0.5, (loaded, sound) => {
+        this.audioLoader.loadSound("./assets/sound/nearDeath.mp3", false, 0.2, (loaded, sound) => {
             if (loaded && sound) {
                 this.near_death_sound = sound;
             }

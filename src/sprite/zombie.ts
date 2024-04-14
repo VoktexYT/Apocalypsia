@@ -45,6 +45,7 @@ export default class Zombie {
     animationSpeed = 0;
     health = randInt(3, 6);
     damage = randInt(0.4, 0.6);
+
     velocity = randInt(300, 500);
 
     obtimisation_range = 5;
@@ -58,14 +59,26 @@ export default class Zombie {
     size = new THREE.Vector3();
 
     audioLoader = new AudioLoader(object.player.camera);
+    audioLoader2 = new THREE.AudioLoader();
 
     zombie_death_sound: THREE.Audio | null = null;
 
     cannon_shape = new CANNON.Box(new CANNON.Vec3());
 
+    road_sound = new THREE.PositionalAudio(this.audioLoader.listener);
+
+    next_road_interval: number = 0;
+
+
+    road_interval: number = Date.now();
+
     constructor(properties: properties) {
         this.properties = properties;
         this.COLLIDE_BOX = new THREE.Mesh();
+
+        if (this.properties.zombie_type === 2) {
+            this.velocity = randInt(200, 400);
+        }
 
         this.set_audio();
     }
@@ -153,6 +166,8 @@ export default class Zombie {
                 
         this.is_finish_load = true;
 
+        this.mesh.add(this.road_sound)
+
         console.info("[load]:", "Zombie is loaded");
     }
 
@@ -197,7 +212,15 @@ export default class Zombie {
     }
 
     attack_player() {
-        object.player.set_health_point(-this.damage);
+        let damage: number;
+
+        if (this.properties.zombie_type === 2) {
+            damage = -this.damage/1.5;
+        } else {
+            damage = -this.damage
+        }
+
+        object.player.set_health_point(damage);
     }
     
     update() {
@@ -223,7 +246,7 @@ export default class Zombie {
     
         const diffX = playerX - zombieX;
         const diffZ = playerZ - zombieZ;
-    
+
         if (!this.is_attack && !this.is_hurt && !this.is_death) {
             this.body.position.x += diffX / this.velocity;
             this.body.position.z += diffZ / this.velocity;
@@ -247,12 +270,22 @@ export default class Zombie {
         }
         
         const player_dist = Math.sqrt(Math.pow(diffX, 2)+Math.pow(diffZ, 2));
-         
-        if (player_dist < 2 && !this.is_death) {
+        const zombie_distance_attack = this.properties.zombie_type === 1 ? 2: 4;
+
+
+        if (player_dist < zombie_distance_attack  && !this.is_death) {
             if (!this.animation_name.includes("attack")) {
                 this.is_attack = true;
                 this.animation_name = "attack" + randomChoice(["1", "2", "3"]);
-                this.play_animation(this.animation_name, 0.08, true);
+
+                if (this.properties.zombie_type === 2) {
+                    this.animation_name = "attack4";
+                    this.play_animation(this.animation_name, 0.12, true);
+                } else {
+                    this.play_animation(this.animation_name, 0.08, true);
+                }
+
+
             } else {
                 this.attack_player();
             }
@@ -305,6 +338,27 @@ export default class Zombie {
                 this.change_material(ZOMBIE_MATERIAL.material_zombie1_high);
             } else {
                 this.change_material(ZOMBIE_MATERIAL.material_zombie2_high);
+            }
+        }
+
+        let road_type: string | undefined;
+
+        if (Date.now() - this.road_interval > this.next_road_interval && !this.is_death) {
+            const THIS = this;
+            this.road_interval = Date.now();
+            this.next_road_interval = randInt(1000, 10000)
+
+            if (!this.road_sound.isPlaying) {
+                road_type = randomChoice(["", "2"]);
+
+                if (road_type) {
+                    this.audioLoader2.load(`./assets/sound/zombieRoad${road_type}.mp3`, function(buffer) {
+                        THIS.road_sound.setBuffer(buffer);
+                        THIS.road_sound.setRefDistance(3);
+                        THIS.road_sound.setVolume(0.4)
+                        THIS.road_sound.play();
+                    });
+                }
             }
         }
     }

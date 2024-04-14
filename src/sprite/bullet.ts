@@ -135,9 +135,9 @@ export default class Bullet {
             this.delete();
 
             if (intersectsZombie[1]) {
-                this.zombie_collide.get_damage(this.zombie_collide.health);
+                this.zombie_collide.get_damage(object.gun.actual_settings.bulet_damage*3);
             } else {
-                this.zombie_collide.get_damage(1);
+                this.zombie_collide.get_damage(object.gun.actual_settings.bulet_damage);
             }
 
             this.zombie_collide = undefined;
