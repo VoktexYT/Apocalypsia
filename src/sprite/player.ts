@@ -17,7 +17,9 @@ export default class Player {
     health = 100;
     max_health = 100;
     size = [1, 2.4, 1];
-    position = [-7, 10, 21];
+    position = [19.930721091735315, 1, 21.867035238570725];
+
+
     health_movement_intensity = 10;
 
     camera_move_y = 0;
@@ -387,5 +389,7 @@ export default class Player {
         this.all_bullets.forEach((bullet) => {bullet.update()});
 
         this.previous_health = this.health;
+
+        console.log(this.mesh.position)
     }
 }

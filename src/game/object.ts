@@ -17,12 +17,18 @@ export const player = new Player();
 // Create Zombies
 export const every_zombie: Array<Zombie> = [];
 
-for (let i=0; i<10; i++) {
+for (let i=0; i<30; i++) {
+    const scale = randInt(13, 15)/1000;
+
     every_zombie.push(   
         new Zombie({
             zombie_type: randInt(1, 2),
-            zombie_position: [randInt(-5, 15), 1, randInt(-5, 15)],
-            zombie_scale: [0.014, 0.014, 0.014]
+            zombie_position: [randInt(-12, 8), 1, randInt(-1, 16)],
+            zombie_scale: [
+                scale, 
+                scale, 
+                scale
+            ]
         })
     );
 };
