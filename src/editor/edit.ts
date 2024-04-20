@@ -1,6 +1,6 @@
-import * as object from '../game/object';
+import * as object from '../game/instances';
 import * as THREE from 'three';
-import * as init from '../game/init-three';
+import * as init from '../three/init-three';
 
 
 export default class Edit {

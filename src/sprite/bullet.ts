@@ -1,8 +1,8 @@
 import * as THREE from 'three'
 import * as CANNON from 'cannon'
-import * as init from '../game/init-three'
-import * as object from '../game/object'
-import Zombie from './zombie'
+import * as init from '../three/init-three'
+import * as object from '../game/instances'
+import Zombie from './zombies/zombie'
 
 
 export default class Bullet {

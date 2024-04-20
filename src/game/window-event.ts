@@ -1,12 +1,10 @@
-import * as THREE from 'three'
-
-import Player from '../sprite/player';
+import * as THREE from 'three';
+import * as instances from '../game/instances';
 
 
 export default class WindowEvent {
     camera: THREE.PerspectiveCamera;
     webGl_renderer: THREE.WebGLRenderer;
-    player: Player;
 
     key_states: { [key: string]: boolean }  = {};
     mouse_state: { [key: string]: boolean } = {};
@@ -18,10 +16,9 @@ export default class WindowEvent {
     cursor_sensibility: number = 5;
 
 
-    constructor(camera: THREE.PerspectiveCamera, webGl_renderer: THREE.WebGLRenderer, player: Player) {
+    constructor(camera: THREE.PerspectiveCamera, webGl_renderer: THREE.WebGLRenderer) {
         this.camera = camera;
         this.webGl_renderer = webGl_renderer;
-        this.player = player;
 
         window.addEventListener('resize',    this.window_resize_event);
         window.addEventListener('keydown',   this.window_keydown_event   .bind( this ));
@@ -48,7 +45,7 @@ export default class WindowEvent {
     }
 
     window_keydown_event(this: WindowEvent, key_pressed: KeyboardEvent) {
-        this.key_states[key_pressed.code] = true;
+        this.key_states[key_pressed.code] = true; 
     }
 
     window_keyup_event(this: WindowEvent, key_raised: KeyboardEvent) {
@@ -57,7 +54,7 @@ export default class WindowEvent {
 
     window_mousemove_event(this: WindowEvent, mouse: MouseEvent) {
         this.current_cursor_position = [mouse.clientX, mouse.clientY];
-        this.player.moveHead();
+        instances.player.moveHead();
         this.previous_cursor_position = this.current_cursor_position;
     }
 

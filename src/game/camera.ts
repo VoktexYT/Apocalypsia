@@ -1,5 +1,5 @@
-import * as object from './object';
-import * as init from './init-three';
+import * as object from '../game/instances';
+import * as init from '../three/init-three';
 
 
 export function change_camera_event() {

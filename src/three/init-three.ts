@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import * as CANNON from 'cannon';
-import * as object from './object'
+import * as instances from '../game/instances'
 import HtmlPage from '../html-page/html-page';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
@@ -27,20 +27,24 @@ export function change_game_running_to(is_running: boolean) {
 }
 
 
+// Ambiant light
+// const ambiantLight = new THREE.AmbientLight(0xFFFFFF);
+// scene.add(ambiantLight)
+
 // FOG Ambiance
 const near = 1;
 const far = 40;
-scene.fog = new THREE.Fog(0x333333, near, far);
+scene.fog = new THREE.Fog(0xddca7d, near, far);
 
 // Camera
 export const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(-6.9182842130092705, 1.1729619062491528, 16.613011115597622);
 
-export let activeCamera = object.player.camera
+export let activeCamera = instances.player.camera
 
 export function switch_active_camera() {
     if (activeCamera === camera) {
-        activeCamera = object.player.camera;
+        activeCamera = instances.player.camera;
     } else {
         activeCamera = camera;
     }
@@ -64,6 +68,21 @@ controls.target.set(0, 1, 0);
 export const cannon_world = new CANNON.World();
 cannon_world.gravity.set(0, -9.82, 0)
 
-// Add cube
+// load ressources
+instances.loading.loadResource([
+    instances.diner.load_3d_object,
+    instances.diner.load_three_object,
+    instances.diner.load_collide,
+    instances.diner.load_position,
 
+    instances.zombieLoader.load_3d_object,
+    instances.zombieLoader.load_zombie_material,
+    instances.zombieLoader.load_audio,
+
+    instances.gunLoader.load_pistol_three_mesh,
+    instances.gunLoader.load_riffle_three_mesh,
+    instances.gunLoader.load_pistol_material,
+    instances.gunLoader.load_riffle_material,
+    instances.gunLoader.load_audio
+]);
 

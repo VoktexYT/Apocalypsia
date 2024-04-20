@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import * as CANNON from 'cannon';
-import * as init from '../game/init-three'
+import * as init from '../three/init-three'
 import { TextureLoader } from 'three';
 
 

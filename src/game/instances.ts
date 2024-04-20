@@ -1,13 +1,18 @@
-import Zombie from '../sprite/zombie'
-import Player from '../sprite/player'
-import Gun from '../sprite/gun';
+import Zombie from '../sprite/zombies/zombie'
+import Player from './player'
+import Gun from '../sprite/gun/gun';
 import Floor from '../sprite/floor';
-import Basement from '../sprite/basement';
+import Diner from '../sprite/diner';
 import WindowEvent from './window-event';
-import * as init from './init-three'
+
+import * as init from '../three/init-three'
 
 import { randInt } from 'three/src/math/MathUtils';
 
+import { ZombieLoader } from '../sprite/zombies/zombie_loader';
+import { GunLoader } from '../sprite/gun/gun_loader';
+
+import Loading from './loading';
 
 
 
@@ -15,9 +20,11 @@ import { randInt } from 'three/src/math/MathUtils';
 export const player = new Player();
 
 // Create Zombies
+export const zombieLoader = new ZombieLoader();
+
 export const every_zombie: Array<Zombie> = [];
 
-for (let i=0; i<30; i++) {
+for (let i=0; i<1; i++) {
     const scale = randInt(13, 15)/1000;
 
     every_zombie.push(   
@@ -34,19 +41,13 @@ for (let i=0; i<30; i++) {
 };
 
 
-// Create Gun
+export const gunLoader = new GunLoader();
 export const gun = new Gun();
 
+export const window_event = new WindowEvent( init.activeCamera, init.renderer );
 
-// Create Event
-export const window_event = new WindowEvent(
-    init.activeCamera,
-    init.renderer,
-    player
-);
-
-// Create Floor
 export const floor = new Floor();
+export const diner = new Diner();
 
-// Create Basement
-export const basement = new Basement();
+export const loading = new Loading();
+

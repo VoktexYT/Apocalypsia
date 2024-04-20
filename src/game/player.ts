@@ -1,11 +1,11 @@
 import * as THREE from 'three'
 import * as CANNON from 'cannon'
 
-import * as init from '../game/init-three'
-import * as object from '../game/object'
+import * as init from '../three/init-three'
+import * as object from './instances'
 import HtmlPage from '../html-page/html-page'
-import Bullet from './bullet'
-import randomChoice from '../random.choice'
+import Bullet from '../sprite/bullet'
+import randomChoice from '../module/random.choice'
 
 import AudioLoader from '../loader/audio';
 

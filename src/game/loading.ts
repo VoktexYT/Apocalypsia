@@ -1,29 +1,25 @@
-import * as object from './object'
-import HtmlPage from '../html-page/html-page';
+export default class Loading {
+    isFinishLoad: boolean = false;
+    index: number = 0;
 
-const loadPage = new HtmlPage("load-page")
+    async loadResource(ressource: Array<() => Promise<string>>) {
+        if (this.isFinishLoad) return;
 
-const is_finish_loading = () => {
-    let all_load = [
-        object.player.is_finish_load,
-        object.gun.is_finish_load,
-        object.floor.is_finish_load,
-        object.basement.is_finish_load
-    ]
+        console.log("--- [START LOADING] ---");
 
-    for (const zombie of object.every_zombie) {
-        all_load.push(zombie.is_finish_load)
-    }
-    
-    return all_load.every(val => val === true)
-};
+        for (const load of ressource) {
+            await load().then((msg) => {
+                console.log(msg)
+                this.index++;
 
-export default function load_page_event() {
-    loadPage.searchHTML()
+                if (this.index === ressource.length) {
+                    console.log("--- [FINISH LOADING] ---");
+                }
+            }).catch((error) => {
+                console.error(`${error}`);
+            });
+        }
 
-    if (is_finish_loading()) {
-        loadPage.disable()
-    } else {
-        loadPage.enable()
+        this.isFinishLoad = true;
     }
 }
