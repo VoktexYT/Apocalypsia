@@ -8,8 +8,6 @@ import * as object from '../../game/instances'
 import randomChoice from '../../module/random.choice'
 import clone from '../../module/skeleton.clone'
 
-import { zombieLoaderProperties } from './zombie_loader'
-
 
 // Loader
 import MaterialTextureLoader from '../../loader/material'
@@ -57,6 +55,9 @@ export default class Zombie {
     properties: properties;
     material_change = true;
 
+    zombie_loader = object.zombieLoader
+    zombie_loader_properties = this.zombie_loader.properties
+
     COLLIDE_BOX: THREE.Mesh;
     size = new THREE.Vector3();
 
@@ -89,7 +90,7 @@ export default class Zombie {
         if (this.health <= 0) {
             this.is_death = true;
 
-            zombieLoaderProperties.death_sound?.play()
+            this.zombie_loader_properties.death_sound?.play()
 
             init.cannon_world.remove(this.body);
             init.scene.remove(this.COLLIDE_BOX);
@@ -102,17 +103,17 @@ export default class Zombie {
     }
 
     setup_mesh() {
-        const copy_original = zombieLoaderProperties.mesh;
+        const copy_original = this.zombie_loader_properties.mesh;
         if (!copy_original) return;
 
         this.mesh = clone(copy_original);
         
         if (this.properties.zombie_type === 1) {
-            const material = zombieLoaderProperties.material_zombie1_low;
+            const material = this.zombie_loader_properties.material_zombie1_low;
             if (material)
                 this.change_material(material);
         } else {
-            const material = zombieLoaderProperties.material_zombie2_low;
+            const material = this.zombie_loader_properties.material_zombie2_low;
             if (material)
                 this.change_material(material);
         }
@@ -157,12 +158,10 @@ export default class Zombie {
                 
         this.is_finish_load = true;
 
-        const road_sound = zombieLoaderProperties.road_sound;
+        const road_sound = this.zombie_loader_properties.road_sound;
 
         if (road_sound)
             this.mesh.add(road_sound);
-
-        console.info("[load]:", "Zombie is loaded");
     }
 
     change_material(new_material_loader: MaterialTextureLoader) {
@@ -178,7 +177,7 @@ export default class Zombie {
 
     play_animation(animationName: string, speed: number, is_loop?: boolean) {
         this.animationSpeed = speed;
-        const objectLoader = zombieLoaderProperties.objectLoader;
+        const objectLoader = this.zombie_loader_properties.objectLoader;
 
         if (objectLoader && Object.keys(objectLoader.animations).includes(animationName) && this.mesh !== null) {
             const mixer = new THREE.AnimationMixer(this.mesh);
@@ -219,7 +218,7 @@ export default class Zombie {
     }
     
     update() {
-        const objectLoader = zombieLoaderProperties.objectLoader;
+        const objectLoader = this.zombie_loader_properties.objectLoader;
 
         if (objectLoader && !objectLoader.finishLoad) return;
 
@@ -324,12 +323,12 @@ export default class Zombie {
         if (player_dist > this.obtimisation_range && !this.material_change) {
             this.material_change = true;
             if (this.properties.zombie_type === 1) {
-                const material = zombieLoaderProperties.material_zombie1_low;
+                const material = this.zombie_loader_properties.material_zombie1_low;
 
                 if (material)
                     this.change_material(material);
             } else {
-                const material = zombieLoaderProperties.material_zombie2_low;
+                const material = this.zombie_loader_properties.material_zombie2_low;
 
                 if (material)
                     this.change_material(material);
@@ -339,11 +338,11 @@ export default class Zombie {
         if (player_dist <= this.obtimisation_range && this.material_change) {
             this.material_change = false;
             if (this.properties.zombie_type === 1) {
-                const material = zombieLoaderProperties.material_zombie1_high;
+                const material = this.zombie_loader_properties.material_zombie1_high;
                 if (material)
                     this.change_material(material);
             } else {
-                const material = zombieLoaderProperties.material_zombie2_high;
+                const material = this.zombie_loader_properties.material_zombie2_high;
 
                 if (material)
                     this.change_material(material);
@@ -357,14 +356,14 @@ export default class Zombie {
             this.road_interval = Date.now();
             this.next_road_interval = randInt(1000, 10000)
 
-            const road_sound = zombieLoaderProperties.road_sound;
+            const road_sound = this.zombie_loader_properties.road_sound;
 
 
             if (road_sound && !road_sound.isPlaying) {
                 road_type = randomChoice(["", "2"]);
 
                 if (road_type) {
-                    zombieLoaderProperties.audioLoaderThree.load(`./assets/sound/zombieRoad${road_type}.mp3`, function(buffer) {
+                    this.zombie_loader_properties.audioLoaderThree.load(`./assets/sound/zombieRoad${road_type}.mp3`, function(buffer: any) {
                         road_sound.setBuffer(buffer);
                         road_sound.setRefDistance(3);
                         road_sound.setVolume(0.4)

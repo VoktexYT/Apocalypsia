@@ -4,7 +4,6 @@ import * as object from '../../game/instances';
 import * as init from '../../three/init-three';
 
 import MaterialTextureLoader from '../../loader/material';
-import { gunLoaderProperties } from './gun_loader';
 import ObjectLoader from '../../loader/object';
 
 
@@ -45,6 +44,9 @@ export default class Gun {
     movement: number = 0;
     mesh: THREE.Object3D | null = null;
 
+    gun_loader = object.gunLoader;
+    gun_loader_properties = this.gun_loader.properties;
+
     PISTOL: gun_settings = {
         id: "pistol",
         scale: [0.05, 0.05, 0.05],
@@ -57,9 +59,9 @@ export default class Gun {
         bulet_damage: 1,
         fire_interval: 600,
         reload_interval: 500,
-        loader: gunLoaderProperties.pistol_loader,
-        mesh: gunLoaderProperties.pistol_mesh,
-        material: gunLoaderProperties.material_pistol
+        loader: this.gun_loader_properties.pistol_loader,
+        mesh: this.gun_loader_properties.pistol_mesh,
+        material: this.gun_loader_properties.material_pistol
     };
 
     RIFLE: gun_settings = {
@@ -74,9 +76,9 @@ export default class Gun {
         bulet_damage: 0.5,
         reload_interval: 1000,
         fire_interval: 150,
-        loader: gunLoaderProperties.riffle_loader,
-        mesh: gunLoaderProperties.riffle_mesh,
-        material: gunLoaderProperties.material_riffle
+        loader: this.gun_loader_properties.riffle_loader,
+        mesh: this.gun_loader_properties.riffle_mesh,
+        material: this.gun_loader_properties.material_riffle
     };
     
     actual_settings: gun_settings = this.is_pistol_weapon ? this.PISTOL : this.RIFLE;
@@ -140,7 +142,7 @@ export default class Gun {
             this.is_finish_load = false;
             init.scene.remove(this.mesh);
 
-            const switch_weapons_sound = gunLoaderProperties.switch_weapons_sound;
+            const switch_weapons_sound = this.gun_loader_properties.switch_weapons_sound;
             if (switch_weapons_sound && !switch_weapons_sound?.isPlaying)
                 switch_weapons_sound?.play();
         }
@@ -148,6 +150,7 @@ export default class Gun {
 
     private setup_mesh() {
         this.mesh = this.is_pistol_weapon ? this.PISTOL.mesh: this.RIFLE.mesh;
+        
         if (!this.mesh) return;
 
         this.update_actual_settings();
@@ -187,10 +190,16 @@ export default class Gun {
                 object.player.flash_light.intensity = 1;
             }, 100);
 
-            if (this.is_pistol_weapon)
-                gunLoaderProperties.audioLoader.loadSound("./assets/sound/fire3.mp3", false, 0.8);
-            else
-                gunLoaderProperties.audioLoader.loadSound("./assets/sound/fire2.mp3", false, 0.8);
+            
+            const audio_loader = this.gun_loader_properties.audioLoader
+
+            if (audio_loader) {
+                if (this.is_pistol_weapon)
+                    audio_loader.loadSound("./assets/sound/fire3.mp3", false, 0.8);
+                else
+                    audio_loader.loadSound("./assets/sound/fire2.mp3", false, 0.8);
+            }
+  
         } else {
             this.fire_backward = true;
 
@@ -198,8 +207,8 @@ export default class Gun {
                 this.fire_backward = false;
             }, 100);
 
-            if (!gunLoaderProperties.empty_weapons_sound?.isPlaying) {
-                gunLoaderProperties.empty_weapons_sound?.play();
+            if (!this.gun_loader_properties.empty_weapons_sound?.isPlaying) {
+                this.gun_loader_properties.empty_weapons_sound?.play();
             }
         }
     }
@@ -209,9 +218,9 @@ export default class Gun {
             this.actual_settings.bullet_charge_now = this.actual_settings.bullet_charge_max
         }, 1100);
 
-        if (!gunLoaderProperties.reload_weapons_sound?.isPlaying) {
-            gunLoaderProperties.reload_weapons_sound?.setPlaybackRate(0.8);
-            gunLoaderProperties.reload_weapons_sound?.play();
+        if (!this.gun_loader_properties.reload_weapons_sound?.isPlaying) {
+            this.gun_loader_properties.reload_weapons_sound?.setPlaybackRate(0.8);
+            this.gun_loader_properties.reload_weapons_sound?.play();
         }
     }
 }

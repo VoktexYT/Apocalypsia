@@ -2,7 +2,7 @@ import Zombie from '../sprite/zombies/zombie'
 import Player from './player'
 import Gun from '../sprite/gun/gun';
 import Floor from '../sprite/floor';
-import Diner from '../sprite/diner';
+import Diner from '../sprite/diner/diner';
 import WindowEvent from './window-event';
 
 import * as init from '../three/init-three'
@@ -20,7 +20,7 @@ import Loading from './loading';
 export const player = new Player();
 
 // Create Zombies
-export const zombieLoader = new ZombieLoader();
+export const zombieLoader = new ZombieLoader(player);
 
 export const every_zombie: Array<Zombie> = [];
 
@@ -41,7 +41,7 @@ for (let i=0; i<1; i++) {
 };
 
 
-export const gunLoader = new GunLoader();
+export const gunLoader = new GunLoader(player);
 export const gun = new Gun();
 
 export const window_event = new WindowEvent( init.activeCamera, init.renderer );

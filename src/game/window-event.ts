@@ -39,9 +39,15 @@ export default class WindowEvent {
     }
 
     window_resize_event() {
-        this.camera.aspect = window.innerWidth / window.innerHeight;
-        this.camera.updateProjectionMatrix();
-        this.webGl_renderer.setSize(window.innerWidth, window.innerHeight);
+        try {
+            this.camera.aspect = window.innerWidth / window.innerHeight;
+
+            this.camera.updateProjectionMatrix();
+
+            this.webGl_renderer.setSize(window.innerWidth, window.innerHeight);
+        } catch (e) {
+            // console.error(e)
+        }
     }
 
     window_keydown_event(this: WindowEvent, key_pressed: KeyboardEvent) {

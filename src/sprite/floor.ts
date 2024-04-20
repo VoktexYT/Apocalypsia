@@ -50,8 +50,6 @@ export default class Floor {
                 init.cannon_world.addBody(this.body_collide);
 
                 this.is_finish_load = true;
-
-                console.info("[load]:", "Floor is loaded");
             }
         );
     }

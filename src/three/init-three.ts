@@ -5,6 +5,7 @@ import HtmlPage from '../html-page/html-page';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 
+
 // Scene
 export const scene = new THREE.Scene();
 
@@ -34,7 +35,7 @@ export function change_game_running_to(is_running: boolean) {
 // FOG Ambiance
 const near = 1;
 const far = 40;
-scene.fog = new THREE.Fog(0xddca7d, near, far);
+scene.fog = new THREE.Fog(0x5c5124, near, far);
 
 // Camera
 export const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -79,10 +80,12 @@ instances.loading.loadResource([
     instances.zombieLoader.load_zombie_material,
     instances.zombieLoader.load_audio,
 
-    instances.gunLoader.load_pistol_three_mesh,
-    instances.gunLoader.load_riffle_three_mesh,
+    instances.gunLoader.load_pistol_fbx,
+    instances.gunLoader.load_riffle_fbx,
     instances.gunLoader.load_pistol_material,
     instances.gunLoader.load_riffle_material,
     instances.gunLoader.load_audio
-]);
+]).then(() => {
+    instances.player.load();
+});
 

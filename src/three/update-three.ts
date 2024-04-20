@@ -6,9 +6,6 @@ import * as camera_func from '../game/camera'
 import Edit from '../editor/edit';
 
 
-
-instances.player.load()
-
 const edit = new Edit();
 
 function animate() {

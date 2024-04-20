@@ -3,6 +3,7 @@ import * as CANNON from 'cannon'
 
 import * as init from '../three/init-three'
 import * as object from './instances'
+
 import HtmlPage from '../html-page/html-page'
 import Bullet from '../sprite/bullet'
 import randomChoice from '../module/random.choice'
@@ -74,26 +75,23 @@ export default class Player {
         });
 
         // MUSIC
-
         this.audioLoader.loadSound("./assets/sound/backgroundMusic2.mp3", false, 0.2, (loaded, sound) => {
             if (loaded && sound) {
-                this.every_music.push(sound)
+                this.every_music.push(sound);
             }
         });
 
         this.audioLoader.loadSound("./assets/sound/backgroundMusic3.mp3", false, 0.2, (loaded, sound) => {
             if (loaded && sound) {
-                this.every_music.push(sound)
+                this.every_music.push(sound);
             }
         });
 
         this.audioLoader.loadSound("./assets/sound/backgroundMusic4.mp3", false, 0.2, (loaded, sound) => {
             if (loaded && sound) {
-                this.every_music.push(sound)
+                this.every_music.push(sound);
             }
         });
-
-    
     }
 
 
@@ -389,7 +387,5 @@ export default class Player {
         this.all_bullets.forEach((bullet) => {bullet.update()});
 
         this.previous_health = this.health;
-
-        console.log(this.mesh.position)
     }
 }

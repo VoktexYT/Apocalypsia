@@ -11,12 +11,18 @@
     
     <script src="./bundle.js"></script>
     
-    <div id="load-page" style="display: none;">
-        <h2>Loading...</h2>
-    </div>
+    <div id="load-page">
+        <video autoplay loop controls disabled width="100%" height="100%">
+            <source src="./assets/web/loading.mp4" type="video/mp4">
+        </video>
 
-    <div id="home-page" style="display: block;">
-        <p style="color: white; font-size: 20px; font-family: 'Courier New', Courier, monospace; position: absolute; left: 50px; top: 200px;">PRESS ENTER ...</p>
+        <div id="progress-bar">
+            <div id="front-bar"></div>
+            <div id="back-bar"></div>
+        </div>
+        
+
+        <p id="credit" style="position: absolute; bottom: 0px; user-select: none;">This game was created by Voktex. All the code and art assets are on my github. https://github.com/VoktexYT/WebSurviveZombieFps</p>
     </div>
 
     <div id="cursor-page" style="display: none;">

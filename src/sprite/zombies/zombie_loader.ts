@@ -3,12 +3,12 @@ import ObjectLoader from "../../loader/object";
 import MaterialTextureLoader from "../../loader/material";
 
 import * as THREE from 'three';
-import * as instances from '../../game/instances';
+import Player from "../../game/player";
 
 
 
 interface zombies_loader_properties {
-    audioLoader: AudioLoader
+    audioLoader: AudioLoader | null
     audioLoaderThree: THREE.AudioLoader
     death_sound: THREE.PositionalAudio | null
     road_sound: THREE.PositionalAudio | null
@@ -22,12 +22,13 @@ interface zombies_loader_properties {
     material_zombie2_high: MaterialTextureLoader | null
 }
 
-export const zombieLoaderProperties: zombies_loader_properties = {
-    audioLoader: new AudioLoader(instances.player.camera),
+
+const properties: zombies_loader_properties = {
+    audioLoader: null,
     audioLoaderThree: new THREE.AudioLoader(),
 
-    death_sound:  null,
-    road_sound:  null,
+    death_sound: null,
+    road_sound: null,
     fbxObject: null,
     objectLoader: null,
     mesh: null,
@@ -38,27 +39,19 @@ export const zombieLoaderProperties: zombies_loader_properties = {
 }
 
 
-
 export class ZombieLoader {
-    async load_audio(): Promise<string> {
-        console.log("[LOAD] zombie audio");
+    properties: zombies_loader_properties
 
-        const THIS = zombieLoaderProperties;
-        
-        return new Promise<string>((resolve) => {
-            THIS.road_sound = new THREE.PositionalAudio(THIS.audioLoader.listener);
-            THIS.death_sound = new THREE.PositionalAudio(THIS.audioLoader.listener);
-            resolve("[LOADED] zombie audio");
-        });
+    constructor(public player: Player) {
+        this.properties = properties;
+        this.properties.audioLoader = new AudioLoader(player.camera)
     }
 
     async load_3d_object(): Promise<string> {
         console.log("[LOAD] zombie .fbx object");
 
-        const THIS = zombieLoaderProperties;
-
         return new Promise<string>((resolve) => {
-            THIS.objectLoader = new ObjectLoader(
+            properties.objectLoader = new ObjectLoader(
                 "assets/entity/zombie/models/Base mesh fbx.fbx", 
                 [
                     {path: "./assets/entity/zombie/animation/zombie@atack1.fbx", name: "attack1"},
@@ -75,24 +68,38 @@ export class ZombieLoader {
                 ]
             );
             
-            THIS.fbxObject = THIS.objectLoader.load();
+            properties.fbxObject = properties.objectLoader.load();
 
-            THIS.fbxObject.then((obj) => {
-                THIS.mesh = obj;
+            properties.fbxObject.then((obj) => {
+                properties.mesh = obj;
                 resolve("[LOADED] zombie .fbx object");
             });
         });
     }
 
+    async load_audio(): Promise<string> {
+        console.log("[LOAD] zombie audio");
+        
+        return new Promise<string>((resolve) => {
+            const audio_loader = properties.audioLoader;
+
+            if (!audio_loader) return;
+
+            properties.road_sound = new THREE.PositionalAudio(audio_loader.listener);
+            properties.death_sound = new THREE.PositionalAudio(audio_loader.listener);
+            resolve("[LOADED] zombie audio");
+        });
+    }
+
+
+
     async load_zombie_material(): Promise<string> {
         console.log("[LOAD] zombie material texture");
-
-        const THIS = zombieLoaderProperties;
 
         return new Promise<string>((resolve) => {
             const root_path = "./assets/entity/zombie/textures/"
 
-            THIS.material_zombie1_low = new MaterialTextureLoader({
+            properties.material_zombie1_low = new MaterialTextureLoader({
                 map:             root_path + `1/LOW/1_Albedo.png`,
                 emissiveMap:     root_path + `1/LOW/1_Emission.png`,
                 roughnessMap:    root_path + `1/LOW/1_gloss.png`,
@@ -102,7 +109,7 @@ export class ZombieLoader {
                 aoMap:           root_path + `1/LOW/1_Occlusion.png`
             });
 
-            THIS.material_zombie1_high = new MaterialTextureLoader({
+            properties.material_zombie1_high = new MaterialTextureLoader({
                 map:             root_path + `1/HIGH/1_Albedo.png`,
                 emissiveMap:     root_path + `1/HIGH/1_Emission.png`,
                 roughnessMap:    root_path + `1/HIGH/1_gloss.png`,
@@ -112,7 +119,7 @@ export class ZombieLoader {
                 aoMap:           root_path + `1/HIGH/1_Occlusion.png`
             });
 
-            THIS.material_zombie2_low = new MaterialTextureLoader({
+            properties.material_zombie2_low = new MaterialTextureLoader({
                 map:             root_path + `2/LOW/2_Albedo.png`,
                 emissiveMap:     root_path + `2/LOW/2_Emission.png`,
                 roughnessMap:    root_path + `2/LOW/2_gloss.png`,
@@ -122,7 +129,7 @@ export class ZombieLoader {
                 aoMap:           root_path + `2/LOW/2_Occlusion.png`
             });
 
-            THIS.material_zombie2_high = new MaterialTextureLoader({
+            properties.material_zombie2_high = new MaterialTextureLoader({
                 map:             root_path + `2/HIGH/2_Albedo.png`,
                 emissiveMap:     root_path + `2/HIGH/2_Emission.png`,
                 roughnessMap:    root_path + `2/HIGH/2_gloss.png`,

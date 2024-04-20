@@ -40,3 +40,29 @@ body {
     opacity: 0;
     background-color: rgb(43, 0, 0);
 }
+
+#progress-bar {
+    position: absolute;
+    width: 80%;
+    left: 10%;
+    right: 10%;
+    top: 10px;
+    height: 10px;
+    background-color: black;
+}
+
+#front-bar {
+    position: absolute;
+    height: 10px;
+    background-color: rgb(165, 91, 42);
+    text-align: center;
+    color: aliceblue;
+    font-family: monospace;
+    color: #5c5124;
+}
+
+#back-bar {
+    width: 100%;
+    height: 10px;
+    background-color: brown;
+}
