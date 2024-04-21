@@ -5,7 +5,6 @@ import * as init from '../../three/init-three'
 
 import * as object from '../../game/instances'
 
-import randomChoice from '../../module/random.choice'
 import clone from '../../module/skeleton.clone'
 
 
@@ -25,7 +24,6 @@ interface properties {
 
 
 export default class Zombie {
-    mesh: THREE.Object3D | null = null;
     mixer: THREE.AnimationMixer | null = null;
 
     last_action: THREE.AnimationAction | null = null;
@@ -58,7 +56,7 @@ export default class Zombie {
     zombie_loader = object.zombieLoader
     zombie_loader_properties = this.zombie_loader.properties
 
-    COLLIDE_BOX: THREE.Mesh;
+    // COLLIDE_BOX: THREE.Mesh;
     size = new THREE.Vector3();
 
     audioLoader = new AudioLoader(object.player.camera);
@@ -67,12 +65,10 @@ export default class Zombie {
 
     next_road_interval: number = 0;
 
-
     road_interval: number = Date.now();
 
-    constructor(properties: properties) {
+    constructor(properties: properties, public mesh: THREE.Mesh) {
         this.properties = properties;
-        this.COLLIDE_BOX = new THREE.Mesh();
 
         if (this.properties.zombie_type === 2) {
             this.velocity = randInt(200, 400);
@@ -89,12 +85,8 @@ export default class Zombie {
 
         if (this.health <= 0) {
             this.is_death = true;
-
             this.zombie_loader_properties.death_sound?.play()
-
             init.cannon_world.remove(this.body);
-            init.scene.remove(this.COLLIDE_BOX);
-
             this.is_death_time = Date.now();
         } else {
             this.animation_name = "gethit";
@@ -103,11 +95,6 @@ export default class Zombie {
     }
 
     setup_mesh() {
-        const copy_original = this.zombie_loader_properties.mesh;
-        if (!copy_original) return;
-
-        this.mesh = clone(copy_original);
-        
         if (this.properties.zombie_type === 1) {
             const material = this.zombie_loader_properties.material_zombie1_low;
             if (material)
@@ -126,6 +113,9 @@ export default class Zombie {
         
         const scale = this.properties.zombie_scale;
         this.mesh.scale.set(scale[0], scale[1], scale[2]);
+
+        // frustumCulled
+        this.mesh.frustumCulled = true;
 
         const boundingBox = new THREE.Box3().setFromObject(this.mesh);
         boundingBox.getSize(this.size);
@@ -148,20 +138,14 @@ export default class Zombie {
                 
         init.cannon_world.addBody(this.body);
         init.scene.add(this.mesh);
-
-        // DEBUG
-        const BOX = new THREE.BoxGeometry(this.size.x, this.size.y, this.size.z);
-        const MATERIAL = new THREE.MeshBasicMaterial({ color: 0x00FF00, transparent: true, opacity: 0 });
-        this.COLLIDE_BOX = new THREE.Mesh(BOX, MATERIAL);
-        this.COLLIDE_BOX.position.copy(this.body.position);
-        init.scene.add(this.COLLIDE_BOX);
                 
-        this.is_finish_load = true;
-
+        
         const road_sound = this.zombie_loader_properties.road_sound;
-
+        
         if (road_sound)
             this.mesh.add(road_sound);
+
+        this.is_finish_load = true;
     }
 
     change_material(new_material_loader: MaterialTextureLoader) {
@@ -216,30 +200,79 @@ export default class Zombie {
 
         object.player.set_health_point(damage);
     }
+
+    update_textures(player_dist: number) {
+        if (player_dist > this.obtimisation_range && !this.material_change) {
+            this.material_change = true;
+            if (this.properties.zombie_type === 1) {
+                const material = this.zombie_loader_properties.material_zombie1_low;
+
+                if (material)
+                    this.change_material(material);
+            } else {
+                const material = this.zombie_loader_properties.material_zombie2_low;
+
+                if (material)
+                    this.change_material(material);
+            }
+        }
+        
+        // if (player_dist <= this.obtimisation_range && this.material_change) {
+        //     this.material_change = false;
+        //     if (this.properties.zombie_type === 1) {
+        //         const material = this.zombie_loader_properties.material_zombie1_high;
+        //         if (material)
+        //             this.change_material(material);
+        //     } else {
+        //         const material = this.zombie_loader_properties.material_zombie2_high;
+
+        //         if (material)
+        //             this.change_material(material);
+        //     }
+        // }
+    }
+
+    update_sound() {
+        if (Date.now() - this.road_interval > this.next_road_interval && !this.is_death) {
+            this.road_interval = Date.now();
+            this.next_road_interval = randInt(1000, 10000);
+            const road_sound = this.zombie_loader_properties.road_sound;
+
+            if (road_sound && !road_sound.isPlaying) {
+                road_sound.play()
+            }
+        }
+    }
+
+    update_rotation(diffX: number, diffZ: number, mesh: THREE.Object3D) {
+        if (!this.is_death) {
+            const angle = Math.atan2(diffX, diffZ);
+            const angleInRange = (angle + Math.PI) % (2 * Math.PI) - Math.PI;
+            this.body.quaternion.setFromAxisAngle(
+                new CANNON.Vec3(0, 1, 0),
+                angleInRange
+            );
+            mesh.quaternion.copy(this.body.quaternion);
+        }
+    }
     
     update() {
         const objectLoader = this.zombie_loader_properties.objectLoader;
+        const player_body = object.player.cannon_body;
+        const mesh = this.mesh;
 
         if (objectLoader && !objectLoader.finishLoad) return;
 
         if (!this.is_finish_load) {
-            this.setup_mesh();
-            this.is_finish_load = true;
+            return
         }
 
-        const player_body = object.player.cannon_body;
-        const mesh = this.mesh;
-
         if (!player_body || !mesh) return;
-        
-        this.COLLIDE_BOX.position.copy(this.body.position)
-        this.COLLIDE_BOX.quaternion.copy(this.body.quaternion)
 
         const playerX = player_body.position.x;
         const playerZ = player_body.position.z;
         const zombieX = this.body.position.x;
         const zombieZ = this.body.position.z;
-
     
         const diffX = playerX - zombieX;
         const diffZ = playerZ - zombieZ;
@@ -255,21 +288,12 @@ export default class Zombie {
             this.body.position.z
         );
 
-        if (!this.is_death) {
-            const angle = Math.atan2(diffX, diffZ);
-            const angleInRange = (angle + Math.PI) % (2 * Math.PI) - Math.PI;
-            this.body.quaternion.setFromAxisAngle(
-                new CANNON.Vec3(0, 1, 0),
-                angleInRange
-            );
-
-            mesh.quaternion.copy(this.body.quaternion);
-        }
+        this.update_rotation(diffX, diffZ, mesh)
         
-        const player_dist = Math.sqrt(Math.pow(diffX, 2)+Math.pow(diffZ, 2));
+        const player_dist = Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffZ, 2));
         const zombie_distance_attack = this.properties.zombie_type === 1 ? 2: 4;
 
-
+        /*
         if (player_dist < zombie_distance_attack  && !this.is_death) {
             if (!this.animation_name.includes("attack")) {
                 this.is_attack = true;
@@ -311,66 +335,17 @@ export default class Zombie {
             }
         }
 
+        */
+
         if (this.is_death && Date.now() - this.is_death_time > 3000) {
             const mesh = this.mesh;
             if (!mesh) return;
             init.scene.remove(mesh);
         }
 
-        this.update_animation()
-
-        // Texture obtimisation
-        if (player_dist > this.obtimisation_range && !this.material_change) {
-            this.material_change = true;
-            if (this.properties.zombie_type === 1) {
-                const material = this.zombie_loader_properties.material_zombie1_low;
-
-                if (material)
-                    this.change_material(material);
-            } else {
-                const material = this.zombie_loader_properties.material_zombie2_low;
-
-                if (material)
-                    this.change_material(material);
-            }
-        }
+        this.update_animation();
+        // this.update_textures(player_dist);
+        // this.update_sound()
         
-        if (player_dist <= this.obtimisation_range && this.material_change) {
-            this.material_change = false;
-            if (this.properties.zombie_type === 1) {
-                const material = this.zombie_loader_properties.material_zombie1_high;
-                if (material)
-                    this.change_material(material);
-            } else {
-                const material = this.zombie_loader_properties.material_zombie2_high;
-
-                if (material)
-                    this.change_material(material);
-            }
-        }
-
-        let road_type: string | undefined;
-
-        if (Date.now() - this.road_interval > this.next_road_interval && !this.is_death) {
-            const THIS = this;
-            this.road_interval = Date.now();
-            this.next_road_interval = randInt(1000, 10000)
-
-            const road_sound = this.zombie_loader_properties.road_sound;
-
-
-            if (road_sound && !road_sound.isPlaying) {
-                road_type = randomChoice(["", "2"]);
-
-                if (road_type) {
-                    this.zombie_loader_properties.audioLoaderThree.load(`./assets/sound/zombieRoad${road_type}.mp3`, function(buffer: any) {
-                        road_sound.setBuffer(buffer);
-                        road_sound.setRefDistance(3);
-                        road_sound.setVolume(0.4)
-                        road_sound.play();
-                    });
-                }
-            }
-        }
     }
 }

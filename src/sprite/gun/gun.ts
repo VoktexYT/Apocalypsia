@@ -44,6 +44,9 @@ export default class Gun {
     movement: number = 0;
     mesh: THREE.Object3D | null | undefined = null;
 
+    riffle_mesh: THREE.Object3D | null = null;
+    pistol_mesh: THREE.Object3D | null = null;
+
     gun_loader = object.gunLoader;
     gun_loader_properties = this.gun_loader.properties;
 
@@ -72,37 +75,39 @@ export default class Gun {
         bullet_charge_now: 10,
         bulet_damage: 0.5,
         reload_interval: 1000,
-        fire_interval: 150
+        fire_interval: 180
     };
 
     actual_settings: gun_settings = this.is_pistol_weapon ? this.PISTOL : this.RIFLE;
     
 
-    load() {
-        this.PISTOL.loader = this.gun_loader_properties.pistol_loader;
-        this.PISTOL.material = this.gun_loader_properties.material_pistol;
-        this.PISTOL.mesh = this.gun_loader_properties.pistol_mesh;
+    async load(): Promise<void> {
+        return new Promise<void>(async (resolve) => {
+            this.PISTOL.loader = this.gun_loader_properties.pistol_loader;
+            this.PISTOL.material = this.gun_loader_properties.material_pistol;
+            this.PISTOL.mesh = this.gun_loader_properties.pistol_mesh;
 
-        this.RIFLE.loader = this.gun_loader_properties.riffle_loader;
-        this.RIFLE.material = this.gun_loader_properties.material_riffle;
-        this.RIFLE.mesh = this.gun_loader_properties.riffle_mesh;
-        
-        this.actual_settings = this.is_pistol_weapon ? this.PISTOL : this.RIFLE;
+            this.RIFLE.loader = this.gun_loader_properties.riffle_loader;
+            this.RIFLE.material = this.gun_loader_properties.material_riffle;
+            this.RIFLE.mesh = this.gun_loader_properties.riffle_mesh;
+            
+            this.actual_settings = this.is_pistol_weapon ? this.PISTOL : this.RIFLE;
+
+            await this.setup_gun_mesh().then(() => {
+                this.is_finish_load = true;
+                resolve();
+            });
+        });
     }
 
     private update_actual_settings() {
         this.actual_settings = this.is_pistol_weapon ? this.PISTOL : this.RIFLE;
     }
 
-
-    update() {
-        console.log(this.gun_loader_properties)
-        const actual_settings_loader = this.actual_settings.loader;
-        
-        if (actual_settings_loader && !actual_settings_loader.finishLoad) return;
-        if (!this.is_finish_load) this.setup_mesh();
+    private update_position() {
         if (!this.mesh) return;
-        
+        this.update_actual_settings();
+
         this.mesh.position.copy(object.player.camera.position);
         this.mesh.quaternion.copy(object.player.camera.quaternion);
 
@@ -126,59 +131,104 @@ export default class Gun {
             if (this.is_pistol_weapon) {
                 this.mesh.translateY(this.backward_intensity);
             } else {
-                this.mesh.translateZ(this.backward_intensity);
+                this.mesh.translateZ(-this.backward_intensity);
             }
         }
 
         this.movement += 0.1;
     }
 
-    private change_material(new_material_loader: MaterialTextureLoader) {
-        const mesh = this.mesh;
-        if (!mesh) return;
 
-        mesh.traverse((child) => {
-            if (!(child instanceof THREE.Mesh)) return;
-            child.material = new_material_loader.material;
-            child.material.transparent = false;
-        })
+    update() {
+        if (!this.is_finish_load) return;
+        this.update_position();
     }
 
-    switch_gun() {        
-        if (this.mesh) {
-            this.is_pistol_weapon = !this.is_pistol_weapon;
-            this.is_finish_load = false;
-            init.scene.remove(this.mesh);
+    switch_gun() {
+        this.is_pistol_weapon = !this.is_pistol_weapon;
+        this.is_finish_load = false;
 
-            const switch_weapons_sound = this.gun_loader_properties.switch_weapons_sound;
-            if (switch_weapons_sound && !switch_weapons_sound?.isPlaying)
-                switch_weapons_sound?.play();
+        const switch_weapons_sound = this.gun_loader_properties.switch_weapons_sound;
+
+        if (switch_weapons_sound && !switch_weapons_sound?.isPlaying)
+            switch_weapons_sound?.play();
+
+        if (this.pistol_mesh && this.riffle_mesh) {
+            if (this.is_pistol_weapon) {
+                this.pistol_mesh.visible = true
+                this.riffle_mesh.visible = false
+            } else {
+                this.pistol_mesh.visible = false
+                this.riffle_mesh.visible = true
+            }
         }
+
+        this.mesh = this.is_pistol_weapon ? this.pistol_mesh: this.riffle_mesh;
+        this.is_finish_load = true;
     }
 
-    private setup_mesh() {
-        this.mesh = this.is_pistol_weapon ? this.PISTOL.mesh: this.RIFLE.mesh;
+    private async setup_gun_mesh(): Promise<void> {
+        return new Promise<void>((resolve) => {
+            const pistol_mesh = this.PISTOL.mesh;
+            const riffle_mesh = this.RIFLE.mesh;
+
+            if (!pistol_mesh || !riffle_mesh) return;
+
+            this.update_actual_settings()
+
+            pistol_mesh.scale.set(
+                this.PISTOL.scale[0],
+                this.PISTOL.scale[1],
+                this.PISTOL.scale[2],
+            )
+
+            riffle_mesh.scale.set(
+                this.RIFLE.scale[0],
+                this.RIFLE.scale[1],
+                this.RIFLE.scale[2],
+            )
+
+            pistol_mesh.position.set(
+                0, -10, 0
+            )
+
+            riffle_mesh.position.set(
+                0, -10, 0
+            )
+
+            const pistol_material = this.PISTOL.material;
+            const riffle_material = this.RIFLE.material;
+
+            pistol_mesh.traverse((child) => {
+                if (!(child instanceof THREE.Mesh)) return;
+                if (pistol_material) {
+                    child.material = pistol_material.material;
+                    child.material.transparent = false;
+                }
+            });
         
-        if (!this.mesh) return;
+            riffle_mesh.traverse((child) => {
+                if (!(child instanceof THREE.Mesh)) return;
+                if (riffle_material) {
+                    child.material = riffle_material.material;
+                    child.material.transparent = false;
+                }
+            });
 
-        console.log("SETUP GUN MESH")
+            this.riffle_mesh = riffle_mesh;
+            this.pistol_mesh = pistol_mesh;
 
-        this.update_actual_settings();
-        
-        this.mesh.scale.set(
-            this.actual_settings.scale[0],
-            this.actual_settings.scale[1],
-            this.actual_settings.scale[2],
-        );
-        
-        const material = this.actual_settings.material;
-        if (material)
-            this.change_material(material);
+            init.scene.add(pistol_mesh, riffle_mesh);
+            
 
-        init.scene.add(this.mesh);
-        this.is_finish_load = true;
+            if (this.is_pistol_weapon) {
+                this.mesh = pistol_mesh;
+            } else {
+                this.mesh = riffle_mesh;
+            }
 
-        console.info("[load]:", "gun is loaded");
+            resolve();
+        })
     }
 
     fire_event() {

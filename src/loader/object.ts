@@ -25,13 +25,13 @@ export default class ObjectLoader {
         return new Promise<THREE.Object3D>((resolve, reject) => {
             const fbxLoader = new FBXLoader();
 
-            fbxLoader.load(this.baseFBXFile, (object) => {
+            fbxLoader.load(this.baseFBXFile, ( fbx ) => {
                 if (!this.animationFBXFile || this.animationFBXFile.length === 0) {
                     this.finishLoad = true;
-                    resolve(object);
+                    resolve(fbx);
                 } else {
                     this.loadAnimations().then(() => {
-                        resolve(object);
+                        resolve(fbx);
                     });
                 }
             }, undefined, (error) => {

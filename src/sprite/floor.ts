@@ -54,14 +54,18 @@ export default class Floor {
         );
     }
 
-    update() {
-        if (this.mesh !== null && this.body_collide !== null && this.is_finish_load) {
-            this.body_collide.quaternion.setFromAxisAngle(
-                new CANNON.Vec3(1, 0, 0),
-                this.floor_rad_angle
-            );
+    load(): Promise<void> {
+        return new Promise<void>((resolve) => {
+            if (this.mesh !== null && this.body_collide !== null && this.is_finish_load) {
+                this.body_collide.quaternion.setFromAxisAngle(
+                    new CANNON.Vec3(1, 0, 0),
+                    this.floor_rad_angle
+                );
+    
+                this.mesh.position.copy(this.body_collide.position);
+                resolve()
+            }
+        })
 
-            this.mesh.position.copy(this.body_collide.position);
-        }
     }
 }

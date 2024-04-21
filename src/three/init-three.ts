@@ -5,7 +5,6 @@ import HtmlPage from '../html-page/html-page';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 
-
 // Scene
 export const scene = new THREE.Scene();
 
@@ -22,7 +21,7 @@ export let idx_page = 0;
 export const next_page = () => {idx_page++};
 
 // Game running
-export let game_running = true;
+export let game_running = false;
 export function change_game_running_to(is_running: boolean) {
     game_running = is_running
 }
@@ -70,23 +69,83 @@ export const cannon_world = new CANNON.World();
 cannon_world.gravity.set(0, -9.82, 0)
 
 // load ressources
-instances.loading.loadResource([
-    instances.diner.load_3d_object,
-    instances.diner.load_three_object,
-    instances.diner.load_collide,
-    instances.diner.load_position,
 
-    instances.zombieLoader.load_3d_object,
-    instances.zombieLoader.load_zombie_material,
-    instances.zombieLoader.load_audio,
+export const number_of_zombies: number = 3;
+export let every_zombie_mesh: THREE.InstancedMesh | null = null;
 
-    instances.gunLoader.load_pistol_fbx,
-    instances.gunLoader.load_riffle_fbx,
-    instances.gunLoader.load_pistol_material,
-    instances.gunLoader.load_riffle_material,
-    instances.gunLoader.load_audio
-]).then(() => {
-    instances.player.load();
-    instances.gun.load();
-});
+setTimeout(() => {
+    instances.loading.loadResource([
+        // instances.diner.load_3d_object,
+        // instances.diner.load_three_object,
+        // instances.diner.load_collide,
+        // instances.diner.load_position,
+    
+        instances.zombieLoader.load_3d_object,
+        instances.zombieLoader.load_zombie_material,
+        instances.zombieLoader.load_audio,
+    
+        instances.gunLoader.load_pistol_fbx,
+        instances.gunLoader.load_riffle_fbx,
+        instances.gunLoader.load_pistol_material,
+        instances.gunLoader.load_riffle_material,
+        instances.gunLoader.load_audio,
+    ]).then(async (htmlPage: HTMLElement) => {
+        await instances.gun.load().then(() => {
+            instances.player.load().then(() => {
+                instances.floor.load().then(() => {
+
+                    for (let zombie of instances.every_zombie) {
+                        zombie.setup_mesh();
+                    }
+
+                    const mesh = instances.zombieLoader.properties.fbx;
+                    const material = instances.zombieLoader.properties.material_zombie1_low?.material
+
+                    if (mesh) {
+                        let geometry: THREE.BufferGeometry | null = null;
+
+                        mesh.traverse((child) => {
+                            if (child instanceof THREE.Mesh) {
+                                geometry = child.geometry;
+                                return;
+                            }
+                        });
+
+                        if (geometry && material) {
+                            console.log("zombie instance mesh")
+                            console.log(geometry, material, number_of_zombies)
+
+                            every_zombie_mesh = new THREE.InstancedMesh(
+                                geometry,
+                                material,
+                                number_of_zombies
+                            );
+
+                            every_zombie_mesh.instanceMatrix.needsUpdate = true;
+
+                            scene.add(every_zombie_mesh);
+
+                        } else {
+                            console.error("No geometry found in the mesh");
+                        }
+                    } else {
+                        console.error("No mesh found in the instance");
+                    }
+           
+                    htmlPage.classList.toggle("fadeout");
+
+                    setTimeout(() => {
+                        htmlPage.innerHTML = "";
+                        game_running = true;
+
+                        const canvasPage = document.querySelector("canvas");
+                        if (canvasPage)
+                            canvasPage.classList.toggle("fadein")
+                    }, 5000);
+                });
+            });
+        });
+    });
+}, 2000)
+
 

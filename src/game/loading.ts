@@ -15,8 +15,8 @@ export default class Loading {
             this.front_loading_bar = document.getElementById("front-bar");
     }
 
-    async loadResource(ressource: Array<() => Promise<string>>): Promise<void> {
-        return new Promise<void>(async resolve => {
+    async loadResource(ressource: Array<() => Promise<string>>): Promise<HTMLElement> {
+        return new Promise<HTMLElement>(async resolve => {
             if (this.isFinishLoad) return;
 
             console.log("--- [START LOADING] ---");
@@ -44,9 +44,8 @@ export default class Loading {
                         this.isFinishLoad = true;
 
                         if (loadPage) {
-                            loadPage.innerHTML = ""
+                            resolve(loadPage)
                         }
-                        resolve()
                     }
                 }).catch((error) => {
                     console.error(`${error}`);

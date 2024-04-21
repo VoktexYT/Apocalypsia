@@ -60,6 +60,20 @@ export default class Player {
     near_death_sound:     THREE.Audio | null = null;
     walk_sound:   THREE.Audio | null = null;
 
+
+    load(): Promise<void> {
+        return new Promise<void>((resolve)=> {
+            this.set_three_box();
+            this.set_cannon_collide_box();
+            this.set_audio();
+            this.set_flash_light();
+
+            this.is_finish_load = true;
+            resolve()
+        });
+    }
+        
+
     set_audio() {
         // SOUND
         this.audioLoader.loadSound("./assets/sound/nearDeath.mp3", false, 0.2, (loaded, sound) => {
@@ -92,19 +106,6 @@ export default class Player {
                 this.every_music.push(sound);
             }
         });
-    }
-
-
-    // load player body
-    load() {
-        this.set_three_box();
-        this.set_cannon_collide_box();
-        this.set_audio();
-        this.set_flash_light();
-
-        this.is_finish_load = true
-
-        console.info("[load]:", "Player is loaded")
     }
 
     set_three_box() {
@@ -151,14 +152,14 @@ export default class Player {
     }
 
     update_music() {
-    if (this.every_music.length !== 3) return;
+        if (this.every_music.length !== 3) return;
 
-    const isAnyMusicPlaying = this.every_music.some(m => m.isPlaying);
+        const isAnyMusicPlaying = this.every_music.some(m => m.isPlaying);
 
-    if (!isAnyMusicPlaying) {
-        const randomMusic = this.every_music[Math.floor(Math.random() * this.every_music.length)];
-        randomMusic.play();
-    }
+        if (!isAnyMusicPlaying) {
+            const randomMusic = this.every_music[Math.floor(Math.random() * this.every_music.length)];
+            randomMusic.play();
+        }
     }
 
     update_position() {
@@ -231,8 +232,6 @@ export default class Player {
             this.moveBodyAlongDirection(new THREE.Vector3().crossVectors(this.camera.up, direction).negate());
         if (keyStates["KeyR"])
             object.gun.reload_gun_event();
-        if (keyStates["KeyQ"])
-            this.jump();
         if (mouseStates["left"])
             this.shoot();
         if (!this.is_moving)
@@ -285,10 +284,6 @@ export default class Player {
         }
     }
 
-    jump() {
-        this.cannon_body?.velocity.set(0, this.jump_velocity, 0);
-    }
-
     updateFlashLightPosition() {
         const distance = 1;
         const direction = new THREE.Vector3();
@@ -319,12 +314,6 @@ export default class Player {
         this.finalQuaternion.multiplyQuaternions(this.quaternionY, this.quaternionX);
     
         this.camera.quaternion.copy(this.finalQuaternion);
-    }
-
-    respawn_after_death() {
-        if (!this.cannon_body) return;
-        if (this.cannon_body.position.y < -5)
-            this.cannon_body.position.set(0, 10, 0)
     }
 
     set_health_point(hp: number) {
@@ -369,6 +358,8 @@ export default class Player {
 
 
     update() {
+        if (!this.is_finish_load) return;
+
         this.updateFlashLightPosition();
         this.update_position();
 
@@ -381,7 +372,6 @@ export default class Player {
             this.event();
         }
 
-        this.respawn_after_death();
         this.isStartCamera();
         
         this.all_bullets.forEach((bullet) => {bullet.update()});

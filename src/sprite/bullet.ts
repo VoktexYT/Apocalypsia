@@ -23,17 +23,11 @@ export default class Bullet {
     fireTime:  number  = Date.now()
 
     dirrection: THREE.Vector3
-    mesh: THREE.Mesh
     boxBody: CANNON.Body
     zombie_collide: Zombie | undefined
 
     constructor(position: Array<number>, direction: THREE.Vector3) {
         this.dirrection = direction
-
-        // Three.js box
-        const box = new THREE.BoxGeometry( this.size, this.size, this.size );
-        const material = new THREE.MeshBasicMaterial({ color: this.color, opacity: this.opacity, transparent: true });
-        this.mesh = new THREE.Mesh(box, material);
 
         // Cannon.js Collide Box
         const shapeSize: number = this.size / 2;
@@ -61,7 +55,6 @@ export default class Bullet {
         );
 
         // Init bullet
-        init.scene.add(this.mesh)
         init.cannon_world.addBody(this.boxBody);
         
         // Set collide between bullet and zombies
@@ -126,7 +119,6 @@ export default class Bullet {
         this.boxBody.position.y += dir_pos.y / this.slow;
         this.boxBody.position.z += dir_pos.z / this.slow;
 
-        this.mesh.position.copy(this.boxBody.position);
 
         // Check collide with zombies
         const intersectsZombie = this.checkCollisionWithZombie();
@@ -147,7 +139,7 @@ export default class Bullet {
     }
     
     delete() {
-        init.scene.remove(this.mesh);
+        // init.scene.remove(this.mesh);
         init.cannon_world.remove(this.boxBody);
         this.is_delete = true;
     }

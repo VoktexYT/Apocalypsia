@@ -7,6 +7,7 @@ import Player from "../../game/player";
 
 
 
+
 interface zombies_loader_properties {
     audioLoader: AudioLoader | null
     audioLoaderThree: THREE.AudioLoader
@@ -14,7 +15,7 @@ interface zombies_loader_properties {
     road_sound: THREE.PositionalAudio | null
     fbxObject: Promise<THREE.Object3D> | null
     objectLoader: ObjectLoader | null
-    mesh: THREE.Object3D | null
+    fbx: THREE.Object3D | null
 
     material_zombie1_low: MaterialTextureLoader | null
     material_zombie1_high: MaterialTextureLoader | null
@@ -29,9 +30,11 @@ const properties: zombies_loader_properties = {
 
     death_sound: null,
     road_sound: null,
+
+
     fbxObject: null,
     objectLoader: null,
-    mesh: null,
+    fbx: null,
     material_zombie1_low: null,
     material_zombie1_high: null,
     material_zombie2_low: null,
@@ -70,8 +73,8 @@ export class ZombieLoader {
             
             properties.fbxObject = properties.objectLoader.load();
 
-            properties.fbxObject.then((obj) => {
-                properties.mesh = obj;
+            properties.fbxObject.then((fbx) => {
+                properties.fbx = fbx;
                 resolve("[LOADED] zombie .fbx object");
             });
         });
@@ -87,6 +90,15 @@ export class ZombieLoader {
 
             properties.road_sound = new THREE.PositionalAudio(audio_loader.listener);
             properties.death_sound = new THREE.PositionalAudio(audio_loader.listener);
+
+            properties.audioLoaderThree.load(`./assets/sound/zombieRoad.mp3`, function(buffer: any) {
+                if (properties.road_sound) {
+                    properties.road_sound.setBuffer(buffer);
+                    properties.road_sound.setRefDistance(3);
+                    properties.road_sound.setVolume(0.7);
+                }
+            });
+
             resolve("[LOADED] zombie audio");
         });
     }
