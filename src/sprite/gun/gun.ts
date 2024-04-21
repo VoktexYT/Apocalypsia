@@ -23,9 +23,9 @@ interface gun_settings {
     fire_interval: number
     reload_interval: number,
 
-    mesh: THREE.Object3D | null,
-    material: MaterialTextureLoader | null,
-    loader: ObjectLoader | null
+    mesh?: THREE.Object3D | null,
+    material?: MaterialTextureLoader | null,
+    loader?: ObjectLoader | null
 }
 
 
@@ -42,7 +42,7 @@ export default class Gun {
     mass: number = 1;
     backward_intensity: number = 0.1;
     movement: number = 0;
-    mesh: THREE.Object3D | null = null;
+    mesh: THREE.Object3D | null | undefined = null;
 
     gun_loader = object.gunLoader;
     gun_loader_properties = this.gun_loader.properties;
@@ -58,10 +58,7 @@ export default class Gun {
         bullet_charge_now: 4,
         bulet_damage: 1,
         fire_interval: 600,
-        reload_interval: 500,
-        loader: this.gun_loader_properties.pistol_loader,
-        mesh: this.gun_loader_properties.pistol_mesh,
-        material: this.gun_loader_properties.material_pistol
+        reload_interval: 500
     };
 
     RIFLE: gun_settings = {
@@ -75,13 +72,23 @@ export default class Gun {
         bullet_charge_now: 10,
         bulet_damage: 0.5,
         reload_interval: 1000,
-        fire_interval: 150,
-        loader: this.gun_loader_properties.riffle_loader,
-        mesh: this.gun_loader_properties.riffle_mesh,
-        material: this.gun_loader_properties.material_riffle
+        fire_interval: 150
     };
-    
+
     actual_settings: gun_settings = this.is_pistol_weapon ? this.PISTOL : this.RIFLE;
+    
+
+    load() {
+        this.PISTOL.loader = this.gun_loader_properties.pistol_loader;
+        this.PISTOL.material = this.gun_loader_properties.material_pistol;
+        this.PISTOL.mesh = this.gun_loader_properties.pistol_mesh;
+
+        this.RIFLE.loader = this.gun_loader_properties.riffle_loader;
+        this.RIFLE.material = this.gun_loader_properties.material_riffle;
+        this.RIFLE.mesh = this.gun_loader_properties.riffle_mesh;
+        
+        this.actual_settings = this.is_pistol_weapon ? this.PISTOL : this.RIFLE;
+    }
 
     private update_actual_settings() {
         this.actual_settings = this.is_pistol_weapon ? this.PISTOL : this.RIFLE;
@@ -89,6 +96,7 @@ export default class Gun {
 
 
     update() {
+        console.log(this.gun_loader_properties)
         const actual_settings_loader = this.actual_settings.loader;
         
         if (actual_settings_loader && !actual_settings_loader.finishLoad) return;
@@ -152,6 +160,8 @@ export default class Gun {
         this.mesh = this.is_pistol_weapon ? this.PISTOL.mesh: this.RIFLE.mesh;
         
         if (!this.mesh) return;
+
+        console.log("SETUP GUN MESH")
 
         this.update_actual_settings();
         

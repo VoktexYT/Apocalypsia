@@ -3,10 +3,7 @@ import * as instances from '../game/instances'
 
 import * as camera_func from '../game/camera'
 
-import Edit from '../editor/edit';
 
-
-const edit = new Edit();
 
 function animate() {
     requestAnimationFrame(animate);
@@ -25,9 +22,7 @@ function animate() {
         instances.floor.update();
         instances.player.update();
         instances.gun.update();
-        instances.every_zombie.forEach((zombie) => {zombie.update()})
-    } else {
-        edit.update()
+        instances.every_zombie.forEach((zombie) => {zombie.update()});
     }
 
     init.render();

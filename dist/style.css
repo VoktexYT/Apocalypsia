@@ -1,5 +1,6 @@
 body {
     margin: 0;
+    overflow: hidden;
 }
 
 #cursor-page, #load-page, #health-page, #home-page {
@@ -14,7 +15,6 @@ body {
 
 
 #cursor-page {
-    
     justify-content: center; 
     align-items: center;
 }
@@ -52,6 +52,7 @@ body {
 }
 
 #front-bar {
+    transition: 0.5s;
     position: absolute;
     height: 10px;
     background-color: rgb(165, 91, 42);
@@ -65,4 +66,9 @@ body {
     width: 100%;
     height: 10px;
     background-color: brown;
+}
+
+#credit {
+    width: 100%;
+    text-align: center;
 }
