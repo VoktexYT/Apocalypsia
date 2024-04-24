@@ -14,7 +14,7 @@ function animate() {
     
     instances.player.update();
     instances.gun.update();
-    instances.every_zombie.forEach((zombie) => {zombie.update()});
+    instances.zombieInstanceMesh.all_zombies.forEach((zombie) => {zombie.update()});
 
     init.render();
 }

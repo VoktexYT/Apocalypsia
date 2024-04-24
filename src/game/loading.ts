@@ -5,7 +5,7 @@ export default class Loading {
     front_loading_bar: HTMLElement | null = document.getElementById("front-bar");
     load_page: HTMLElement | null = document.getElementById("load-page");
 
-    async updateProgressBar(max_length: number) {
+    updateProgressBar(max_length: number) {
         const front_bar = this.front_loading_bar;
 
         if (front_bar) {
@@ -35,7 +35,7 @@ export default class Loading {
                 await load().then(async (msg) => {
                     console.log(msg);
 
-                    await this.updateProgressBar(ressource.length)
+                    this.updateProgressBar(ressource.length)
 
                     this.index++;
 

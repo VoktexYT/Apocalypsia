@@ -13,7 +13,6 @@ interface zombies_loader_properties {
     audioLoaderThree: THREE.AudioLoader
     death_sound: THREE.PositionalAudio | null
     road_sound: THREE.PositionalAudio | null
-    fbxObject: Promise<THREE.Object3D> | null
     objectLoader: ObjectLoader | null
     fbx: THREE.Object3D | null
 
@@ -30,9 +29,6 @@ const properties: zombies_loader_properties = {
 
     death_sound: null,
     road_sound: null,
-
-
-    fbxObject: null,
     objectLoader: null,
     fbx: null,
     material_zombie1_low: null,
@@ -71,9 +67,9 @@ export class ZombieLoader {
                 ]
             );
             
-            properties.fbxObject = properties.objectLoader.load();
+            const fbx_promise = properties.objectLoader.load();
 
-            properties.fbxObject.then((fbx) => {
+            fbx_promise.then((fbx) => {
                 properties.fbx = fbx;
                 resolve("[LOADED] zombie .fbx object");
             });

@@ -1,9 +1,9 @@
 body {
     margin: 0;
     overflow: hidden;
-    background-color: black;
+    /* background-color: black; */
 }
-
+/*
 #cursor-page, #load-page, #health-page, #home-page {
     display: none;
     position: absolute;
@@ -107,3 +107,4 @@ body {
 canvas {
     opacity: 0;
 }
+*/

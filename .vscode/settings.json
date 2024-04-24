@@ -1,0 +1,9 @@
+{
+    "workbench.editor.editorActionsLocation": "hidden",
+    "workbench.editor.titleScrollbarSizing": "default",
+    "workbench.colorCustomizations": {
+        "activityBar.background": "#0D3428",
+        "titleBar.activeBackground": "#134938",
+        "titleBar.activeForeground": "#F3FCF9"
+    }
+}

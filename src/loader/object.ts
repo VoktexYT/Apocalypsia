@@ -55,6 +55,7 @@ export default class ObjectLoader {
                     this.animations[animsPath.name] = animation.animations[0];
                     if (Object.keys(this.animations).length === animationCount) {
                         this.finishLoad = true;
+                        console.log(this.animations)
                         resolve()
                     };
                 });

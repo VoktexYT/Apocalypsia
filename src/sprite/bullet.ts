@@ -58,10 +58,10 @@ export default class Bullet {
         init.cannon_world.addBody(this.boxBody);
         
         // Set collide between bullet and zombies
-        for (const zombie of object.every_zombie) {
+        for (const zombie of object.zombieInstanceMesh.all_zombies) {
             const contactMaterial = new CANNON.ContactMaterial(
                 this.boxBody.material, 
-                zombie.body.material, 
+                zombie.body.material,
                 {
                     friction: this.material_friction, 
                     restitution: this.material_restitution
@@ -77,7 +77,7 @@ export default class Bullet {
         let collisionDetected: boolean = false;
         let head_shot: boolean = false;
 
-        for (const zombie of object.every_zombie) {
+        for (const zombie of object.zombieInstanceMesh.all_zombies) {
 
             if (zombie.mesh && !zombie.is_death) {
                 const bulletPos  = this.boxBody.position;

@@ -8,12 +8,14 @@ import * as object from '../../game/instances'
 import clone from '../../module/skeleton.clone'
 
 
+
 // Loader
 import MaterialTextureLoader from '../../loader/material'
 import AudioLoader from '../../loader/audio'
 
 
 import { randInt } from 'three/src/math/MathUtils'
+import randomChoice from '../../module/random.choice'
 
 
 interface properties {
@@ -164,9 +166,12 @@ export default class Zombie {
         const objectLoader = this.zombie_loader_properties.objectLoader;
 
         if (objectLoader && Object.keys(objectLoader.animations).includes(animationName) && this.mesh !== null) {
-            const mixer = new THREE.AnimationMixer(this.mesh);
+            const mixer = new THREE.AnimationMixer(
+                this.mesh
+            );
             
             const action = mixer.clipAction(objectLoader.animations[animationName]);
+
             if (this.last_action !== null) {
                 this.last_action.crossFadeTo(action, 0.5, false);
             }
@@ -175,6 +180,8 @@ export default class Zombie {
                 action.clampWhenFinished = true;
                 action.setLoop(THREE.LoopOnce, 0);
             }
+
+            console.log("ACTION PLAY: ", action)
 
             action.play();
             
@@ -217,19 +224,19 @@ export default class Zombie {
             }
         }
         
-        // if (player_dist <= this.obtimisation_range && this.material_change) {
-        //     this.material_change = false;
-        //     if (this.properties.zombie_type === 1) {
-        //         const material = this.zombie_loader_properties.material_zombie1_high;
-        //         if (material)
-        //             this.change_material(material);
-        //     } else {
-        //         const material = this.zombie_loader_properties.material_zombie2_high;
+        if (player_dist <= this.obtimisation_range && this.material_change) {
+            this.material_change = false;
+            if (this.properties.zombie_type === 1) {
+                const material = this.zombie_loader_properties.material_zombie1_high;
+                if (material)
+                    this.change_material(material);
+            } else {
+                const material = this.zombie_loader_properties.material_zombie2_high;
 
-        //         if (material)
-        //             this.change_material(material);
-        //     }
-        // }
+                if (material)
+                    this.change_material(material);
+            }
+        }
     }
 
     update_sound() {
@@ -293,7 +300,6 @@ export default class Zombie {
         const player_dist = Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffZ, 2));
         const zombie_distance_attack = this.properties.zombie_type === 1 ? 2: 4;
 
-        /*
         if (player_dist < zombie_distance_attack  && !this.is_death) {
             if (!this.animation_name.includes("attack")) {
                 this.is_attack = true;
@@ -334,8 +340,6 @@ export default class Zombie {
                 this.is_hurt = false;
             }
         }
-
-        */
 
         if (this.is_death && Date.now() - this.is_death_time > 3000) {
             const mesh = this.mesh;
