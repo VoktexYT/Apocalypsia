@@ -19,7 +19,6 @@ export const order_html_page = [
 
 export let idx_page = 0;
 
-export const next_page = () => {idx_page++};
 
 // Game running
 export let game_running = false;
@@ -64,69 +63,98 @@ controls.target.set(0, 1, 0);
 export const cannon_world = new CANNON.World();
 cannon_world.gravity.set(0, -9.82, 0)
 
-function exitLoadingPage(htmlPage: HTMLElement) {
+/**
+ * This function is used to add fade animation to page
+ * @param htmlPage 
+ */
+function exitLoadingPage(htmlPage: HTMLElement) : void
+{
     htmlPage.classList.toggle("fadeout");
-    setTimeout(() => {
-        htmlPage.innerHTML = "";
-        game_running = true;
 
-        const canvasPage = document.querySelector("canvas");
-        if (canvasPage)
-            canvasPage.classList.toggle("fadein")
-    }, 5000);
+    setTimeout(
+        () => 
+            {
+                htmlPage.innerHTML = "";
+                game_running = true;
+
+                const canvasPage = document.querySelector("canvas");
+                
+                if (canvasPage)
+                {
+                canvasPage.classList.toggle("fadein")
+                }
+            },
+        5000
+    );
 }
 
 // load ressources
-setTimeout(() => {
-    instances.loading.loadResource([
-        // instances.diner.load_3d_object,
-        // instances.diner.load_three_object,
-        // instances.diner.load_collide,
-        // instances.diner.load_position,
-    
-        instances.zombieLoader.load_3d_object,
-        instances.zombieLoader.load_zombie_material,
-        instances.zombieLoader.load_audio,
-    
-        instances.gunLoader.load_pistol_fbx,
-        instances.gunLoader.load_riffle_fbx,
-        instances.gunLoader.load_pistol_material,
-        instances.gunLoader.load_riffle_material,
-        instances.gunLoader.load_audio,
+setTimeout(
+    () => 
+        {
+            instances.loading.load_assets(
+                [
+                    // instances.diner.load_3d_object,
+                    // instances.diner.load_three_object,
+                    // instances.diner.load_collide,
+                    // instances.diner.load_position,
+                
+                    instances.zombieLoader.load_3d_object,
+                    instances.zombieLoader.load_zombie_material,
+                    instances.zombieLoader.load_audio,
+                
+                    instances.gunLoader.load_pistol_fbx,
+                    instances.gunLoader.load_rifle_fbx,
+                    instances.gunLoader.load_pistol_material,
+                    instances.gunLoader.load_rifle_material,
+                    instances.gunLoader.load_audio,
+                ]
+            ).then(
+                async (htmlPage: HTMLElement) => 
+                    {
+                        await instances.gun.load().then(() => 
+                            {
+                                instances.player.load().then(() => 
+                                    {
+                                        instances.floor.setup();
+                                        exitLoadingPage(htmlPage);
 
-    ]).then(async (htmlPage: HTMLElement) => {
-        await instances.gun.load().then(() => {
-            instances.player.load().then(() => {
-                instances.floor.load().then(() => {
-                    exitLoadingPage(htmlPage);
+                                        // get Geometry, Material, number of zombie
+                                        const number_of_zombies = instances.zombieInstanceMesh.number_of_entities;
+                                        const material = instances.zombieLoader.properties.material_zombie1_low?.material;
 
-                    // get Geometry, Material, number of zombie
-                    const number_of_zombies = instances.zombieInstanceMesh.number_of_entities;
-                    const material = instances.zombieLoader.properties.material_zombie1_low?.material;
+                                        const geometries: THREE.BufferGeometry[] = [];
+                                        let geometry: THREE.BufferGeometry | undefined;
 
-                    const geometries: THREE.BufferGeometry[] = [];
-                    let geometry: THREE.BufferGeometry | undefined;
+                                        const zombie_fbx = instances.zombieLoader.properties.fbx;
+                                        if (zombie_fbx) 
+                                        {
+                                            zombie_fbx.traverse(
+                                                (child) => 
+                                                    {
+                                                        if (child instanceof THREE.Mesh && child.geometry instanceof THREE.BufferGeometry) 
+                                                        {
+                                                            geometries.push(child.geometry);
+                                                        }
+                                                    }
+                                            );
+                                        }
 
-                    const zombie_fbx = instances.zombieLoader.properties.fbx;
-                    if (zombie_fbx) {
-                        zombie_fbx.traverse((child) => {
-                            if (child instanceof THREE.Mesh && child.geometry instanceof THREE.BufferGeometry) {
-                                geometries.push(child.geometry);
+                                        if (geometries.length > 0)
+                                        {
+                                            geometry = mergeGeometries(geometries);
+                                        }
+
+                                        instances.zombieInstanceMesh.instanced_mesh = new THREE.InstancedMesh(geometry, material, number_of_zombies);
+                                        instances.zombieInstanceMesh.instanced_mesh.instanceMatrix.needsUpdate = true;
+                                        instances.zombieInstanceMesh.create();
+                                    }
+                                );
                             }
-                        });
+                        );
                     }
-
-                    if (geometries.length > 0) {
-                        geometry = mergeGeometries(geometries);
-                    }
-
-                    instances.zombieInstanceMesh.instanced_mesh = new THREE.InstancedMesh(geometry, material, number_of_zombies);
-                    instances.zombieInstanceMesh.instanced_mesh.instanceMatrix.needsUpdate = true;
-                    instances.zombieInstanceMesh.create();
-                });
-            });
-        });
-    });
-}, 2000)
-
+            );
+        },
+    2000
+);
 

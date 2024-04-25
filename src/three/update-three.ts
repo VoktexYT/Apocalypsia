@@ -2,11 +2,11 @@ import * as init from './init-three'
 import * as instances from '../game/instances'
 
 
-function animate() {
+function animate() 
+{
     requestAnimationFrame(animate);
 
-
-    if (!instances.loading.isFinishLoad) return;
+    if (!instances.loading.end_of_loading) return;
     if (!init.game_running) return;
 
     // GAME LOOP

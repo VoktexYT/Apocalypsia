@@ -4,17 +4,23 @@ import { randInt } from 'three/src/math/MathUtils';
 
 
 
-export class ZombieInstanceMesh {
+export class ZombieInstanceMesh 
+{
     number_of_entities: number = 1
     instanced_mesh: THREE.InstancedMesh | null = null;
-
     all_zombies: Array<Zombie> = [];
 
-    create() {
+    /**
+     * This function is used to create an instances
+     */
+    create() 
+    {
         const instanced_mesh = this.instanced_mesh;
 
-        if (instanced_mesh) {
-            for (let i = 0; i < this.number_of_entities; i++) {
+        if (instanced_mesh) 
+        {
+            for (let i = 0; i < this.number_of_entities; i++) 
+            {
                 const matrix4 = new THREE.Matrix4();
                 instanced_mesh.getMatrixAt(i, matrix4);
 
@@ -27,15 +33,18 @@ export class ZombieInstanceMesh {
                 const type: number = randInt(1, 2);
                 const position: [number, number, number] = [randInt(-12, 8), 1, randInt(-1, 16)];
 
-                const zombie = new Zombie({
-                    zombie_type: type,
-                    zombie_position: position,
-                    zombie_scale: [
-                        scale, 
-                        scale, 
-                        scale
-                    ]
-                }, mesh)
+                const zombie = new Zombie(
+                    {
+                        zombie_type: type,
+                        zombie_position: position,
+                        zombie_scale: [
+                            scale, 
+                            scale, 
+                            scale
+                        ]
+                    },
+                    mesh
+                )
 
                 zombie.setup_mesh();
 

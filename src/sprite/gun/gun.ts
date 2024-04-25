@@ -8,7 +8,8 @@ import ObjectLoader from '../../loader/object';
 
 
 
-interface gun_settings {
+interface gun_settings 
+{
     id: string,
 
     scale: [number, number, number],
@@ -29,7 +30,8 @@ interface gun_settings {
 }
 
 
-export default class Gun {
+export default class Gun
+{
     is_finish_load: boolean = false;
     is_shooting_position: boolean = false;
     is_fire: boolean = false;
@@ -80,57 +82,88 @@ export default class Gun {
 
     actual_settings: gun_settings = this.is_pistol_weapon ? this.PISTOL : this.RIFLE;
     
+    /**
+     * This function is used to set value to PISTOL and RIFLE Object and create mesh.
+     * @returns Promise if mesh is load
+     */
+    async load() : Promise<void> 
+    {
+        return new Promise<void>(
+            async (resolve) => 
+            {
+                this.PISTOL.loader = this.gun_loader_properties.pistol_loader;
+                this.PISTOL.material = this.gun_loader_properties.pistol_material;
+                this.PISTOL.mesh = this.gun_loader_properties.pistol_mesh;
 
-    async load(): Promise<void> {
-        return new Promise<void>(async (resolve) => {
-            this.PISTOL.loader = this.gun_loader_properties.pistol_loader;
-            this.PISTOL.material = this.gun_loader_properties.material_pistol;
-            this.PISTOL.mesh = this.gun_loader_properties.pistol_mesh;
+                this.RIFLE.loader = this.gun_loader_properties.rifle_loader;
+                this.RIFLE.material = this.gun_loader_properties.rifle_material;
+                this.RIFLE.mesh = this.gun_loader_properties.rifle_mesh;
+                
+                this.actual_settings = this.is_pistol_weapon ? this.PISTOL : this.RIFLE;
 
-            this.RIFLE.loader = this.gun_loader_properties.riffle_loader;
-            this.RIFLE.material = this.gun_loader_properties.material_riffle;
-            this.RIFLE.mesh = this.gun_loader_properties.riffle_mesh;
-            
-            this.actual_settings = this.is_pistol_weapon ? this.PISTOL : this.RIFLE;
-
-            await this.setup_gun_mesh().then(() => {
-                this.is_finish_load = true;
-                resolve();
-            });
-        });
+                await this.setup_gun_mesh().then(
+                    () => 
+                    {
+                        this.is_finish_load = true;
+                        resolve();
+                    }
+                );
+            }
+        );
     }
 
-    private update_actual_settings() {
+    /**
+     * This function is used to update actual settings var
+     */
+    private update_actual_settings() : void
+    {
         this.actual_settings = this.is_pistol_weapon ? this.PISTOL : this.RIFLE;
     }
 
-    private update_position() {
+    /**
+     * This function is used to move gun when player body or head is moving
+     */
+    private update_position() : void
+    {
         if (!this.mesh) return;
+
         this.update_actual_settings();
 
         this.mesh.position.copy(object.player.camera.position);
         this.mesh.quaternion.copy(object.player.camera.quaternion);
 
-        if (this.is_shooting_position) {
+        if (this.is_shooting_position)
+        {
+            const translateY = Math.sin(this.movement) / (200 - Number(object.player.is_moving) * 160);
+
             this.mesh.translateX(this.actual_settings.shooting_position_translate[0]);
-            this.mesh.translateY(this.actual_settings.shooting_position_translate[1] + Math.sin(this.movement) / (200 - Number(object.player.is_moving) * 160));
+            this.mesh.translateY(this.actual_settings.shooting_position_translate[1] + translateY);
             this.mesh.translateZ(this.actual_settings.shooting_position_translate[2]);
             this.mesh.rotateX(this.actual_settings.shooting_position_radian[0]);
             this.mesh.rotateY(this.actual_settings.shooting_position_radian[1]);
             this.mesh.rotateZ(this.actual_settings.shooting_position_radian[2]);
-        } else {
+        } 
+        
+        else
+        {
+            const translateY =  Math.sin(this.movement) / (100 - Number(object.player.is_moving) * 80);
             this.mesh.translateX(this.actual_settings.normal_position_translate[0]);
-            this.mesh.translateY(this.actual_settings.normal_position_translate[1] + Math.sin(this.movement) / (100 - Number(object.player.is_moving) * 80));
+            this.mesh.translateY(this.actual_settings.normal_position_translate[1] + translateY);
             this.mesh.translateZ(this.actual_settings.normal_position_translate[2]);
             this.mesh.rotateX(this.actual_settings.normal_position_radian[0]);
             this.mesh.rotateY(this.actual_settings.normal_position_radian[1]);
             this.mesh.rotateZ(this.actual_settings.normal_position_radian[2]);
         }
 
-        if (this.fire_backward) {
-            if (this.is_pistol_weapon) {
+        if (this.fire_backward) 
+        {
+            if (this.is_pistol_weapon) 
+            {
                 this.mesh.translateY(this.backward_intensity);
-            } else {
+            } 
+            
+            else 
+            {
                 this.mesh.translateZ(-this.backward_intensity);
             }
         }
@@ -139,27 +172,42 @@ export default class Gun {
     }
 
 
-    update() {
+    /**
+     * This is the update function of gun class
+     */
+    update() 
+    {
         if (!this.is_finish_load) return;
         this.update_position();
     }
 
-    switch_gun() {
+    /**
+     * This function is used to switch gun : make a sound, set visible gun to true or false
+     */
+    switch_gun() 
+    {
         this.is_pistol_weapon = !this.is_pistol_weapon;
         this.is_finish_load = false;
 
         const switch_weapons_sound = this.gun_loader_properties.switch_weapons_sound;
 
         if (switch_weapons_sound && !switch_weapons_sound?.isPlaying)
+        {
             switch_weapons_sound?.play();
+        }
 
-        if (this.pistol_mesh && this.riffle_mesh) {
-            if (this.is_pistol_weapon) {
-                this.pistol_mesh.visible = true
-                this.riffle_mesh.visible = false
-            } else {
-                this.pistol_mesh.visible = false
-                this.riffle_mesh.visible = true
+        if (this.pistol_mesh && this.riffle_mesh) 
+        {
+            if (this.is_pistol_weapon)
+            {
+                this.pistol_mesh.visible = true;
+                this.riffle_mesh.visible = false;
+            } 
+            
+            else 
+            {
+                this.pistol_mesh.visible = false;
+                this.riffle_mesh.visible = true;
             }
         }
 
@@ -167,118 +215,187 @@ export default class Gun {
         this.is_finish_load = true;
     }
 
-    private async setup_gun_mesh(): Promise<void> {
-        return new Promise<void>((resolve) => {
-            const pistol_mesh = this.PISTOL.mesh;
-            const riffle_mesh = this.RIFLE.mesh;
+    /**
+     * This function is used to create three gun mesh
+     * @returns 
+     */
+    private async setup_gun_mesh() : Promise<void> 
+    {
+        return new Promise<void>(
+            (resolve) => 
+            {
+                const pistol_mesh = this.PISTOL.mesh;
+                const riffle_mesh = this.RIFLE.mesh;
 
-            if (!pistol_mesh || !riffle_mesh) return;
+                if (!pistol_mesh || !riffle_mesh) return;
 
-            this.update_actual_settings()
+                this.update_actual_settings()
 
-            pistol_mesh.scale.set(
-                this.PISTOL.scale[0],
-                this.PISTOL.scale[1],
-                this.PISTOL.scale[2],
-            )
+                pistol_mesh.scale.set(
+                    this.PISTOL.scale[0],
+                    this.PISTOL.scale[1],
+                    this.PISTOL.scale[2],
+                )
 
-            riffle_mesh.scale.set(
-                this.RIFLE.scale[0],
-                this.RIFLE.scale[1],
-                this.RIFLE.scale[2],
-            )
+                riffle_mesh.scale.set(
+                    this.RIFLE.scale[0],
+                    this.RIFLE.scale[1],
+                    this.RIFLE.scale[2],
+                )
 
-            pistol_mesh.position.set(
-                0, -10, 0
-            )
+                pistol_mesh.position.set(
+                    0, -10, 0
+                )
 
-            riffle_mesh.position.set(
-                0, -10, 0
-            )
+                riffle_mesh.position.set(
+                    0, -10, 0
+                )
 
-            const pistol_material = this.PISTOL.material;
-            const riffle_material = this.RIFLE.material;
+                const pistol_material = this.PISTOL.material;
+                const riffle_material = this.RIFLE.material;
 
-            pistol_mesh.traverse((child) => {
-                if (!(child instanceof THREE.Mesh)) return;
-                if (pistol_material) {
-                    child.material = pistol_material.material;
-                    child.material.transparent = false;
-                }
-            });
-        
-            riffle_mesh.traverse((child) => {
-                if (!(child instanceof THREE.Mesh)) return;
-                if (riffle_material) {
-                    child.material = riffle_material.material;
-                    child.material.transparent = false;
-                }
-            });
+                pistol_mesh.traverse(
+                    (child) => 
+                    {
+                        if (!(child instanceof THREE.Mesh)) return;
 
-            this.riffle_mesh = riffle_mesh;
-            this.pistol_mesh = pistol_mesh;
-
-            init.scene.add(pistol_mesh, riffle_mesh);
+                        if (pistol_material) 
+                        {
+                            child.material = pistol_material.material;
+                            child.material.transparent = false;
+                        }
+                    }
+                );
             
+                riffle_mesh.traverse(
+                    (child) => 
+                    {
+                        if (!(child instanceof THREE.Mesh)) return;
 
-            if (this.is_pistol_weapon) {
-                this.mesh = pistol_mesh;
-            } else {
-                this.mesh = riffle_mesh;
+                        if (riffle_material) 
+                        {
+                            child.material = riffle_material.material;
+                            child.material.transparent = false;
+                        }
+                    }
+                );
+
+                this.riffle_mesh = riffle_mesh;
+                this.pistol_mesh = pistol_mesh;
+
+                init.scene.add(pistol_mesh, riffle_mesh);
+                
+
+                if (this.is_pistol_weapon) 
+                {
+                    this.mesh = pistol_mesh;
+                }
+                
+                else
+                {
+                    this.mesh = riffle_mesh;
+                }
+
+                resolve();
             }
-
-            resolve();
-        })
+        )
     }
 
-    fire_event() {
+    /**
+     * This function is used to simulate a fire. Setup fire interval, reload. Make a sound and backward effect.
+     */
+    fire_event() 
+    {
         this.is_gun_used = false;
 
-        if (this.actual_settings.bullet_charge_now > 0) {
+        if (this.actual_settings.bullet_charge_now > 0) 
+        {
             this.actual_settings.bullet_charge_now -= 1;
             this.is_fire = true;
             this.fire_backward = true;
             this.is_gun_used = true;
             object.player.flash_light.intensity = 2;
 
-            setTimeout(() => {
-                this.is_fire = false;
-            }, this.actual_settings.fire_interval);
+            setTimeout(
+                () => 
+                    {
+                        this.is_fire = false;
+                    },
+                this.actual_settings.fire_interval
+            );
 
-            setTimeout(() => {
-                this.fire_backward = false;
-                object.player.flash_light.intensity = 1;
-            }, 100);
+            setTimeout(
+                () => 
+                    {
+                        this.fire_backward = false;
+                        object.player.flash_light.intensity = 1;
+                    }, 
+                100
+            );
 
             
             const audio_loader = this.gun_loader_properties.audioLoader
 
-            if (audio_loader) {
-                if (this.is_pistol_weapon)
-                    audio_loader.loadSound("./assets/sound/fire3.mp3", false, 0.8);
-                else
-                    audio_loader.loadSound("./assets/sound/fire2.mp3", false, 0.8);
+            if (audio_loader) 
+            {
+                if (this.is_pistol_weapon) 
+                {
+                    audio_loader.load(
+                        {
+                            path: "./assets/sound/fire3.mp3",
+                            is_loop: false,
+                            volume: 0.8
+                        }
+                    );
+                }
+                    
+                else 
+                {
+                    audio_loader.load(
+                        {
+                            path: "./assets/sound/fire2.mp3",
+                            is_loop: false,
+                            volume: 0.8
+                        }
+                    );
+                }   
             }
-  
-        } else {
+        } 
+
+        else
+        {
             this.fire_backward = true;
 
-            setTimeout(() => {
-                this.fire_backward = false;
-            }, 100);
+            setTimeout(
+                () => 
+                    {
+                        this.fire_backward = false;
+                    }, 
+                100
+            );
 
-            if (!this.gun_loader_properties.empty_weapons_sound?.isPlaying) {
+            if (!this.gun_loader_properties.empty_weapons_sound?.isPlaying) 
+            {
                 this.gun_loader_properties.empty_weapons_sound?.play();
             }
         }
     }
 
-    reload_gun_event() {
-        setTimeout(() => {
-            this.actual_settings.bullet_charge_now = this.actual_settings.bullet_charge_max
-        }, 1100);
+    /**
+     * This function is used to reload gun
+     */
+    reload_gun_event() 
+    {
+        setTimeout(
+            () => 
+                {
+                    this.actual_settings.bullet_charge_now = this.actual_settings.bullet_charge_max
+                }, 
+            1100
+        );
 
-        if (!this.gun_loader_properties.reload_weapons_sound?.isPlaying) {
+        if (!this.gun_loader_properties.reload_weapons_sound?.isPlaying) 
+        {
             this.gun_loader_properties.reload_weapons_sound?.setPlaybackRate(0.8);
             this.gun_loader_properties.reload_weapons_sound?.play();
         }

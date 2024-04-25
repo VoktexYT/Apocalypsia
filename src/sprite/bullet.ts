@@ -1,11 +1,12 @@
-import * as THREE from 'three'
-import * as CANNON from 'cannon'
-import * as init from '../three/init-three'
-import * as object from '../game/instances'
-import Zombie from './zombies/zombie'
+import * as CANNON from 'cannon';
+import * as THREE from 'three';
+import * as init from '../three/init-three';
+import * as object from '../game/instances';
+import Zombie from './zombies/zombie';
 
 
-export default class Bullet {
+export default class Bullet 
+{
     velocity:   number = 1
     slow:       number = 2
     color:      number = 0xFFFF00
@@ -26,7 +27,8 @@ export default class Bullet {
     boxBody: CANNON.Body
     zombie_collide: Zombie | undefined
 
-    constructor(position: Array<number>, direction: THREE.Vector3) {
+    constructor(position: Array<number>, direction: THREE.Vector3) 
+    {
         this.dirrection = direction
 
         // Cannon.js Collide Box
@@ -38,12 +40,14 @@ export default class Bullet {
         boxMaterial.friction = this.material_friction;
         boxMaterial.restitution = this.material_restitution;
         
-        this.boxBody = new CANNON.Body({ 
-            mass:          this.body_mass,
-            fixedRotation: this.body_fixed_rotation,
-            shape:         boxShape,
-            material:      boxMaterial
-        });
+        this.boxBody = new CANNON.Body(
+            { 
+                mass:          this.body_mass,
+                fixedRotation: this.body_fixed_rotation,
+                shape:         boxShape,
+                material:      boxMaterial
+            }
+        );
 
         this.boxBody.collisionFilterGroup = (1 << 0)
         this.boxBody.collisionFilterMask = ~(1 << 0)
@@ -58,7 +62,8 @@ export default class Bullet {
         init.cannon_world.addBody(this.boxBody);
         
         // Set collide between bullet and zombies
-        for (const zombie of object.zombieInstanceMesh.all_zombies) {
+        for (const zombie of object.zombieInstanceMesh.all_zombies) 
+        {
             const contactMaterial = new CANNON.ContactMaterial(
                 this.boxBody.material, 
                 zombie.body.material,
@@ -73,13 +78,18 @@ export default class Bullet {
         
     }
 
-    checkCollisionWithZombie(): [boolean, boolean] {
+    /**
+     * This function is used to check if bullet hits the zombie
+     */
+    checkCollisionWithZombie(): [boolean, boolean] 
+    {
         let collisionDetected: boolean = false;
         let head_shot: boolean = false;
 
-        for (const zombie of object.zombieInstanceMesh.all_zombies) {
-
-            if (zombie.mesh && !zombie.is_death) {
+        for (const zombie of object.zombieInstanceMesh.all_zombies) 
+        {
+            if (zombie.mesh && !zombie.is_death) 
+            {
                 const bulletPos  = this.boxBody.position;
                 const bulletSize = this.size / 2;
                 const zombiePos  = zombie.body.position;
@@ -91,7 +101,8 @@ export default class Bullet {
                     (bulletPos.z - bulletSize < zombiePos.z + zombieSize.z / 2 && bulletPos.z + bulletSize > zombiePos.z - zombieSize.z / 2)
                 );
 
-                if (is_collide) {
+                if (is_collide) 
+                {
                     this.zombie_collide = zombie;
                     collisionDetected = is_collide;
                     head_shot = bulletPos.y > 0.40;
@@ -104,12 +115,23 @@ export default class Bullet {
         return [collisionDetected, head_shot];
     }
 
-    check_bullet_range() {
+    /**
+     * This function is usd to delete bullet
+     */
+    check_bullet_range() : void
+    {
         if (Date.now() - this.fireTime > this.time_alive)
+        {
             this.delete();
+        }
     }
 
-    update() {
+    /**
+     * This is the update function of bullet class
+     * @returns 
+     */
+    update() : void
+    {
         if (this.is_delete) return;
 
         // Move bullet
@@ -123,12 +145,17 @@ export default class Bullet {
         // Check collide with zombies
         const intersectsZombie = this.checkCollisionWithZombie();
 
-        if (intersectsZombie[0] && !this.is_delete && this.zombie_collide) {
+        if (intersectsZombie[0] && !this.is_delete && this.zombie_collide) 
+        {
             this.delete();
 
-            if (intersectsZombie[1]) {
+            if (intersectsZombie[1]) 
+            {
                 this.zombie_collide.get_damage(object.gun.actual_settings.bulet_damage*3);
-            } else {
+            } 
+            
+            else 
+            {
                 this.zombie_collide.get_damage(object.gun.actual_settings.bulet_damage);
             }
 
@@ -138,7 +165,11 @@ export default class Bullet {
         this.check_bullet_range();
     }
     
-    delete() {
+    /**
+     * This function is used to delete bullet
+     */
+    delete() 
+    {
         // init.scene.remove(this.mesh);
         init.cannon_world.remove(this.boxBody);
         this.is_delete = true;

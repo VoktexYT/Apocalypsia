@@ -2,7 +2,8 @@ import * as THREE from 'three';
 
 
 
-interface diner_properties {
+interface diner_properties
+ {
     is_finish_load: boolean
     collide_walls: Array<any>
     collide_mass: number
@@ -15,7 +16,8 @@ interface diner_properties {
     childToKeep: Array<string>,
 }
 
-export const diner_properties: diner_properties = {
+export const diner_properties: diner_properties = 
+{
     is_finish_load: false,
     collide_walls: [// position, scale, y rotation
         [[-22.5,0,21],[0.5,0.5,4.4],[-0.031415926535897934]],
@@ -37,6 +39,7 @@ export const diner_properties: diner_properties = {
         [[0.39999999999999014,0,-12.700000000000001],[10.05000000000001,0.5,0.7000000000000002],[0]],
         [[-2.100000000000023,0,-19.00000000000003],[14.25000000000007,0.5,0.5],[0]]
     ],
+
     collide_mass: 0,
     collide_fixedRotation: true,
     fbxObjectPath: "./assets/env/diner.fbx",
@@ -99,4 +102,4 @@ export const diner_properties: diner_properties = {
         "Lights_07",
         "Lights_08",
     ]
-}
+};

@@ -1,57 +1,89 @@
-export default class Loading {
-    isFinishLoad: boolean = false;
-    index: number = 0;
+/**
+ * This class is used to manage the load of each assets component.
+ */
+export default class Loading 
+{
+    public end_of_loading: boolean = false;
+    private index: number = 0;
 
-    front_loading_bar: HTMLElement | null = document.getElementById("front-bar");
-    load_page: HTMLElement | null = document.getElementById("load-page");
+    private front_loading_bar: HTMLElement | null = document.getElementById("front-bar");
+    private html_loading_page: HTMLElement | null = document.getElementById("load-page");
 
-    updateProgressBar(max_length: number) {
-        const front_bar = this.front_loading_bar;
+    /**
+     * This function is used to update size of the progress bar.
+     * @param max_length Get max size of the progress bar.
+     */
+    update_progress_bar(max_length: number) : void
+    {
+        const front_bar: HTMLElement | null = this.front_loading_bar;
 
-        if (front_bar) {
-            front_bar.style.width = (this.index * 100 / max_length).toString() + "%";
+        if (front_bar)
+        {
+            const progress_percent: number = (this.index * 100 / max_length);
+            const css_percent: string = progress_percent.toString() + "%";
+            front_bar.style.width = css_percent;
         }
+
         else
+        {
             this.front_loading_bar = document.getElementById("front-bar");
+        }
     }
 
-    async loadResource(ressource: Array<() => Promise<string>>): Promise<HTMLElement> {
-        return new Promise<HTMLElement>(async resolve => {
-            if (this.isFinishLoad) return;
+    /**
+     * The load assets function is used to load game assets
+     * @param load_functions every load function
+     * @returns void if the loading is finished
+     */
+    async load_assets(load_functions: Array<() => Promise<string>>) : Promise<HTMLElement> 
+    {
+        return new Promise<HTMLElement>(
+            async resolve => 
+            {
+                if (this.end_of_loading) return;
 
-            console.log("--- [START LOADING] ---");
+                console.info("--- [START LOADING] ---");
 
-            for (const load of ressource) {
-
-                const loadPage = this.load_page
-
-                if (loadPage && !this.isFinishLoad) {
-                    loadPage.style.display = "block";
-                } else {
-                    this.load_page = document.getElementById("load-page");
-                }
-
-
-                await load().then(async (msg) => {
-                    console.log(msg);
-
-                    this.updateProgressBar(ressource.length)
-
-                    this.index++;
-
-                    if (this.index === ressource.length) {
-                        console.log("--- [FINISH LOADING] ---");
-                        this.isFinishLoad = true;
-
-                        if (loadPage) {
-                            resolve(loadPage)
-                        }
+                for (const func of load_functions) 
+                {
+                    if (this.html_loading_page && !this.end_of_loading)
+                    {
+                        this.html_loading_page.style.display = "block";
+                    } 
+                    
+                    else
+                    {
+                        this.html_loading_page = document.getElementById("load-page");
                     }
-                }).catch((error) => {
-                    console.error(`${error}`);
-                });
+
+
+                    await func().then(
+                        async (msg) => 
+                        {
+                            console.info(msg);
+
+                            this.update_progress_bar(load_functions.length)
+
+                            this.index++;
+
+                            if (this.index === load_functions.length) 
+                            {
+                                console.log("--- [FINISH LOADING] ---");
+                                this.end_of_loading = true;
+
+                                if (this.html_loading_page) 
+                                {
+                                    resolve(this.html_loading_page)
+                                }
+                            }
+                                
+                        }).catch((error) => 
+                        {
+                            console.error(`${error}`);
+                        }
+                    );
+                }
             }
-        })
-        
+        )
     }
 }
