@@ -88,7 +88,7 @@ export default class Bullet
 
         for (const zombie of object.zombieInstanceMesh.all_zombies) 
         {
-            if (zombie.mesh && !zombie.is_death) 
+            if (zombie.object && !zombie.is_death) 
             {
                 const bulletPos  = this.boxBody.position;
                 const bulletSize = this.size / 2;
@@ -170,7 +170,6 @@ export default class Bullet
      */
     delete() 
     {
-        // init.scene.remove(this.mesh);
         init.cannon_world.remove(this.boxBody);
         this.is_delete = true;
     }

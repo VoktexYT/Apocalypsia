@@ -44,6 +44,17 @@ export default class Loading
 
                 console.info("--- [START LOADING] ---");
 
+                if (load_functions.length === 0)
+                {
+                    this.html_loading_page = document.getElementById("load-page");
+                    if (this.html_loading_page) 
+                    {
+                        this.end_of_loading = true;
+                        console.log("--- [END LOADING] ---");
+                        resolve(this.html_loading_page);
+                    }
+                }
+
                 for (const func of load_functions) 
                 {
                     if (this.html_loading_page && !this.end_of_loading)
@@ -73,7 +84,7 @@ export default class Loading
 
                                 if (this.html_loading_page) 
                                 {
-                                    resolve(this.html_loading_page)
+                                    resolve(this.html_loading_page);
                                 }
                             }
                                 

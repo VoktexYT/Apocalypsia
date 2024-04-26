@@ -3,7 +3,6 @@ import * as CANNON from 'cannon';
 import * as instances from '../game/instances'
 import HtmlPage from '../html-page/html-page';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils';
 
 
 // Scene
@@ -21,7 +20,7 @@ export let idx_page = 0;
 
 
 // Game running
-export let game_running = false;
+export let game_running = true;
 export function change_game_running_to(is_running: boolean) {
     game_running = is_running
 }
@@ -117,37 +116,11 @@ setTimeout(
                                 instances.player.load().then(() => 
                                     {
                                         instances.floor.setup();
-                                        exitLoadingPage(htmlPage);
 
-                                        // get Geometry, Material, number of zombie
-                                        const number_of_zombies = instances.zombieInstanceMesh.number_of_entities;
-                                        const material = instances.zombieLoader.properties.material_zombie1_low?.material;
-
-                                        const geometries: THREE.BufferGeometry[] = [];
-                                        let geometry: THREE.BufferGeometry | undefined;
-
-                                        const zombie_fbx = instances.zombieLoader.properties.fbx;
-                                        if (zombie_fbx) 
-                                        {
-                                            zombie_fbx.traverse(
-                                                (child) => 
-                                                    {
-                                                        if (child instanceof THREE.Mesh && child.geometry instanceof THREE.BufferGeometry) 
-                                                        {
-                                                            geometries.push(child.geometry);
-                                                        }
-                                                    }
-                                            );
-                                        }
-
-                                        if (geometries.length > 0)
-                                        {
-                                            geometry = mergeGeometries(geometries);
-                                        }
-
-                                        instances.zombieInstanceMesh.instanced_mesh = new THREE.InstancedMesh(geometry, material, number_of_zombies);
-                                        instances.zombieInstanceMesh.instanced_mesh.instanceMatrix.needsUpdate = true;
+                                        instances.zombieInstanceMesh.load();
                                         instances.zombieInstanceMesh.create();
+
+                                        exitLoadingPage(htmlPage);
                                     }
                                 );
                             }

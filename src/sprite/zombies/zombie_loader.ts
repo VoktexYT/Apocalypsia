@@ -95,7 +95,7 @@ export class ZombieLoader
     async load_audio() : Promise<string>
     {
         console.log("[LOAD] zombie audio");
-        
+
         return new Promise<string>(
             (resolve) => 
                 {

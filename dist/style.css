@@ -1,7 +1,8 @@
 body {
     margin: 0;
     overflow: hidden;
-    background-color: black;
+    /* background-color: #000000; */
+    background-color: white;
 }
 
 #cursor-page, #load-page, #health-page, #home-page {

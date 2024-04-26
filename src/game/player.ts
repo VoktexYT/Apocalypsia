@@ -73,7 +73,7 @@ export default class Player
             {
                 this.set_three_box();
                 this.set_cannon_collide_box();
-                this.set_audio();
+                // this.set_audio();
                 this.set_flash_light();
 
                 this.end_of_load = true;
@@ -450,7 +450,6 @@ export default class Player
      */
     shoot_event() : void
     {
-        console.log("SHOOT !")
         if (object.gun.is_fire || !this.cannon_body || !object.gun.mesh) return;
 
         object.gun.fire_event();
@@ -599,11 +598,7 @@ export default class Player
     {
         if (!this.end_of_load) return;
 
-        if (this.camera_is_enabled) 
-        {
-            this.cursor_page_event();
-        }
-
+        this.cursor_page_event();
         this.update_flash_light_position();
         this.update_position();
 

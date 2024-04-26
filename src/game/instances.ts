@@ -19,7 +19,6 @@ const player = new Player();
 const zombieLoader = new ZombieLoader(player);
 const zombieInstanceMesh = new ZombieInstanceMesh()
 
-
 const gunLoader = new GunLoader( player );
 const gun = new Gun();
 

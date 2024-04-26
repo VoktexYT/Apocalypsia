@@ -91,23 +91,42 @@ export default class Gun
         return new Promise<void>(
             async (resolve) => 
             {
-                this.PISTOL.loader = this.gun_loader_properties.pistol_loader;
-                this.PISTOL.material = this.gun_loader_properties.pistol_material;
-                this.PISTOL.mesh = this.gun_loader_properties.pistol_mesh;
+                const is_loaded = (
+                    this.gun_loader_properties.pistol_loader &&
+                    this.gun_loader_properties.pistol_material &&
+                    this.gun_loader_properties.pistol_mesh &&
+                    this.gun_loader_properties.rifle_loader &&
+                    this.gun_loader_properties.rifle_material &&
+                    this.gun_loader_properties.rifle_mesh
+                )
 
-                this.RIFLE.loader = this.gun_loader_properties.rifle_loader;
-                this.RIFLE.material = this.gun_loader_properties.rifle_material;
-                this.RIFLE.mesh = this.gun_loader_properties.rifle_mesh;
+                if (is_loaded) 
+                {
+                    this.PISTOL.loader = this.gun_loader_properties.pistol_loader;
+                    this.PISTOL.material = this.gun_loader_properties.pistol_material;
+                    this.PISTOL.mesh = this.gun_loader_properties.pistol_mesh;
+    
+                    this.RIFLE.loader = this.gun_loader_properties.rifle_loader;
+                    this.RIFLE.material = this.gun_loader_properties.rifle_material;
+                    this.RIFLE.mesh = this.gun_loader_properties.rifle_mesh;
+                    
+                    this.actual_settings = this.is_pistol_weapon ? this.PISTOL : this.RIFLE;
+    
+                    await this.setup_gun_mesh().then(
+                        () => 
+                        {
+                            this.is_finish_load = true;
+                            resolve();
+                        }
+                    );
+                } 
                 
-                this.actual_settings = this.is_pistol_weapon ? this.PISTOL : this.RIFLE;
+                else 
+                {
+                    resolve()   
+                }
 
-                await this.setup_gun_mesh().then(
-                    () => 
-                    {
-                        this.is_finish_load = true;
-                        resolve();
-                    }
-                );
+               
             }
         );
     }
@@ -226,7 +245,7 @@ export default class Gun
             {
                 const pistol_mesh = this.PISTOL.mesh;
                 const riffle_mesh = this.RIFLE.mesh;
-
+                
                 if (!pistol_mesh || !riffle_mesh) return;
 
                 this.update_actual_settings()
@@ -295,6 +314,7 @@ export default class Gun
                 {
                     this.mesh = riffle_mesh;
                 }
+
 
                 resolve();
             }
