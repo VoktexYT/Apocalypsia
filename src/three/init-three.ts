@@ -3,7 +3,10 @@ import * as CANNON from 'cannon';
 import * as instances from '../game/instances'
 import HtmlPage from '../html-page/html-page';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { setup_game_page } from '../html-page/init-html';
 
+// set loading, health, cursor, page
+setup_game_page();
 
 // Scene
 export const scene = new THREE.Scene();
@@ -25,10 +28,14 @@ export function change_game_running_to(is_running: boolean) {
     game_running = is_running
 }
 
+// Ambiant light
+export const ambiantLight = new THREE.AmbientLight(0xFFFFFF);
+scene.add(ambiantLight)
+
 // FOG Ambiance
 const near = 1;
 const far = 40;
-scene.fog = new THREE.Fog(0x333322, near, far);
+// scene.fog = new THREE.Fog(0x333322, near, far);
 
 // Camera
 export const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);

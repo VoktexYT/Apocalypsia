@@ -72,19 +72,19 @@ class Script {
 
     update() 
     {
-        // if (!this.is_loaded || !this.mesh) return
+        if (!this.is_loaded || !this.mesh) return;
 
-        // for (let i=0; i<this.number_of_zombies; i++) {
-        //     this.mesh.getMatrixAt(i, this.zombie.matrix);
-        //     this.mesh.matrix.decompose(this.zombie.position, this.zombie.quaternion, this.zombie.scale);
-
-        //     this.zombie.rotation.y += randInt(0, 10) * Math.PI / 1000;
-        //     this.zombie.updateMatrix();
-
-        //     this.mesh.setMatrixAt(i, this.zombie.matrix);
-        // }
-
-        // this.mesh.instanceMatrix.needsUpdate = true;
+        for (let i = 0; i < this.number_of_zombies; i++) {
+            this.mesh.getMatrixAt(i, this.zombie.matrix);
+            this.zombie.matrix.decompose(this.zombie.position, this.zombie.quaternion, this.zombie.scale);
+            
+            this.zombie.position.z += 0.01
+            
+            this.zombie.updateMatrix();
+            this.mesh.setMatrixAt(i, this.zombie.matrix);
+        }
+    
+        this.mesh.instanceMatrix.needsUpdate = true;
     }
 }
 

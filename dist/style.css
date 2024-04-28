@@ -1,8 +1,11 @@
+title {
+    color: red;
+}
+
 body {
     margin: 0;
     overflow: hidden;
-    /* background-color: #000000; */
-    background-color: white;
+    background-color: #000000;
 }
 
 #cursor-page, #load-page, #health-page, #home-page {

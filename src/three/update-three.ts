@@ -16,8 +16,11 @@ function animate()
     instances.player.update();
     instances.gun.update();
 
-    // instances.zombieInstanceMesh.all_zombies.forEach((zombie) => {zombie.update()});
+    instances.zombieInstanceMesh.all_zombies.forEach((zombie) => {zombie.update()});
+    instances.zombieInstanceMesh.update();
     init.render();
+
+    init.camera.updateProjectionMatrix()
 }
 
 animate();

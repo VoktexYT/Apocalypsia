@@ -617,5 +617,6 @@ export default class Player
         );
 
         this.previous_health = this.health;
+
     }
 }

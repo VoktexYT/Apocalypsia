@@ -71,7 +71,8 @@ export default class Zombie
     zombie_loader = instances.zombieLoader
     zombie_loader_properties = this.zombie_loader.properties
 
-    // COLLIDE_BOX: THREE.Mesh;
+    COLLIDE_BOX: THREE.Mesh | null = null;
+
     size = new THREE.Vector3();
 
     audioLoader = new AudioLoader(instances.player.camera);
@@ -81,9 +82,12 @@ export default class Zombie
     next_road_interval: number = 0;
     road_interval: number = Date.now();
 
-    object: THREE.Object3D = new THREE.Object3D();
+    initialPosition = new THREE.Vector3().copy(this.object.position);
 
-    constructor(properties: properties, public instances_mesh: THREE.InstancedMesh, public mesh_index: number) 
+    first = true;
+
+
+    constructor(properties: properties, public instances_mesh: THREE.InstancedMesh, public mesh_index: number, public object: THREE.Object3D) 
     {
         this.properties = properties;
 
@@ -91,6 +95,87 @@ export default class Zombie
         {
             this.velocity = randInt(200, 400);
         }
+    }
+
+    /**
+     * This function is used to setup zombie mesh
+     */
+    setup_mesh() : void
+    {
+        // MATERIAL
+        if (this.properties.zombie_type === 1) 
+        {
+            const material = this.zombie_loader_properties.material_zombie1_low;
+
+            if (material)
+            {
+                this.change_material(material);
+            }
+        } 
+        
+        else {
+            const material = this.zombie_loader_properties.material_zombie2_low;
+
+            if (material)
+            {
+                this.change_material(material);
+            }
+        }
+
+        this.body.material = this.material;
+        
+        // SCALE
+        const scale = this.properties.zombie_scale;
+        this.object.scale.set(
+            scale[0], 
+            scale[1], 
+            scale[2]
+        );
+
+        // POSITION
+        this.body.position.set(
+            this.properties.zombie_position[0],
+            this.properties.zombie_position[1],
+            this.properties.zombie_position[2],
+        );
+
+        this.object.position.copy(this.body.position);
+
+        // SIZE
+        const scaledGeometry = this.instances_mesh.geometry.clone();
+        scaledGeometry.scale(this.object.scale.x, this.object.scale.y, this.object.scale.z);
+        const boundingBox = new THREE.Box3().setFromObject(new THREE.Mesh(scaledGeometry));
+        this.size.x = boundingBox.max.x - boundingBox.min.x;
+        this.size.y = boundingBox.max.y - boundingBox.min.y;
+        this.size.z = boundingBox.max.z - boundingBox.min.z;
+
+        // SHAPE
+        this.cannon_shape = new CANNON.Box(new CANNON.Vec3(
+            this.size.x/2, this.size.y/2, this.size.z/2
+        ));
+        this.body.addShape(this.cannon_shape);
+
+        // BOX
+        this.COLLIDE_BOX = new THREE.Mesh(
+            new THREE.BoxGeometry(this.size.x, this.size.y, this.size.z),
+            new THREE.MeshBasicMaterial({ color: 0xFF0000, transparent: true, opacity: 0.5 })
+        )
+        
+        // ADD SCENE
+        init.cannon_world.addBody(this.body);
+                
+        // const road_sound = this.zombie_loader_properties.road_sound;
+        
+        // if (road_sound)
+        // {
+        //     this.object.add(road_sound);
+        // }
+
+        this.is_finish_load = true;
+        init.scene.add(this.COLLIDE_BOX)
+
+        this.object.updateMatrix();
+        this.instances_mesh.setMatrixAt(this.mesh_index, this.object.matrix);
     }
 
     /**
@@ -129,81 +214,13 @@ export default class Zombie
     }
 
     /**
-     * This function is used to setup zombie mesh
-     */
-    setup_mesh() : void
-    {
-        if (this.properties.zombie_type === 1) 
-        {
-            const material = this.zombie_loader_properties.material_zombie1_low;
-
-            if (material)
-            {
-                this.change_material(material);
-            }
-        } 
-        
-        else {
-            const material = this.zombie_loader_properties.material_zombie2_low;
-
-            if (material)
-            {
-                this.change_material(material);
-            }
-        }
-
-        this.object.position.set(
-            this.properties.zombie_position[0],
-            this.properties.zombie_position[1],
-            this.properties.zombie_position[2]
-        );
-        
-        const scale = this.properties.zombie_scale;
-        this.object.scale.set(
-            scale[0], 
-            scale[1], 
-            scale[2]
-        );
-
-        const boundingBox = new THREE.Box3().setFromObject(this.object);
-        boundingBox.getSize(this.size);
-
-        this.size.x /= 2;
-        this.cannon_shape = new CANNON.Box(new CANNON.Vec3(
-            this.size.x/2, this.size.y/2, this.size.z/2
-        ));
-        
-        this.body.addShape(this.cannon_shape);
-
-        this.body.material = this.material;
-        
-        this.body.position.set(
-            this.properties.zombie_position[0],
-            this.properties.zombie_position[1],
-            this.properties.zombie_position[2],
-        );
-                
-        init.cannon_world.addBody(this.body);
-
-        this.object.frustumCulled = true; // obtimisation
-                
-        const road_sound = this.zombie_loader_properties.road_sound;
-        
-        if (road_sound)
-        {
-            this.object.add(road_sound);
-        }
-
-        this.update_zombie_instances()
-        this.is_finish_load = true;
-    }
-
-    /**
      * This function is used to change zombie's textures
      */
     change_material(new_material_loader: MaterialTextureLoader) : void
     {
-        if (!this.object) return
+        // if (!this.instances_mesh) return
+        // this.instances_mesh.material = new_material_loader.material;
+        // this.instances_mesh.material.transparent = false;
 
         this.object.traverse(
             (child) => 
@@ -367,9 +384,8 @@ export default class Zombie
      * This function is used to rotateY zombie in the player direction
      * @param diffX distance x from player to zombie
      * @param diffZ distance z from player to zombie
-     * @param mesh zombie mesh
      */
-    update_rotation(diffX: number, diffZ: number, mesh: THREE.Object3D) : void
+    update_rotation(diffX: number, diffZ: number) : void
     {
         if (!this.is_death) 
         {
@@ -380,17 +396,11 @@ export default class Zombie
                 new CANNON.Vec3(0, 1, 0),
                 angleInRange
             );
-            mesh.quaternion.copy(this.body.quaternion);
-        }
-    }
 
-    /**
-     * This function is used to update zombie mesh instance with object matrix properties
-     */
-    update_zombie_instances()
-    {
-        this.object.updateMatrix()
-        this.instances_mesh.setMatrixAt(this.mesh_index, this.object.matrix);
+            this.object.quaternion.copy(this.body.quaternion);
+
+            this.COLLIDE_BOX?.quaternion.copy(this.body.quaternion)
+        }
     }
 
     /**
@@ -536,12 +546,30 @@ export default class Zombie
             this.body.position.x += diffX / this.velocity;
             this.body.position.z += diffZ / this.velocity;
         }
+
+        // this.body.position.x += 0.05;
     
         this.object.position.set(
             this.body.position.x,
             this.body.position.y-1.2,
             this.body.position.z
         );
+
+        if (this.COLLIDE_BOX)
+        {
+            this.COLLIDE_BOX.position.copy(this.body.position)
+        }
+
+
+    }
+
+    /**
+     * This function is used to update zombie mesh instance with object matrix properties
+     */
+    update_instance_mesh()
+    {
+        // this.object.updateMatrix();
+        // this.object.updateMatrixWorld(true);
     }
 
     /**
@@ -550,6 +578,9 @@ export default class Zombie
      */
     update() : void
     {
+        this.instances_mesh.getMatrixAt(this.mesh_index, this.object.matrix);
+        this.object.matrix.decompose(this.object.position, this.object.quaternion, this.object.scale);
+
         const objectLoader = this.zombie_loader_properties.objectLoader;
         const player_body = instances.player.cannon_body;
 
@@ -570,13 +601,17 @@ export default class Zombie
 
         const player_dist = Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffZ, 2));
 
+
         this.update_movement(diffX, diffZ);
-        this.update_rotation(diffX, diffZ, this.object);
+        this.update_rotation(diffX, diffZ);
+
         this.update_hurt();
         this.update_death();
         this.update_animation_event(player_dist);
         this.update_textures(player_dist);
         this.update_sound();
-        this.update_zombie_instances();
+
+        this.object.updateMatrix();
+        this.instances_mesh.setMatrixAt(this.mesh_index, this.object.matrix);
     }
 }
