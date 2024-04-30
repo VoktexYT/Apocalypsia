@@ -1,4 +1,4 @@
-const text = "👾 WELCOME TO ☢️ APOCALYPSIA ☣️ GAME 👾 ";
+const text = "WELCOME TO ☢️ APOCALYPSIA ☣️. THIS GAME WAS CREATED BY VOKTEX. FPS ZOMBIE IN A WEBSITE !!";
 const letter_max = 20;
 const interval = 200;
 let index = 0;
@@ -14,3 +14,8 @@ function updateTitle() {
 }
 
 setInterval(updateTitle, interval);
+
+
+window.addEventListener("resize", () => {
+    alert("resize!")
+})
