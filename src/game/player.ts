@@ -547,6 +547,7 @@ export default class Player
             this.health = 0;
             this.health_page.disable();
             init.change_game_running_to(false);
+            window.location.reload();
         }
 
         else if (this.health > this.max_health) 
