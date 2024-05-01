@@ -62,7 +62,7 @@ export class GunLoader
      */
     async load_audio() : Promise<string>
     {
-        console.log("[LOAD] Gun audio");
+        console.info("[LOAD] Gun audio");
 
         return new Promise<string>(
             (resolve) => 
@@ -141,7 +141,7 @@ export class GunLoader
      */
     async load_pistol_fbx() : Promise<string>
     {
-        console.log("[LOAD] pistol .fbx object");
+        console.info("[LOAD] pistol .fbx object");
 
         return new Promise<string>(
             (resolve) => 
@@ -165,7 +165,7 @@ export class GunLoader
      * This function is used to load rifle fbx object
      */
     async load_rifle_fbx(): Promise<string> {
-        console.log("[LOAD] rifle .fbx object");
+        console.info("[LOAD] rifle .fbx object");
 
         return new Promise<string>((resolve) => {
             properties.rifle_loader = new ObjectLoader("./assets/weapons/weapons/AK-74(LP).fbx");
@@ -185,7 +185,7 @@ export class GunLoader
      */
     async load_pistol_material() : Promise<string>
     {
-        console.log("[LOAD] Pistol material texture");
+        console.info("[LOAD] Pistol material texture");
 
         return new Promise<string>(
             (resolve) => 
@@ -212,7 +212,7 @@ export class GunLoader
      */
     async load_rifle_material() : Promise<string>
     {
-        console.log("[LOAD] rifle material texture");
+        console.info("[LOAD] rifle material texture");
 
         return new Promise<string>(
             (resolve) => 

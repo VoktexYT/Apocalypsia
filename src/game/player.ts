@@ -298,12 +298,6 @@ export default class Player
         );
         
         this.cursor_page.searchHTML();
-        
-        if (init.activeCamera === init.camera)
-        {
-            this.cursor_page.disable();
-            return;
-        }
 
         if (is_cursor_center_screen)
         {

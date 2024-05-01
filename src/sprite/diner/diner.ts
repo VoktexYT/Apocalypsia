@@ -13,7 +13,7 @@ export default class Diner
      */
     async load_3d_object() : Promise<string>
     {
-        console.log("[LOAD] diner .fbx object");
+        console.info("[LOAD] diner .fbx object");
 
         const THIS = diner_properties;
 
@@ -39,7 +39,7 @@ export default class Diner
      */
     async load_three_object() : Promise<string>
     {
-        console.log('[LOAD] diner three mesh')
+        console.info('[LOAD] diner three mesh')
         
         const THIS = diner_properties;
 
@@ -77,7 +77,7 @@ export default class Diner
      */
     async load_collide() : Promise<string>
     {
-        console.log("[LOAD] Diner collision");
+        console.info("[LOAD] Diner collision");
 
         const THIS = diner_properties;
 
@@ -116,7 +116,7 @@ export default class Diner
      */
     async load_position() : Promise<string>
     {
-        console.log("[LOAD] Diner position");
+        console.info("[LOAD] Diner position");
         const THIS = diner_properties;
 
         return new Promise<string>(

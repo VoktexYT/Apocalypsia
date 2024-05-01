@@ -1,4 +1,4 @@
-function setupCssPage() {
+function setupCssLinkHtmlPage() {
     const head = document.querySelector("head");
     const link = document.createElement("link");
 
@@ -7,8 +7,6 @@ function setupCssPage() {
     link.href = "style.css";
 
     head?.appendChild(link);
-
-    console.log("setup css page")
 }
 
 
@@ -45,7 +43,7 @@ function setupHtmlPage() {
 
     var creditParagraph = document.createElement('p');
     creditParagraph.id = 'credit';
-    creditParagraph.textContent = 'This game was created by Voktex. All the code and art assets are on my github. https://github.com/VoktexYT/WebSurviveZombieFps';
+    creditParagraph.textContent = 'This game was created by Voktex. All the code and art assets are on my github. https://github.com/VoktexYT/Apocalypsia';
     creditParagraph.style.position = 'absolute';
     creditParagraph.style.bottom = '0px';
     creditParagraph.style.userSelect = 'none';
@@ -70,11 +68,13 @@ function setupHtmlPage() {
     document.body.appendChild(cursorPageDiv);
     document.body.appendChild(healthPageDiv);
 
-    console.log("setup html page")
 }
 
 
 export function setup_game_page() {
-    setupCssPage();
+    setupCssLinkHtmlPage();
     setupHtmlPage();
+
+    console.info("[LOADED] html page")
+
 }

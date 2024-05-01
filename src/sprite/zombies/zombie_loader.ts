@@ -53,7 +53,7 @@ export class ZombieLoader
      */
     async load_3d_object() : Promise<string>
     {
-        console.log("[LOAD] zombie .fbx object");
+        console.info("[LOAD] zombie .fbx object");
 
         return new Promise<string>(
             (resolve) => 
@@ -94,7 +94,7 @@ export class ZombieLoader
      */
     async load_audio() : Promise<string>
     {
-        console.log("[LOAD] zombie audio");
+        console.info("[LOAD] zombie audio");
 
         return new Promise<string>(
             (resolve) => 
@@ -129,7 +129,7 @@ export class ZombieLoader
      */
     async load_zombie_material() : Promise<string> 
     {
-        console.log("[LOAD] zombie material texture");
+        console.info("[LOAD] zombie material texture");
 
         return new Promise<string>(
             (resolve) => 

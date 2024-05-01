@@ -22,7 +22,7 @@ const zombieInstanceMesh = new ZombieInstanceMesh()
 const gunLoader = new GunLoader( player );
 const gun = new Gun();
 
-const window_event = new WindowEvent( init.activeCamera, init.renderer );
+const window_event = new WindowEvent( player.camera, init.renderer );
 
 const floor = new Floor();
 const diner = new Diner();

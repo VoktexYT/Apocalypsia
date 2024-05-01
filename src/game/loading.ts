@@ -50,7 +50,9 @@ export default class Loading
                     if (this.html_loading_page) 
                     {
                         this.end_of_loading = true;
-                        console.log("--- [END LOADING] ---");
+
+                        console.info("--- [END LOADING] ---");
+
                         resolve(this.html_loading_page);
                     }
                 }
@@ -79,7 +81,8 @@ export default class Loading
 
                             if (this.index === load_functions.length) 
                             {
-                                console.log("--- [FINISH LOADING] ---");
+                                console.info("--- [FINISH LOADING] ---");
+                                
                                 this.end_of_loading = true;
 
                                 if (this.html_loading_page) 

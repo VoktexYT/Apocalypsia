@@ -19,8 +19,6 @@ function animate()
     instances.zombieInstanceMesh.all_zombies.forEach((zombie) => {zombie.update()});
     instances.zombieInstanceMesh.update();
     init.render();
-
-    init.camera.updateProjectionMatrix()
 }
 
 animate();
