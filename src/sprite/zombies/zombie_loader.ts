@@ -112,8 +112,20 @@ export class ZombieLoader
                                 if (properties.road_sound) 
                                 {
                                     properties.road_sound.setBuffer(buffer);
-                                    properties.road_sound.setRefDistance(3);
-                                    properties.road_sound.setVolume(0.7);
+                                    properties.road_sound.setRefDistance(10);
+                                    properties.road_sound.setVolume(1);
+                                }
+                            }
+                    );
+
+                    properties.audioLoaderThree.load(`./assets/sound/zombie_death.mp3`, 
+                        (buffer: any) =>
+                            {
+                                if (properties.death_sound) 
+                                {
+                                    properties.death_sound.setBuffer(buffer);
+                                    properties.death_sound.setRefDistance(5);
+                                    properties.death_sound.setVolume(1);
                                 }
                             }
                     );

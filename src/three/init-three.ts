@@ -1,8 +1,6 @@
 import * as THREE from 'three';
 import * as CANNON from 'cannon';
 import * as instances from '../game/instances'
-import HtmlPage from '../html-page/html-page';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { setup_game_page } from '../html-page/init-html';
 
 // Set HTML Page
@@ -89,10 +87,7 @@ setTimeout(
                                 instances.player.load().then(() => 
                                     {
                                         instances.floor.setup();
-
-                                        instances.zombieInstanceMesh.load();
-                                        instances.zombieInstanceMesh.create();
-
+                                        instances.zombieGroup.create();
                                         exitLoadingPage(htmlPage);
                                     }
                                 );

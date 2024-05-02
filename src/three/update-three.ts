@@ -6,18 +6,15 @@ function animate()
 {
     requestAnimationFrame(animate);
 
-    if (!instances.loading.end_of_loading) return;
-    if (!init.game_running) return;
-
+    if (!instances.loading.end_of_loading || !init.game_running) return;
 
     // GAME LOOP
     init.cannon_world.step(1 / 60);
     
     instances.player.update();
     instances.gun.update();
+    instances.zombieGroup.update();
 
-    instances.zombieInstanceMesh.all_zombies.forEach((zombie) => {zombie.update()});
-    instances.zombieInstanceMesh.update();
     init.render();
 }
 

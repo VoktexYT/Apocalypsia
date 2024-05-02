@@ -10,14 +10,14 @@ import { ZombieLoader } from '../sprite/zombies/zombie_loader';
 import { GunLoader } from '../sprite/gun/gun_loader';
 
 import Loading from './loading';
-import { ZombieInstanceMesh } from '../sprite/zombies/zombies_instance_mesh';
+import { ZombieGroup } from '../sprite/zombies/zombie_group';
 
 
 
 const player = new Player();
 
 const zombieLoader = new ZombieLoader(player);
-const zombieInstanceMesh = new ZombieInstanceMesh()
+const zombieGroup = new ZombieGroup();
 
 const gunLoader = new GunLoader( player );
 const gun = new Gun();
@@ -32,7 +32,7 @@ const loading = new Loading();
 export {
     player, 
     zombieLoader, 
-    zombieInstanceMesh, 
+    zombieGroup, 
     gunLoader, 
     gun, window_event, 
     floor, 

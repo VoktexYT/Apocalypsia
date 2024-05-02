@@ -73,7 +73,7 @@ export default class Player
             {
                 this.set_three_box();
                 this.set_cannon_collide_box();
-                // this.set_audio();
+                this.set_audio();
                 this.set_flash_light();
 
                 this.end_of_load = true;

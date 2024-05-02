@@ -39,12 +39,14 @@ interface play_animation_properties
 
 export default class Zombie 
 {
-    mixer: THREE.AnimationMixer | null = null;
+    mesh: THREE.Object3D | undefined;
 
-    last_action: THREE.AnimationAction | null = null;
+    mixer: THREE.AnimationMixer | undefined;
+    last_action: THREE.AnimationAction | undefined;
     is_finish_load = false;
 
     walk_animation_speed = randInt(4, 10) / 100;
+    
 
     animation_name = "";
     is_attack = false;
@@ -63,17 +65,17 @@ export default class Zombie
 
     obtimisation_range = 5;
     
+    // Cannon
     material = new CANNON.Material("zombie");
     body: CANNON.Body = new CANNON.Body({ mass: 1, fixedRotation: true });
     properties: properties;
     material_change = true;
-
+    
+    COLLIDE_BOX = new THREE.Mesh();
+    size = new THREE.Vector3();
+    
     zombie_loader = instances.zombieLoader
     zombie_loader_properties = this.zombie_loader.properties
-
-    COLLIDE_BOX: THREE.Mesh | null = null;
-
-    size = new THREE.Vector3();
 
     audioLoader = new AudioLoader(instances.player.camera);
 
@@ -82,12 +84,8 @@ export default class Zombie
     next_road_interval: number = 0;
     road_interval: number = Date.now();
 
-    initialPosition = new THREE.Vector3().copy(this.object.position);
 
-    first = true;
-
-
-    constructor(properties: properties, public instances_mesh: THREE.InstancedMesh, public mesh_index: number, public object: THREE.Object3D) 
+    constructor(properties: properties) 
     {
         this.properties = properties;
 
@@ -102,6 +100,11 @@ export default class Zombie
      */
     setup_mesh() : void
     {
+        const copy_original = this.zombie_loader.properties.fbx;
+        if (!copy_original) return;
+        this.mesh = clone(copy_original);
+
+
         // MATERIAL
         if (this.properties.zombie_type === 1) 
         {
@@ -121,12 +124,10 @@ export default class Zombie
                 this.change_material(material);
             }
         }
-
-        this.body.material = this.material;
         
         // SCALE
         const scale = this.properties.zombie_scale;
-        this.object.scale.set(
+        this.mesh.scale.set(
             scale[0], 
             scale[1], 
             scale[2]
@@ -139,15 +140,14 @@ export default class Zombie
             this.properties.zombie_position[2],
         );
 
-        this.object.position.copy(this.body.position);
+        this.mesh.position.copy(this.body.position);
 
         // SIZE
-        const scaledGeometry = this.instances_mesh.geometry.clone();
-        scaledGeometry.scale(this.object.scale.x, this.object.scale.y, this.object.scale.z);
-        const boundingBox = new THREE.Box3().setFromObject(new THREE.Mesh(scaledGeometry));
-        this.size.x = boundingBox.max.x - boundingBox.min.x;
-        this.size.y = boundingBox.max.y - boundingBox.min.y;
-        this.size.z = boundingBox.max.z - boundingBox.min.z;
+        const boundingBox = new THREE.Box3().setFromObject(this.mesh);
+        boundingBox.getSize(this.size);
+
+        // Focus in body, no with arm (Just more realist)
+        this.size.x /= 2;
 
         // SHAPE
         this.cannon_shape = new CANNON.Box(new CANNON.Vec3(
@@ -155,27 +155,28 @@ export default class Zombie
         ));
         this.body.addShape(this.cannon_shape);
 
-        // BOX
+        this.body.material = this.material;
+
+        // DEBUG
         this.COLLIDE_BOX = new THREE.Mesh(
             new THREE.BoxGeometry(this.size.x, this.size.y, this.size.z),
-            new THREE.MeshBasicMaterial({ color: 0xFF0000, transparent: true, opacity: 0.5 })
+            new THREE.MeshBasicMaterial({ color: 0xFF0000, transparent: true, opacity: 0 })
         )
-        
+
+        this.COLLIDE_BOX.position.copy(this.body.position);
+
         // ADD SCENE
+        init.scene.add(this.mesh, this.COLLIDE_BOX);
         init.cannon_world.addBody(this.body);
                 
-        // const road_sound = this.zombie_loader_properties.road_sound;
+        const road_sound = this.zombie_loader_properties.road_sound;
         
-        // if (road_sound)
-        // {
-        //     this.object.add(road_sound);
-        // }
+        if (road_sound)
+        {
+            this.mesh.add(road_sound);
+        }
 
         this.is_finish_load = true;
-        init.scene.add(this.COLLIDE_BOX)
-
-        this.object.updateMatrix();
-        this.instances_mesh.setMatrixAt(this.mesh_index, this.object.matrix);
     }
 
     /**
@@ -218,11 +219,9 @@ export default class Zombie
      */
     change_material(new_material_loader: MaterialTextureLoader) : void
     {
-        // if (!this.instances_mesh) return
-        // this.instances_mesh.material = new_material_loader.material;
-        // this.instances_mesh.material.transparent = false;
+        if (!this.mesh) return;
 
-        this.object.traverse(
+        this.mesh.traverse(
             (child) => 
                 {
                     if (!(child instanceof THREE.Mesh)) return;
@@ -244,18 +243,15 @@ export default class Zombie
         this.animationSpeed = settings.speed;
 
         const objectLoader = this.zombie_loader_properties.objectLoader;
-
         const animation_is_exist = (objectLoader && Object.keys(objectLoader.animations).includes(settings.name));
 
-        if (animation_is_exist && this.object) 
+        if (animation_is_exist && this.mesh) 
         {
-            const mixer = new THREE.AnimationMixer(
-                this.object
-            );
+            const mixer = new THREE.AnimationMixer( this.mesh );
             
             const action = mixer.clipAction(objectLoader.animations[settings.name]);
 
-            if (this.last_action) 
+            if (this.last_action)
             {
                 this.last_action.crossFadeTo(action, 0.5, false);
             }
@@ -265,7 +261,8 @@ export default class Zombie
                 action.clampWhenFinished = true;
                 action.setLoop(THREE.LoopOnce, 0);
             }
-
+            
+            
             action.play();
             
             this.last_action = action;
@@ -278,7 +275,7 @@ export default class Zombie
      */
     update_animation() : void
     {
-        if (this.is_finish_load && ![this.object, this.mixer].includes(null)) 
+        if (this.is_finish_load && ![this.mesh, this.mixer].includes(undefined)) 
         {
             this.mixer?.update(this.animationSpeed);
         }
@@ -370,7 +367,7 @@ export default class Zombie
         if (Date.now() - this.road_interval > this.next_road_interval && !this.is_death) 
         {
             this.road_interval = Date.now();
-            this.next_road_interval = randInt(1000, 10000);
+            this.next_road_interval = randInt(1000, 3000);
             const road_sound = this.zombie_loader_properties.road_sound;
 
             if (road_sound && !road_sound.isPlaying) 
@@ -387,7 +384,7 @@ export default class Zombie
      */
     update_rotation(diffX: number, diffZ: number) : void
     {
-        if (!this.is_death) 
+        if (!this.is_death && this.mesh) 
         {
             const angle = Math.atan2(diffX, diffZ);
             const angleInRange = (angle + Math.PI) % (2 * Math.PI) - Math.PI;
@@ -397,7 +394,7 @@ export default class Zombie
                 angleInRange
             );
 
-            this.object.quaternion.copy(this.body.quaternion);
+            this.mesh.quaternion.copy(this.body.quaternion);
 
             this.COLLIDE_BOX?.quaternion.copy(this.body.quaternion)
         }
@@ -529,8 +526,8 @@ export default class Zombie
     {
         if (this.is_death && Date.now() - this.is_death_time > 3000) 
         {
-            if (!this.object) return;
-            init.scene.remove(this.object);
+            if (!this.mesh) return;
+            init.scene.remove(this.mesh);
         }
     }
 
@@ -541,15 +538,15 @@ export default class Zombie
      */
     update_movement(diffX: number, diffZ: number) : void
     {
+        if (!this.mesh) return;
+
         if (!this.is_attack && !this.is_hurt && !this.is_death) 
         {
             this.body.position.x += diffX / this.velocity;
             this.body.position.z += diffZ / this.velocity;
         }
-
-        // this.body.position.x += 0.05;
     
-        this.object.position.set(
+        this.mesh.position.set(
             this.body.position.x,
             this.body.position.y-1.2,
             this.body.position.z
@@ -564,23 +561,11 @@ export default class Zombie
     }
 
     /**
-     * This function is used to update zombie mesh instance with object matrix properties
-     */
-    update_instance_mesh()
-    {
-        // this.object.updateMatrix();
-        // this.object.updateMatrixWorld(true);
-    }
-
-    /**
      * This is the zombie update function
      * @returns 
      */
     update() : void
     {
-        this.instances_mesh.getMatrixAt(this.mesh_index, this.object.matrix);
-        this.object.matrix.decompose(this.object.position, this.object.quaternion, this.object.scale);
-
         const objectLoader = this.zombie_loader_properties.objectLoader;
         const player_body = instances.player.cannon_body;
 
@@ -588,7 +573,7 @@ export default class Zombie
             (objectLoader && !objectLoader.finishLoad) ||
             !this.is_finish_load ||
             !player_body || 
-            !this.object
+            !this.mesh
         ) return;
 
         const playerX = player_body.position.x;
@@ -610,8 +595,6 @@ export default class Zombie
         this.update_animation_event(player_dist);
         this.update_textures(player_dist);
         this.update_sound();
-
-        this.object.updateMatrix();
-        this.instances_mesh.setMatrixAt(this.mesh_index, this.object.matrix);
+        this.update_animation();
     }
 }
