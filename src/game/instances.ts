@@ -13,6 +13,7 @@ import Loading from './loading';
 import { ZombieGroup } from '../sprite/zombies/zombie_group';1
 
 import LevelCounter from '../html-page/level-counter';
+import Popup from '../html-page/popup';
 
 
 const player = new Player();
@@ -31,6 +32,7 @@ const diner = new Diner();
 const loading = new Loading();
 
 const level_counter = new LevelCounter(player.camera);
+const popup = new Popup(player.camera);
 
 export {
     player, 
@@ -41,6 +43,7 @@ export {
     floor, 
     diner, 
     loading,
-    level_counter
+    level_counter,
+    popup
 };
 

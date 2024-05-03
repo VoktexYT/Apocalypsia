@@ -8,7 +8,7 @@ body {
     background-color: #000000;
 }
 
-#cursor-page, #load-page, #health-page, #home-page, #level-page {
+#cursor-page, #load-page, #health-page, #home-page, #level-page, #popup-page {
     display: none;
     position: absolute;
     top: 0;
@@ -32,7 +32,7 @@ body {
 #level-counter {
     position: absolute;
     top: 20px;
-    left: 20px;
+    left: 10px;
     font-size: 50px;
     color: #a51b1b;
     font-family: darkFont;
@@ -40,6 +40,21 @@ body {
     width: 300px;
     text-align: center;
     user-select: none;
+}
+
+#popup-page {
+    z-index: 1000;
+}
+
+#popup-text {
+    position: absolute;
+    transform: scale(2);
+    opacity: 0;
+    font-family: darkFont;
+    font-size: 50px;
+    width: 400px;
+    text-align: center;
+    transition: 0.2s;
 }
 
 

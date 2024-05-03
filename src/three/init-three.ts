@@ -94,7 +94,8 @@ setTimeout(
                                         instances.floor.setup();
                                         instances.zombieGroup.create();
                                         instances.level_counter.load_audio();
-
+                                        instances.popup.load_audio();
+                                        
                                         exitLoadingPage(htmlPage);
                                     }
                                 );

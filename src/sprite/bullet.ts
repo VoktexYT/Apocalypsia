@@ -152,6 +152,12 @@ export default class Bullet
             if (intersectsZombie[1]) 
             {
                 this.zombie_collide.get_damage(object.gun.actual_settings.bulet_damage*3);
+
+                object.popup.update_popup();
+
+                if (this.zombie_collide.health <= 0)
+                {
+                }
             } 
             
             else 

@@ -11,7 +11,7 @@ export default class LevelCounter
     level_page_html_element = document.getElementById("level-page");
 
     initial_css_position_px = {
-        left: 20,
+        left: 10,
         top: 20
     }
 

@@ -67,14 +67,20 @@ function setupHtmlPage() {
     var levelPage = document.createElement("div");
     levelPage.id = "level-page";
     levelPage.style.display = 'none';
+    levelPage.innerHTML = '<div id="level-counter">Level</div>';
 
-    levelPage.innerHTML = '<div id="level-counter">Level</div>'
+    // create popup page
+    var popupPage = document.createElement("div");
+    popupPage.id = "popup-page";
+    popupPage.style.display = "none";
+    popupPage.innerHTML = '<p id="popup-text"></p>'
 
     // Append created elements to the body
     document.body.appendChild(loadPageDiv);
     document.body.appendChild(cursorPageDiv);
     document.body.appendChild(healthPageDiv);
     document.body.appendChild(levelPage);
+    document.body.appendChild(popupPage);
 }
 
 
