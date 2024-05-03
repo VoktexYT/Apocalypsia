@@ -66,7 +66,7 @@ export default class Bullet
         {
             const contactMaterial = new CANNON.ContactMaterial(
                 this.boxBody.material, 
-                zombie.body.material,
+                zombie.object.body.material,
                 {
                     friction: this.material_friction, 
                     restitution: this.material_restitution
@@ -88,12 +88,12 @@ export default class Bullet
 
         for (const zombie of object.zombieGroup.all_zombies) 
         {
-            if (!zombie.is_death) 
+            if (!zombie.object.is_death) 
             {
                 const bulletPos  = this.boxBody.position;
                 const bulletSize = this.size / 2;
-                const zombiePos  = zombie.body.position;
-                const zombieSize = zombie.size;
+                const zombiePos  = zombie.object.body.position;
+                const zombieSize = zombie.object.size;
 
                 const is_collide = (
                     (bulletPos.x - bulletSize < zombiePos.x + zombieSize.x / 2 && bulletPos.x + bulletSize > zombiePos.x - zombieSize.x / 2) &&
@@ -103,7 +103,7 @@ export default class Bullet
 
                 if (is_collide) 
                 {
-                    this.zombie_collide = zombie;
+                    this.zombie_collide = zombie.object;
                     collisionDetected = is_collide;
                     head_shot = bulletPos.y > 0.40;
                     

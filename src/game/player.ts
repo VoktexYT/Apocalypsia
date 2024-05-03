@@ -21,8 +21,8 @@ export default class Player
 
     private three_box_color = 0xFF0000;
     
-    private health = 100;
-    private max_health = 100;
+    private max_health = 150;
+    private health = this.max_health;
     private previous_health = this.health;
 
     private size = [1, 2.4, 1];
@@ -108,7 +108,7 @@ export default class Player
             {
                 path: "./assets/sound/walk.mp3",
                 is_loop: false,
-                volume: 0.1
+                volume: 0.3
             },
 
             (loaded, sound) => 

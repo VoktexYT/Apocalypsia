@@ -10,8 +10,9 @@ import { ZombieLoader } from '../sprite/zombies/zombie_loader';
 import { GunLoader } from '../sprite/gun/gun_loader';
 
 import Loading from './loading';
-import { ZombieGroup } from '../sprite/zombies/zombie_group';
+import { ZombieGroup } from '../sprite/zombies/zombie_group';1
 
+import LevelCounter from '../html-page/level-counter';
 
 
 const player = new Player();
@@ -29,6 +30,8 @@ const diner = new Diner();
 
 const loading = new Loading();
 
+const level_counter = new LevelCounter(player.camera);
+
 export {
     player, 
     zombieLoader, 
@@ -37,6 +40,7 @@ export {
     gun, window_event, 
     floor, 
     diner, 
-    loading
+    loading,
+    level_counter
 };
 

@@ -3,6 +3,7 @@ import * as CANNON from 'cannon';
 import * as instances from '../game/instances'
 import { setup_game_page } from '../html-page/init-html';
 
+
 // Set HTML Page
 setup_game_page();
 
@@ -33,6 +34,10 @@ export const render = ()=>  {renderer.render(scene, instances.player.camera)}
 export const cannon_world = new CANNON.World();
 cannon_world.gravity.set(0, -9.82, 0)
 
+// INTRO PROPERTIES
+export const fadein_time = 5000;
+
+
 /**
  * This function is used to add fade animation to page
  * @param htmlPage 
@@ -51,10 +56,10 @@ function exitLoadingPage(htmlPage: HTMLElement) : void
                 
                 if (canvasPage)
                 {
-                canvasPage.classList.toggle("fadein")
+                    canvasPage.classList.toggle("fadein")
                 }
             },
-        5000
+        fadein_time
     );
 }
 
@@ -88,6 +93,8 @@ setTimeout(
                                     {
                                         instances.floor.setup();
                                         instances.zombieGroup.create();
+                                        instances.level_counter.load_audio();
+
                                         exitLoadingPage(htmlPage);
                                     }
                                 );

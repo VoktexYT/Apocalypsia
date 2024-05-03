@@ -63,11 +63,18 @@ function setupHtmlPage() {
     healthPageDiv.id = 'health-page';
     healthPageDiv.style.display = 'none';
 
+    // create level page
+    var levelPage = document.createElement("div");
+    levelPage.id = "level-page";
+    levelPage.style.display = 'none';
+
+    levelPage.innerHTML = '<div id="level-counter">Level</div>'
+
     // Append created elements to the body
     document.body.appendChild(loadPageDiv);
     document.body.appendChild(cursorPageDiv);
     document.body.appendChild(healthPageDiv);
-
+    document.body.appendChild(levelPage);
 }
 
 

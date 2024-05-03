@@ -27,6 +27,8 @@ interface properties
         types.POSITIVE_NUMBER,
         types.POSITIVE_NUMBER
     ]
+
+    zombie_id: number
 }
 
 interface play_animation_properties
@@ -528,6 +530,7 @@ export default class Zombie
         {
             if (!this.mesh) return;
             init.scene.remove(this.mesh);
+            instances.zombieGroup.remove_zombie_from_id(this.properties.zombie_id);
         }
     }
 
