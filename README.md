@@ -2,7 +2,7 @@
 
 ## 3341 lines of code !!!
 
-
+Link to play : https://voktexyt.github.io/Apocalypsia/dist/
 
 CODE
 
@@ -11,40 +11,6 @@ PIXI.js
 HTML
 CSS
 TYPESCRIPT
-
-SCENE:
-
-Load scene: load every font, image, 3d model, music, sound, etc.
-
-Home menu scene:
-
-Look at center of van
-
-SETTINGS SCENE:
-
-Look at medical and gun zone in van
-
-Resolution
-FPS
-Language
-Music Volume
-Sound effect Volume
-Menu Volume
-Brightness
-
-
-CREDIT SCENE:
-
-Look at bed zone in van
-
-Every source and person in the project will be displayed
-
-START SCENE:
-
-Look at exit door scene
-
-When difficulty will be selected (Tutorial, Easy, Normal, Hard, Fury, etc..)
-An animation with the door will be opened and the camera will go to outside of the van
 
 ASSETS
 
